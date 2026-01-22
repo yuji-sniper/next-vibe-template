@@ -5,7 +5,7 @@ import {
 } from "@/backend/modules/auth/application"
 import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
 import type { Result } from "@/backend/modules/shared"
-import { AUTH_ERROR_CODES, COMMON_ERROR_CODES } from "@/contracts"
+import { AUTH_ERROR_CODES, COMMON_ERROR_CODES } from "@/shared"
 
 type GetAuthUserControllerResult = Result<{
   authUser: {
