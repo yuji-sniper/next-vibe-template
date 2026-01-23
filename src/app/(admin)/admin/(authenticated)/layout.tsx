@@ -1,15 +1,9 @@
-import type { Metadata } from "next"
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
 import { redirect } from "next/navigation"
-import { env } from "@/env"
 import { authAdminKey, getAuthAdminQuery } from "@/features/auth-admin"
 import { getQueryClient } from "@/lib/react-query"
 
 export const dynamic = "force-dynamic"
-
-export const metadata: Metadata = {
-  title: `Dashboard | ${env.NEXT_PUBLIC_SERVICE_NAME_ADMIN}`,
-  description: "Dashboard page."
-}
 
 export default async function AdminAuthenticatedLayout({
   children
@@ -17,14 +11,18 @@ export default async function AdminAuthenticatedLayout({
   children: React.ReactNode
 }) {
   const queryClient = getQueryClient()
-  const authAdmin = await queryClient.fetchQuery({
+  const { authAdmin } = await queryClient.fetchQuery({
     queryKey: authAdminKey,
-    queryFn: () => getAuthAdminQuery()
+    queryFn: () => getAuthAdminQuery({ orError: false })
   })
 
   if (!authAdmin) {
     redirect("/sign-in")
   }
 
-  return children
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      {children}
+    </HydrationBoundary>
+  )
 }
