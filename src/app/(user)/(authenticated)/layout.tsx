@@ -1,15 +1,9 @@
-import type { Metadata } from "next"
+import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
 import { redirect } from "next/navigation"
-import { env } from "@/env"
 import { authUserKey, getAuthUserQuery } from "@/features/auth"
 import { getQueryClient } from "@/lib/react-query"
 
 export const dynamic = "force-dynamic"
-
-export const metadata: Metadata = {
-  title: `Home | ${env.NEXT_PUBLIC_SERVICE_NAME}`,
-  description: "Home page."
-}
 
 export default async function UserAuthenticatedLayout({
   children
@@ -17,14 +11,18 @@ export default async function UserAuthenticatedLayout({
   children: React.ReactNode
 }) {
   const queryClient = getQueryClient()
-  const authUser = await queryClient.fetchQuery({
+  const { authUser } = await queryClient.fetchQuery({
     queryKey: authUserKey,
-    queryFn: () => getAuthUserQuery()
+    queryFn: () => getAuthUserQuery({ orError: false })
   })
 
   if (!authUser) {
     redirect("/sign-in")
   }
 
-  return children
+  return (
+    <HydrationBoundary state={dehydrate(queryClient)}>
+      {children}
+    </HydrationBoundary>
+  )
 }
