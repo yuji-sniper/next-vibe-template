@@ -3,7 +3,7 @@ import { NextResponse } from "next/server"
 import { env } from "./env"
 
 /**
- * ホストとappパスのマッピング
+ * ホストとappディレクトリのパスのマッピング
  */
 const hostPathMap: Record<string, string> = {
   [env.NEXT_PUBLIC_HOST]: "/",
@@ -35,12 +35,12 @@ function setCorsHeaders(response: NextResponse, host: string | null) {
 }
 
 /**
- * サブドメインルーティング用Middleware
+ * サブドメインルーティング用Proxy
  *
  * - admin.example.com/workflows → /admin/workflows にリライト
  * - admin.example.com/api/workflows → /api/admin/workflows にリライト
  */
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const host = request.headers.get("host") || ""
   const pathname = request.nextUrl.pathname
 
