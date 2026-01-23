@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe"
-import type { Transactor } from "@/backend/application"
-import { AlsContext } from "../../../../shared/infrastructure/node"
+import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
+import { AlsContext } from "../../../node/als/als-context"
 import { db } from "./client"
 
 export const PG_DRIZZLE_TRANSACTION_KEY = "PG_DRIZZLE_TRANSACTION_KEY"

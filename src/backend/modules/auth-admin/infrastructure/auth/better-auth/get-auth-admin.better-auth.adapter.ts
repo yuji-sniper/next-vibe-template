@@ -1,15 +1,15 @@
 import { headers } from "next/headers"
-import { AuthAdminUnauthorizedError } from "@/backend/modules/auth/domain/auth-admin/auth-admin.errors"
 import type {
   GetAuthAdminPort,
   GetAuthAdminPortOutput
 } from "../../../application/queries/ports/get-auth-admin.port"
 import { AuthAdmin } from "../../../domain/auth-admin/auth-admin"
-import { auth } from "./auth"
+import { AuthAdminUnauthorizedError } from "../../../domain/auth-admin/auth-admin.errors"
+import { authAdmin } from "./auth-admin"
 
 export class GetAuthAdminBetterAuthAdapter implements GetAuthAdminPort {
   async handle(): Promise<GetAuthAdminPortOutput> {
-    const session = await auth.api.getSession({
+    const session = await authAdmin.api.getSession({
       headers: await headers()
     })
 
