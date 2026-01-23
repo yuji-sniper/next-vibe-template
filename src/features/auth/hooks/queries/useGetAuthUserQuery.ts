@@ -4,14 +4,9 @@ import { useQuery } from "@tanstack/react-query"
 import { getAuthUserQuery } from "../../queries/get-auth-user"
 import { authUserKey } from "../../queries/keys"
 
-export const useGetAuthUserQuery = (params: {
-  redirectIfUnauthorized?: boolean
-}) => {
+export const useGetAuthUserQuery = () => {
   return useQuery({
     queryKey: authUserKey,
-    queryFn: () =>
-      getAuthUserQuery({
-        redirectIfUnauthorized: params.redirectIfUnauthorized
-      })
+    queryFn: () => getAuthUserQuery()
   })
 }
