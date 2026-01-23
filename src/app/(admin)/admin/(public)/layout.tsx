@@ -1,17 +1,8 @@
-import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { env } from "@/env"
 import { authAdminKey, getAuthAdminQuery } from "@/features/auth-admin"
 import { getQueryClient } from "@/lib/react-query"
 
-export const dynamic = "force-dynamic"
-
-export const metadata: Metadata = {
-  title: `Dashboard | ${env.NEXT_PUBLIC_SERVICE_NAME_ADMIN}`,
-  description: "Dashboard page."
-}
-
-export default async function AdminAuthenticatedLayout({
+export default async function AdminPublicLayout({
   children
 }: {
   children: React.ReactNode
@@ -22,8 +13,8 @@ export default async function AdminAuthenticatedLayout({
     queryFn: () => getAuthAdminQuery()
   })
 
-  if (!authAdmin) {
-    redirect("/sign-in")
+  if (authAdmin) {
+    redirect("/")
   }
 
   return children
