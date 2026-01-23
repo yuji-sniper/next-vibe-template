@@ -1,7 +1,7 @@
-export default function Home() {
+export default function TopPage() {
   return (
     <div>
-      <h1>Hello World</h1>
+      <h1>Top</h1>
     </div>
   )
 }
