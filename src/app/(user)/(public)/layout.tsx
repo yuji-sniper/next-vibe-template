@@ -4,14 +4,12 @@ import { env } from "@/env"
 import { authUserKey, getAuthUserQuery } from "@/features/auth"
 import { getQueryClient } from "@/lib/react-query"
 
-export const dynamic = "force-dynamic"
-
 export const metadata: Metadata = {
-  title: `Home | ${env.NEXT_PUBLIC_SERVICE_NAME}`,
-  description: "Home page."
+  title: `Top | ${env.NEXT_PUBLIC_SERVICE_NAME}`,
+  description: "Top page."
 }
 
-export default async function UserAuthenticatedLayout({
+export default async function UserPublicLayout({
   children
 }: {
   children: React.ReactNode
@@ -22,8 +20,8 @@ export default async function UserAuthenticatedLayout({
     queryFn: () => getAuthUserQuery()
   })
 
-  if (!authUser) {
-    redirect("/sign-in")
+  if (authUser) {
+    redirect("/home")
   }
 
   return children
