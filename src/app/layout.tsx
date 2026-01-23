@@ -1,10 +1,5 @@
-import type { Metadata } from "next"
+import { RootLayoutWrapper } from "@/components"
 import "./globals.css"
-
-export const metadata: Metadata = {
-  title: "Next Vibe Template",
-  description: "A template for building a web application with Next.js"
-}
 
 export default function RootLayout({
   children
@@ -13,7 +8,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body>
+        <RootLayoutWrapper>{children}</RootLayoutWrapper>
+      </body>
     </html>
   )
 }
