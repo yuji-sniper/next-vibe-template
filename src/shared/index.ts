@@ -1,5 +1,2 @@
-export { AUTH_ERROR_CODES, AUTH_ERROR_MESSAGES } from "./errors/auth.errors"
-export {
-  COMMON_ERROR_CODES,
-  COMMON_ERROR_MESSAGES
-} from "./errors/common.errors"
+export { AUTH_ERROR_CODES } from "./errors/auth.errors"
+export { COMMON_ERROR_CODES } from "./errors/common.errors"
