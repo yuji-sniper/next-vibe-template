@@ -10,7 +10,7 @@ export default async function AdminPublicLayout({
   const queryClient = getQueryClient()
   const authAdmin = await queryClient.fetchQuery({
     queryKey: authAdminKey,
-    queryFn: () => getAuthAdminQuery()
+    queryFn: () => getAuthAdminQuery({ orError: false })
   })
 
   if (authAdmin) {
