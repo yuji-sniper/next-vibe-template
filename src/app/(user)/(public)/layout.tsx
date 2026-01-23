@@ -15,9 +15,9 @@ export default async function UserPublicLayout({
   children: React.ReactNode
 }) {
   const queryClient = getQueryClient()
-  const authUser = await queryClient.fetchQuery({
+  const { authUser } = await queryClient.fetchQuery({
     queryKey: authUserKey,
-    queryFn: () => getAuthUserQuery()
+    queryFn: () => getAuthUserQuery({ orError: false })
   })
 
   if (authUser) {
