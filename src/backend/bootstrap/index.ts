@@ -1,1 +1,1 @@
-export { resolveContainer } from "./di/resolver"
+export { resolveContainer } from "./container"

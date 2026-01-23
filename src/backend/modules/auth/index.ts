@@ -1,0 +1,1 @@
+export { initAuthDependency } from "./di"

@@ -1,5 +1,6 @@
-import { injectable } from "tsyringe"
+import { inject, injectable } from "tsyringe"
 import type { GetAuthAdminPort } from "../../ports/get-auth-admin.port"
+import { GetAuthAdminPortToken } from "../../ports/get-auth-admin.port"
 import type {
   FindAuthAdminUseCasePort,
   FindAuthAdminUseCasePortOutput
@@ -7,7 +8,10 @@ import type {
 
 @injectable()
 export class FindAuthAdminUseCase implements FindAuthAdminUseCasePort {
-  constructor(private readonly getAuthAdmin: GetAuthAdminPort) {}
+  constructor(
+    @inject(GetAuthAdminPortToken)
+    private readonly getAuthAdmin: GetAuthAdminPort
+  ) {}
 
   async handle(): Promise<FindAuthAdminUseCasePortOutput> {
     const output = await this.getAuthAdmin.handle()

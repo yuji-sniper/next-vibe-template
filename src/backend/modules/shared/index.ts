@@ -3,6 +3,8 @@ export {
   type Transactor,
   TransactorToken
 } from "./application/ports/db/transactor.port"
+// di
+export { initSharedDependency } from "./di"
 // domain
 export { Email } from "./domain/value-objects/email.vo"
 // infrastructure

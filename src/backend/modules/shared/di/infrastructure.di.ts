@@ -1,7 +1,7 @@
 import type { DependencyContainer } from "tsyringe"
 import { AlsContext, DbTransactor, GetDb } from "@/backend/modules/shared"
 
-export const initSharedInfrastructureDependency = (
+export const initInfrastructureDependency = (
   container: DependencyContainer
 ) => {
   // node

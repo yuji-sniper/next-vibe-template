@@ -2,7 +2,7 @@ import { resolveContainer } from "@/backend/bootstrap"
 import {
   type FindAuthUserUseCasePort,
   FindAuthUserUseCasePortToken
-} from "@/backend/modules/auth/application"
+} from "@/backend/modules/auth/application/queries/usecases/find-auth-user/find-auth-user.usecase.port"
 import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
 import type { Result } from "@/backend/modules/shared"
 import { AUTH_ERROR_CODES, COMMON_ERROR_CODES } from "@/shared"
