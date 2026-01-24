@@ -1,4 +1,4 @@
-import type { ActionResponse } from "@/backend/modules/shared"
+import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
 
 export type GetAuthUserActionResponse = ActionResponse<{
   authUser: {

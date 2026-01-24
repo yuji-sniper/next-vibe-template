@@ -7,7 +7,6 @@ import { env } from "@/env"
 export const authAdminClient = createAuthClient({
   baseURL: env.NEXT_PUBLIC_ORIGIN_ADMIN,
   plugins: [
-    // inferAdditionalFields<typeof authAdmin>(),
     oneTapClient({
       clientId: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID_ADMIN,
       cancelOnTapOutside: false,

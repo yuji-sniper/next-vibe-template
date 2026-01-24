@@ -1,5 +1,7 @@
 import type { DependencyContainer } from "tsyringe"
-import { AlsContext, DbTransactor, GetDb } from "@/backend/modules/shared"
+import { GetDb } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/get-db"
+import { DbTransactor } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/transactor"
+import { AlsContext } from "@/backend/modules/shared/infrastructure/node/als/als-context"
 
 export const initInfrastructureDependency = (
   container: DependencyContainer

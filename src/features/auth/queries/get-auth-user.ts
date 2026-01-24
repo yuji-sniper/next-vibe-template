@@ -1,5 +1,5 @@
-import { getAuthUserAction } from "@/backend"
-import { ServerError } from "@/utils/error"
+import { getAuthUserAction } from "@/backend/modules/auth/presentation/actions/get-auth-user/get-auth-user.action"
+import { ServerError } from "@/utils/error/server-error"
 import type { AuthUser } from "../types/auth-user"
 
 export type GetAuthUserQuery = (params: { orError?: boolean }) => Promise<{

@@ -7,7 +7,6 @@ import { env } from "@/env"
 export const authClient = createAuthClient({
   baseURL: env.NEXT_PUBLIC_ORIGIN,
   plugins: [
-    // inferAdditionalFields<typeof auth>(),
     oneTapClient({
       clientId: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
       cancelOnTapOutside: false,

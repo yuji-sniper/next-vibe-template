@@ -1,4 +1,4 @@
-import { Email } from "@/backend/modules/shared"
+import { Email } from "@/backend/modules/shared/domain/value-objects/email.vo"
 
 export class AuthUser {
   private constructor(

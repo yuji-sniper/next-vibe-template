@@ -1,11 +1,12 @@
-import { resolveContainer } from "@/backend/bootstrap"
+import { resolveContainer } from "@/backend/bootstrap/container"
 import {
   type FindAuthAdminUseCasePort,
   FindAuthAdminUseCasePortToken
 } from "@/backend/modules/auth-admin/application/queries/usecases/find-auth-admin/find-auth-admin.usecase.port"
 import { AuthAdminUnauthorizedError } from "@/backend/modules/auth-admin/domain/auth-admin/auth-admin.errors"
-import type { Result } from "@/backend/modules/shared"
-import { AUTH_ERROR_CODES, COMMON_ERROR_CODES } from "@/shared"
+import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
+import { AUTH_ADMIN_ERROR_CODES } from "@/shared/errors/auth-admin.errors"
+import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
 type GetAuthAdminControllerResult = Result<{
   authAdmin: {
@@ -33,7 +34,7 @@ export const handleGetAuthAdmin =
         return {
           ok: false,
           error: {
-            code: AUTH_ERROR_CODES.AUTH_ADMIN_UNAUTHORIZED,
+            code: AUTH_ADMIN_ERROR_CODES.UNAUTHORIZED,
             status: 401,
             message: "Unauthorized"
           }

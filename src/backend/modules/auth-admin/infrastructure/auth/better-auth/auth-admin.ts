@@ -13,6 +13,13 @@ export const authAdmin = betterAuth({
     provider: "pg"
   }),
   baseURL: env.NEXT_PUBLIC_ORIGIN_ADMIN,
+  advanced: {
+    cookies: {
+      session_token: {
+        name: "admin_session_token"
+      }
+    }
+  },
   socialProviders: {
     google: {
       clientId: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID_ADMIN,

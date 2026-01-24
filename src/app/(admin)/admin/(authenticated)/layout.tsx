@@ -1,7 +1,8 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
 import { redirect } from "next/navigation"
-import { authAdminKey, getAuthAdminQuery } from "@/features/auth-admin"
-import { getQueryClient } from "@/lib/react-query"
+import { getAuthAdminQuery } from "@/features/auth-admin/queries/get-auth-admin"
+import { authAdminKey } from "@/features/auth-admin/queries/keys"
+import { getQueryClient } from "@/lib/react-query/query-client"
 
 export const dynamic = "force-dynamic"
 

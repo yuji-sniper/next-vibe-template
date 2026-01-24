@@ -1,4 +1,4 @@
-import { RootLayoutWrapper } from "@/components"
+import { RootLayoutWrapper } from "@/components/layout/wrapper/RootLayoutWrapper"
 import "./globals.css"
 
 export default function RootLayout({

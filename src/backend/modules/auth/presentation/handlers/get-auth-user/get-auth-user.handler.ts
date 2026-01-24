@@ -1,11 +1,12 @@
-import { resolveContainer } from "@/backend/bootstrap"
+import { resolveContainer } from "@/backend/bootstrap/container"
 import {
   type FindAuthUserUseCasePort,
   FindAuthUserUseCasePortToken
 } from "@/backend/modules/auth/application/queries/usecases/find-auth-user/find-auth-user.usecase.port"
 import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
-import type { Result } from "@/backend/modules/shared"
-import { AUTH_ERROR_CODES, COMMON_ERROR_CODES } from "@/shared"
+import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
+import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
+import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
 type GetAuthUserControllerResult = Result<{
   authUser: {
@@ -33,7 +34,7 @@ export const handleGetAuthUser =
         return {
           ok: false,
           error: {
-            code: AUTH_ERROR_CODES.AUTH_USER_UNAUTHORIZED,
+            code: AUTH_ERROR_CODES.UNAUTHORIZED,
             status: 401,
             message: "Unauthorized"
           }

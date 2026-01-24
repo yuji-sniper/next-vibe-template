@@ -3,7 +3,7 @@ import "server-only"
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { oneTap } from "better-auth/plugins"
-import { db } from "@/backend/modules/shared"
+import { db } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/client"
 import { env } from "@/env"
 
 export const auth = betterAuth({

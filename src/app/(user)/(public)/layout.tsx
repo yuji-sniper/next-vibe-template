@@ -1,8 +1,9 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { env } from "@/env"
-import { authUserKey, getAuthUserQuery } from "@/features/auth"
-import { getQueryClient } from "@/lib/react-query"
+import { getAuthUserQuery } from "@/features/auth/queries/get-auth-user"
+import { authUserKey } from "@/features/auth/queries/keys"
+import { getQueryClient } from "@/lib/react-query/query-client"
 
 export const metadata: Metadata = {
   title: `Top | ${env.NEXT_PUBLIC_SERVICE_NAME}`,
