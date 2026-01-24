@@ -1,20 +1,19 @@
-import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { env } from "@/env"
+import { setRequestLocale } from "next-intl/server"
 import { getAuthUserQuery } from "@/features/auth/queries/get-auth-user"
 import { authUserKey } from "@/features/auth/queries/keys"
 import { getQueryClient } from "@/lib/react-query/query-client"
 
-export const metadata: Metadata = {
-  title: `Top | ${env.NEXT_PUBLIC_SERVICE_NAME}`,
-  description: "Top page."
-}
-
 export default async function UserPublicLayout({
-  children
+  children,
+  params
 }: {
   children: React.ReactNode
+  params: Promise<{ locale: string }>
 }) {
+  const { locale } = await params
+  setRequestLocale(locale)
+
   const queryClient = getQueryClient()
   const { authUser } = await queryClient.fetchQuery({
     queryKey: authUserKey,
@@ -22,7 +21,7 @@ export default async function UserPublicLayout({
   })
 
   if (authUser) {
-    redirect("/home")
+    redirect(`/${locale}/home`)
   }
 
   return children

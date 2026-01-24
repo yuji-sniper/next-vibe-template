@@ -1,6 +1,15 @@
 import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
+
+import createMiddleware from "next-intl/middleware"
+
 import { env } from "./env"
+import { routing } from "./i18n/routing"
+
+/**
+ * i18nミドルウェア
+ */
+const intlMiddleware = createMiddleware(routing)
 
 /**
  * ホストとappディレクトリのパスのマッピング
@@ -50,9 +59,21 @@ export function proxy(request: NextRequest) {
     return setCorsHeaders(response, host)
   }
 
+  // ユーザー向けホストの場合、i18nルーティングを適用
+  if (host === env.NEXT_PUBLIC_HOST) {
+    // APIルートは除外
+    if (pathname.startsWith("/api/")) {
+      const response = NextResponse.next()
+      return setCorsHeaders(response, host)
+    }
+
+    // i18nミドルウェアを適用
+    const response = intlMiddleware(request)
+    return setCorsHeaders(response, host)
+  }
+
   for (const [allowedHost, allowedPath] of Object.entries(hostPathMap)) {
     if (host !== allowedHost) continue
-    if (host === env.NEXT_PUBLIC_HOST) continue
 
     // 既に /admin または /api/admin パスの場合はスキップ
     if (
