@@ -1,0 +1,37 @@
+{
+  "top": {
+    "title": "トップ",
+    "heading": "トップ"
+  },
+  "signIn": {
+    "title": "サインイン",
+    "description": "Googleアカウントでサインインしてください"
+  },
+  "home": {
+    "title": "ホーム",
+    "heading": "ホーム"
+  },
+  "errors": {
+    "general": {
+      "title": "エラーが発生しました。",
+      "retry": "再読み込み"
+    },
+    "notFound": {
+      "message": "お探しのページが見つかりませんでした。"
+    }
+  },
+  "metadata": {
+    "top": {
+      "title": "トップ",
+      "description": "トップページ"
+    },
+    "signIn": {
+      "title": "サインイン",
+      "description": "サインインページ"
+    },
+    "home": {
+      "title": "ホーム",
+      "description": "ホームページ"
+    }
+  }
+}

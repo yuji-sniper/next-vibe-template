@@ -1,5 +1,6 @@
 "use client"
 
+import { useTranslations } from "next-intl"
 import { useEffect } from "react"
 
 export default function ErrorPage({
@@ -9,15 +10,17 @@ export default function ErrorPage({
   error: Error & { digest?: string }
   reset: () => void
 }) {
+  const t = useTranslations("errors.general")
+
   useEffect(() => {
     console.error(error)
   }, [error])
 
   return (
     <div>
-      <h2>エラーが発生しました。</h2>
+      <h2>{t("title")}</h2>
       <button type="button" onClick={() => reset()}>
-        再読み込み
+        {t("retry")}
       </button>
     </div>
   )
