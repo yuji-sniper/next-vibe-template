@@ -9,13 +9,13 @@ export default async function AdminPublicLayout({
   children: React.ReactNode
 }) {
   const queryClient = getQueryClient()
-  const authAdmin = await queryClient.fetchQuery({
+  const { authAdmin } = await queryClient.fetchQuery({
     queryKey: authAdminKey,
     queryFn: () => getAuthAdminQuery({ orError: false })
   })
 
   if (authAdmin) {
-    redirect("/")
+    redirect("/dashboard")
   }
 
   return children
