@@ -10,8 +10,11 @@ export const authClient = createAuthClient({
     oneTapClient({
       clientId: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
       cancelOnTapOutside: false,
+      context: "signin",
       promptOptions: {
-        fedCM: false
+        // FedCMはローカル開発環境では動作しないため、本番環境のみ有効化
+        // NEXT_PUBLIC_ORIGINがhttpsで始まる場合のみFedCMを有効化
+        fedCM: env.NEXT_PUBLIC_ORIGIN.startsWith("https://")
       }
     })
   ]
