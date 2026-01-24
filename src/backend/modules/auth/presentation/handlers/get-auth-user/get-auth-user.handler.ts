@@ -13,6 +13,7 @@ type GetAuthUserControllerResult = Result<{
     id: string
     email: string
     name: string
+    image?: string
   }
 }>
 

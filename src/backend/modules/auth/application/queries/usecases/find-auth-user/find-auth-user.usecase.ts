@@ -19,7 +19,8 @@ export class FindAuthUserUseCase implements FindAuthUserUseCasePort {
       authUser: {
         id: output.authUser.id,
         email: output.authUser.email.value,
-        name: output.authUser.name
+        name: output.authUser.name,
+        image: output.authUser.image
       }
     }
   }

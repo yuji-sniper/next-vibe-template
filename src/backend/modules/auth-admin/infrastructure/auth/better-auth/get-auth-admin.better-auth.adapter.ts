@@ -18,7 +18,7 @@ export class GetAuthAdminBetterAuthAdapter implements GetAuthAdminPort {
     }
 
     return {
-      authAdmin: AuthAdmin.create({
+      authAdmin: AuthAdmin.reconstruct({
         id: session.user.id,
         email: session.user.email,
         name: session.user.name

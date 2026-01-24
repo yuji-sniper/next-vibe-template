@@ -3,6 +3,7 @@ export interface FindAuthUserUseCasePortOutput {
     id: string
     email: string
     name: string
+    image?: string
   }
 }
 

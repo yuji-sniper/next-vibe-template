@@ -7,7 +7,7 @@ export class AuthAdmin {
     public readonly name: string
   ) {}
 
-  static create(params: {
+  static reconstruct(params: {
     id: string
     email: string
     name: string
