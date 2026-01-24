@@ -18,10 +18,11 @@ export class GetAuthUserBetterAuthAdapter implements GetAuthUserPort {
     }
 
     return {
-      authUser: AuthUser.create({
+      authUser: AuthUser.reconstruct({
         id: session.user.id,
         email: session.user.email,
-        name: session.user.name
+        name: session.user.name,
+        image: session.user.image ?? undefined
       })
     }
   }

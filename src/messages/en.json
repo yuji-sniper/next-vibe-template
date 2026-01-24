@@ -3,6 +3,12 @@
     "title": "Top",
     "heading": "Top"
   },
+  "userAccount": {
+    "openMenu": "Open account menu",
+    "settings": "Settings",
+    "logout": "Log out",
+    "loggingOut": "Logging out..."
+  },
   "signIn": {
     "title": "Sign In",
     "description": "Please sign in with your Google account"

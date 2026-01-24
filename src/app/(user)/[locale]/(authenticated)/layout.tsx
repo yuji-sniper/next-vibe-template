@@ -1,6 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
 import { redirect } from "next/navigation"
 import { setRequestLocale } from "next-intl/server"
+import { UserLayoutWrapper } from "@/components/layout/wrapper/UserLayoutWrapper"
 import { getAuthUserQuery } from "@/features/auth/queries/get-auth-user"
 import { authUserKey } from "@/features/auth/queries/keys"
 import { getQueryClient } from "@/lib/react-query/query-client"
@@ -29,7 +30,7 @@ export default async function UserAuthenticatedLayout({
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      {children}
+      <UserLayoutWrapper>{children}</UserLayoutWrapper>
     </HydrationBoundary>
   )
 }
