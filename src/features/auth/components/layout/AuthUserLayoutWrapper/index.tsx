@@ -1,14 +1,14 @@
 "use client"
 
 import type { PropsWithChildren } from "react"
-import { UserAccountButton } from "@/components/layout/account/UserAccountButton"
+import { AuthUserMenu } from "@/features/auth/components/layout/AuthUserMenu"
 
-export const UserLayoutWrapper = ({ children }: PropsWithChildren) => {
+export const AuthUserLayoutWrapper = ({ children }: PropsWithChildren) => {
   return (
     <div className="min-h-screen">
       <header className="sticky top-0 z-50 border-b bg-background">
         <div className="container flex h-14 items-center justify-end">
-          <UserAccountButton />
+          <AuthUserMenu />
         </div>
       </header>
       <main>{children}</main>

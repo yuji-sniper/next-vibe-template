@@ -29,7 +29,7 @@ function getInitials(name: string): string {
     .slice(0, 2)
 }
 
-export function UserAccountButton() {
+export function AuthUserMenu() {
   const popoverId = useId()
   const t = useTranslations("userAccount")
   const locale = useLocale()
