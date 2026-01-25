@@ -37,7 +37,7 @@ export function SettingsPresentational({
   const t = useTranslations("settings")
 
   return (
-    <div className="container max-w-2xl py-8">
+    <div className="container max-w-2xl py-8 mx-auto">
       <h1 className="mb-8 text-2xl font-bold">{t("heading")}</h1>
 
       <Card>
