@@ -33,6 +33,9 @@ export class ChangeSubscriptionPlanStripeAdapter
               price: input.newPriceId
             }
           ],
+          // プラン変更時の日割り計算を有効化
+          // 旧プランの未使用分をクレジット、新プランの残り期間分を追加請求として計算し、
+          // 差額を次回の請求に反映する
           proration_behavior: "create_prorations"
         }
       )
