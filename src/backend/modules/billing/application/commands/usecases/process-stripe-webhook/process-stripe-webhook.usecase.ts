@@ -28,20 +28,22 @@ import type { WebhookEventRepository } from "@/backend/modules/billing/domain/we
 import { WebhookEventRepositoryToken } from "@/backend/modules/billing/domain/webhook-event/webhook-event.repository"
 import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
 import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
-import type { ProcessWebhookPort } from "../../ports/process-webhook.port"
-import { ProcessWebhookPortToken } from "../../ports/process-webhook.port"
+import type { ProcessStripeWebhookPort } from "../../ports/process-stripe-webhook.port"
+import { ProcessStripeWebhookPortToken } from "../../ports/process-stripe-webhook.port"
 import type {
-  ProcessWebhookUseCasePort,
-  ProcessWebhookUseCasePortInput
-} from "./process-webhook.usecase.port"
+  ProcessStripeWebhookUseCasePort,
+  ProcessStripeWebhookUseCasePortInput
+} from "./process-stripe-webhook.usecase.port"
 
 @injectable()
-export class ProcessWebhookUseCase implements ProcessWebhookUseCasePort {
+export class ProcessStripeWebhookUseCase
+  implements ProcessStripeWebhookUseCasePort
+{
   constructor(
     @inject(TransactorToken)
     private readonly transactor: Transactor,
-    @inject(ProcessWebhookPortToken)
-    private readonly processWebhook: ProcessWebhookPort,
+    @inject(ProcessStripeWebhookPortToken)
+    private readonly processStripeWebhook: ProcessStripeWebhookPort,
     @inject(WebhookEventRepositoryToken)
     private readonly webhookEventRepository: WebhookEventRepository,
     @inject(PaymentRepositoryToken)
@@ -54,9 +56,9 @@ export class ProcessWebhookUseCase implements ProcessWebhookUseCasePort {
     private readonly invoiceRepository: InvoiceRepository
   ) {}
 
-  async handle(input: ProcessWebhookUseCasePortInput): Promise<void> {
+  async handle(input: ProcessStripeWebhookUseCasePortInput): Promise<void> {
     // 1. 署名検証 & イベントパース（アダプター）- トランザクション外
-    const { event } = await this.processWebhook.handle({
+    const { event } = await this.processStripeWebhook.handle({
       payload: input.payload,
       signature: input.signature
     })

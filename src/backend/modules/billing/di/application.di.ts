@@ -7,8 +7,8 @@ import { CreateCheckoutSessionUseCase } from "@/backend/modules/billing/applicat
 import { CreateCheckoutSessionUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/create-checkout-session/create-checkout-session.usecase.port"
 import { CreateSubscriptionCheckoutSessionUseCase } from "@/backend/modules/billing/application/commands/usecases/create-subscription-checkout-session/create-subscription-checkout-session.usecase"
 import { CreateSubscriptionCheckoutSessionUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/create-subscription-checkout-session/create-subscription-checkout-session.usecase.port"
-import { ProcessWebhookUseCase } from "@/backend/modules/billing/application/commands/usecases/process-webhook/process-webhook.usecase"
-import { ProcessWebhookUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/process-webhook/process-webhook.usecase.port"
+import { ProcessStripeWebhookUseCase } from "@/backend/modules/billing/application/commands/usecases/process-stripe-webhook/process-stripe-webhook.usecase"
+import { ProcessStripeWebhookUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/process-stripe-webhook/process-stripe-webhook.usecase.port"
 import { FindPaymentHistoryUseCase } from "@/backend/modules/billing/application/queries/usecases/find-payment-history/find-payment-history.usecase"
 import { FindPaymentHistoryUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-payment-history/find-payment-history.usecase.port"
 import { FindSubscriptionUseCase } from "@/backend/modules/billing/application/queries/usecases/find-subscription/find-subscription.usecase"
@@ -20,8 +20,8 @@ export function initApplicationDependency(container: DependencyContainer) {
     CreateCheckoutSessionUseCase
   )
   container.registerSingleton(
-    ProcessWebhookUseCasePortToken,
-    ProcessWebhookUseCase
+    ProcessStripeWebhookUseCasePortToken,
+    ProcessStripeWebhookUseCase
   )
   container.registerSingleton(
     FindPaymentHistoryUseCasePortToken,

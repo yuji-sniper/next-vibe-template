@@ -3,17 +3,19 @@ import { injectable } from "tsyringe"
 import { WebhookVerificationFailedError } from "@/backend/modules/billing/domain/webhook-event/webhook-event.errors"
 import { env } from "@/env"
 import type {
-  ProcessWebhookPort,
-  ProcessWebhookPortInput,
-  ProcessWebhookPortOutput
-} from "../../application/commands/ports/process-webhook.port"
+  ProcessStripeWebhookPort,
+  ProcessStripeWebhookPortInput,
+  ProcessStripeWebhookPortOutput
+} from "../../application/commands/ports/process-stripe-webhook.port"
 import { stripe } from "./stripe-client"
 
 @injectable()
-export class ProcessWebhookStripeAdapter implements ProcessWebhookPort {
+export class ProcessStripeWebhookStripeAdapter
+  implements ProcessStripeWebhookPort
+{
   async handle(
-    input: ProcessWebhookPortInput
-  ): Promise<ProcessWebhookPortOutput> {
+    input: ProcessStripeWebhookPortInput
+  ): Promise<ProcessStripeWebhookPortOutput> {
     const event = this.verifySignature(input.payload, input.signature)
     return { event }
   }

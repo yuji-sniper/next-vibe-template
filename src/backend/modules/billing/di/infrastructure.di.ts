@@ -4,7 +4,7 @@ import { ChangeSubscriptionPlanPortToken } from "@/backend/modules/billing/appli
 import { CreateCheckoutSessionPortToken } from "@/backend/modules/billing/application/commands/ports/create-checkout-session.port"
 import { CreateStripeCustomerPortToken } from "@/backend/modules/billing/application/commands/ports/create-stripe-customer.port"
 import { CreateSubscriptionCheckoutSessionPortToken } from "@/backend/modules/billing/application/commands/ports/create-subscription-checkout-session.port"
-import { ProcessWebhookPortToken } from "@/backend/modules/billing/application/commands/ports/process-webhook.port"
+import { ProcessStripeWebhookPortToken } from "@/backend/modules/billing/application/commands/ports/process-stripe-webhook.port"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { InvoiceRepositoryToken } from "@/backend/modules/billing/domain/invoice/invoice.repository"
 import { PaymentRepositoryToken } from "@/backend/modules/billing/domain/payment/payment.repository"
@@ -20,7 +20,7 @@ import { ChangeSubscriptionPlanStripeAdapter } from "@/backend/modules/billing/i
 import { CreateCheckoutSessionStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/create-checkout-session.stripe.adapter"
 import { CreateStripeCustomerStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/create-stripe-customer.stripe.adapter"
 import { CreateSubscriptionCheckoutSessionStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/create-subscription-checkout-session.stripe.adapter"
-import { ProcessWebhookStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/process-webhook.stripe.adapter"
+import { ProcessStripeWebhookStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/process-stripe-webhook.stripe.adapter"
 
 export function initInfrastructureDependency(container: DependencyContainer) {
   // Repositories
@@ -49,8 +49,8 @@ export function initInfrastructureDependency(container: DependencyContainer) {
     CreateStripeCustomerStripeAdapter
   )
   container.registerSingleton(
-    ProcessWebhookPortToken,
-    ProcessWebhookStripeAdapter
+    ProcessStripeWebhookPortToken,
+    ProcessStripeWebhookStripeAdapter
   )
   container.registerSingleton(
     CreateSubscriptionCheckoutSessionPortToken,
