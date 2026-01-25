@@ -17,6 +17,22 @@
     "title": "Home",
     "heading": "Home"
   },
+  "settings": {
+    "title": "Settings",
+    "heading": "Settings",
+    "deleteAccount": {
+      "title": "Delete Account",
+      "description": "Deleting your account will permanently remove all your data. This action cannot be undone.",
+      "button": "Delete Account",
+      "dialog": {
+        "title": "Are you sure?",
+        "description": "This action cannot be undone. All data associated with your account will be permanently deleted.",
+        "cancel": "Cancel",
+        "confirm": "Delete",
+        "deleting": "Deleting..."
+      }
+    }
+  },
   "errors": {
     "general": {
       "title": "An error occurred.",
@@ -38,6 +54,10 @@
     "home": {
       "title": "Home",
       "description": "Home page"
+    },
+    "settings": {
+      "title": "Settings",
+      "description": "Account settings page"
     }
   }
 }
