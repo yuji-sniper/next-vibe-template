@@ -205,6 +205,16 @@ type Props = {
 export class Example {
   private constructor(private readonly props: Props) {}
 
+  static create(props: Props): Example {
+    const now = new Date()
+    return new Customer(
+      props.id,
+      props.name,
+      now,
+      now
+    )
+  }
+
   static reconstruct(props: Props): Example {
     return new Example(props)
   }
