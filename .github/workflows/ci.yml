@@ -1,0 +1,83 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - "**"
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: ./.github/workflows/composite/setup-node
+      - name: Lint
+        run: pnpm lint
+
+  fmt:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: ./.github/workflows/composite/setup-node
+      - name: Format
+        run: pnpm fmt
+
+  type-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: ./.github/workflows/composite/setup-node
+      - name: Type check
+        run: pnpm type:gen && pnpm type:check
+        env:
+          SKIP_ENV_VALIDATION: true
+
+  # unit-test:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: Setup Node
+  #       uses: ./.github/workflows/composite/setup-node
+  #     - name: Run unit tests
+  #       run: pnpm test:unit
+  #       env:
+  #         SKIP_ENV_VALIDATION: true
+
+  # integration-test:
+  #   runs-on: ubuntu-latest
+  #   services:
+  #     postgres:
+  #       image: postgres:17
+  #       env:
+  #         POSTGRES_USER: postgres
+  #         POSTGRES_PASSWORD: postgres
+  #         POSTGRES_DB: test
+  #       ports:
+  #         - 5432:5432
+  #       options: >-
+  #         --health-cmd pg_isready
+  #         --health-interval 10s
+  #         --health-timeout 5s
+  #         --health-retries 5
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #     - name: Setup Node
+  #       uses: ./.github/workflows/composite/setup-node
+  #     - name: Run database migrations
+  #       run: pnpm drizzle:migrate
+  #       env:
+  #         SKIP_ENV_VALIDATION: true
+  #         POSTGRES_URL: postgresql://postgres:postgres@localhost:5432/test
+  #     - name: Run integration tests
+  #       run: pnpm test:integration
+  #       env:
+  #         SKIP_ENV_VALIDATION: true
+  #         NODE_ENV: test
