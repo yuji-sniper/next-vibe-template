@@ -386,6 +386,16 @@ export default async function AuthenticatedLayout({
 }
 ```
 
+## 実装完了後の必須ステップ
+
+**実装が完了したら必ず以下を実行:**
+
+```bash
+pnpm type:check
+```
+
+エラーが出た場合は、すべてのエラーを解消するまで修正を続ける。型エラーが残った状態で実装完了としない。
+
 ## チェックリスト
 
 新規実装時の確認事項:
@@ -398,3 +408,4 @@ export default async function AuthenticatedLayout({
 - [ ] エラーハンドリング実装
 - [ ] React Query でデータフェッチ（必要時）
 - [ ] アクセシビリティ対応（aria-* 属性）
+- [ ] `pnpm type:check` が通ること（必須）
