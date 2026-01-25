@@ -1,6 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
 import { redirect } from "next/navigation"
 import { setRequestLocale } from "next-intl/server"
+import { Toaster } from "@/components/ui/sonner"
 import { AuthUserMenu } from "@/features/auth/components/layout/AuthUserMenu"
 import { getAuthUserQuery } from "@/features/auth/queries/get-auth-user"
 import { authUserKey } from "@/features/auth/queries/keys"
@@ -40,6 +41,7 @@ export default async function UserAuthenticatedLayout({
           {children}
         </HydrationBoundary>
       </main>
+      <Toaster />
     </div>
   )
 }
