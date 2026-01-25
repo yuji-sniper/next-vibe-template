@@ -19,6 +19,8 @@ gh issue view $ARGUMENTS --repo yuji-sniper/next-vibe-template
 - 説明
 
 3. Issueの内容に基づいて、下記に従って実装プランを立ててください。
+- フロントエンドに関しては、frontend-codingのskillsを使用してください。
+- バックエンドに関しては、backend-codingのskillsを使用してください。
 - ディレクトリ構造で、どこにどんな名前のファイルを作成・更新するかを明記してください。
 - 各ファイルの実装方針を、具体のコードまでは明記せず方針を書いてください。
 - 必要があればcontext7のMCPを使ってドキュメントを調べてください。
