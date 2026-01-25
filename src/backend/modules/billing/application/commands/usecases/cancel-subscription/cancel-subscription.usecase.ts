@@ -1,0 +1,78 @@
+import { inject, injectable } from "tsyringe"
+import type { GetAuthUserPort } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
+import { GetAuthUserPortToken } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
+import { CustomerNotFoundError } from "@/backend/modules/billing/domain/customer/customer.errors"
+import type { CustomerRepository } from "@/backend/modules/billing/domain/customer/customer.repository"
+import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
+import { SubscriptionNotFoundError } from "@/backend/modules/billing/domain/subscription/subscription.errors"
+import type { SubscriptionRepository } from "@/backend/modules/billing/domain/subscription/subscription.repository"
+import { SubscriptionRepositoryToken } from "@/backend/modules/billing/domain/subscription/subscription.repository"
+import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
+import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
+import type { CancelSubscriptionPort } from "../../ports/cancel-subscription.port"
+import { CancelSubscriptionPortToken } from "../../ports/cancel-subscription.port"
+import type {
+  CancelSubscriptionUseCasePort,
+  CancelSubscriptionUseCasePortInput,
+  CancelSubscriptionUseCasePortOutput
+} from "./cancel-subscription.usecase.port"
+
+@injectable()
+export class CancelSubscriptionUseCase
+  implements CancelSubscriptionUseCasePort
+{
+  constructor(
+    @inject(TransactorToken)
+    private readonly transactor: Transactor,
+    @inject(GetAuthUserPortToken)
+    private readonly getAuthUser: GetAuthUserPort,
+    @inject(CustomerRepositoryToken)
+    private readonly customerRepository: CustomerRepository,
+    @inject(SubscriptionRepositoryToken)
+    private readonly subscriptionRepository: SubscriptionRepository,
+    @inject(CancelSubscriptionPortToken)
+    private readonly cancelSubscription: CancelSubscriptionPort
+  ) {}
+
+  async handle(
+    input?: CancelSubscriptionUseCasePortInput
+  ): Promise<CancelSubscriptionUseCasePortOutput> {
+    // 1. 認証ユーザー取得
+    const { authUser } = await this.getAuthUser.handle()
+
+    // 2. Customer取得
+    const customer = await this.customerRepository.findByUserId(authUser.id)
+    if (!customer) {
+      throw new CustomerNotFoundError()
+    }
+
+    // 3. Subscription取得
+    const subscription = await this.subscriptionRepository.findByCustomerId(
+      customer.id
+    )
+    if (!subscription) {
+      throw new SubscriptionNotFoundError()
+    }
+
+    // 4. Stripe API: subscription.update({ cancel_at_period_end: true })
+    const cancelAtPeriodEnd = input?.cancelAtPeriodEnd ?? true
+    const result = await this.cancelSubscription.handle({
+      stripeSubscriptionId: subscription.stripeSubscriptionId,
+      cancelAtPeriodEnd
+    })
+
+    // 5. DBのSubscription更新（トランザクション内）
+    await this.transactor.execute(async () => {
+      subscription.setCancelAtPeriodEnd(result.cancelAtPeriodEnd)
+      await this.subscriptionRepository.save(subscription)
+    })
+
+    return {
+      subscriptionId: subscription.id,
+      cancelAtPeriodEnd: result.cancelAtPeriodEnd,
+      currentPeriodEnd: result.currentPeriodEnd
+        ? new Date(result.currentPeriodEnd * 1000)
+        : null
+    }
+  }
+}

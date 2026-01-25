@@ -6,8 +6,8 @@ import {
 } from "@/backend/modules/billing/application/commands/usecases/process-webhook/process-webhook.usecase.port"
 import {
   WebhookEventAlreadyProcessedError,
-  WebhookVerificationFailedError,
-  WebhookProcessingFailedError
+  WebhookProcessingFailedError,
+  WebhookVerificationFailedError
 } from "@/backend/modules/billing/domain/webhook-event/webhook-event.errors"
 
 export async function POST(request: Request) {

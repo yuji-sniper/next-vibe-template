@@ -1,0 +1,101 @@
+import { resolveContainer } from "@/backend/bootstrap/container"
+import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
+import {
+  type CancelSubscriptionUseCasePort,
+  CancelSubscriptionUseCasePortToken
+} from "@/backend/modules/billing/application/commands/usecases/cancel-subscription/cancel-subscription.usecase.port"
+import { CustomerNotFoundError } from "@/backend/modules/billing/domain/customer/customer.errors"
+import {
+  SubscriptionCancelFailedError,
+  SubscriptionNotFoundError
+} from "@/backend/modules/billing/domain/subscription/subscription.errors"
+import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
+import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
+import { BILLING_ERROR_CODES } from "@/shared/errors/billing.errors"
+import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
+
+type CancelSubscriptionHandlerInput = {
+  cancelAtPeriodEnd?: boolean
+}
+
+type CancelSubscriptionHandlerResult = Result<{
+  subscriptionId: string
+  cancelAtPeriodEnd: boolean
+  currentPeriodEnd: string | null
+}>
+
+export const handleCancelSubscription = async (
+  input?: CancelSubscriptionHandlerInput
+): Promise<CancelSubscriptionHandlerResult> => {
+  const usecase = await resolveContainer<CancelSubscriptionUseCasePort>(
+    CancelSubscriptionUseCasePortToken
+  )
+
+  try {
+    const output = await usecase.handle({
+      cancelAtPeriodEnd: input?.cancelAtPeriodEnd
+    })
+
+    return {
+      ok: true,
+      data: {
+        subscriptionId: output.subscriptionId,
+        cancelAtPeriodEnd: output.cancelAtPeriodEnd,
+        currentPeriodEnd: output.currentPeriodEnd?.toISOString() ?? null
+      }
+    }
+  } catch (e: unknown) {
+    if (e instanceof AuthUserUnauthorizedError) {
+      return {
+        ok: false,
+        error: {
+          code: AUTH_ERROR_CODES.UNAUTHORIZED,
+          status: 401,
+          message: "Unauthorized"
+        }
+      }
+    }
+
+    if (e instanceof CustomerNotFoundError) {
+      return {
+        ok: false,
+        error: {
+          code: BILLING_ERROR_CODES.CUSTOMER_NOT_FOUND,
+          status: 404,
+          message: "Customer not found"
+        }
+      }
+    }
+
+    if (e instanceof SubscriptionNotFoundError) {
+      return {
+        ok: false,
+        error: {
+          code: BILLING_ERROR_CODES.SUBSCRIPTION_NOT_FOUND,
+          status: 404,
+          message: "Subscription not found"
+        }
+      }
+    }
+
+    if (e instanceof SubscriptionCancelFailedError) {
+      return {
+        ok: false,
+        error: {
+          code: BILLING_ERROR_CODES.SUBSCRIPTION_CANCEL_FAILED,
+          status: 500,
+          message: "Failed to cancel subscription"
+        }
+      }
+    }
+
+    return {
+      ok: false,
+      error: {
+        code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
+        status: 500,
+        message: "Internal server error"
+      }
+    }
+  }
+}

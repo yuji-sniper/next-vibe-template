@@ -1,0 +1,82 @@
+import { randomUUID } from "node:crypto"
+import { inject, injectable } from "tsyringe"
+import type { GetAuthUserPort } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
+import { GetAuthUserPortToken } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
+import { Customer } from "@/backend/modules/billing/domain/customer/customer"
+import type { CustomerRepository } from "@/backend/modules/billing/domain/customer/customer.repository"
+import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
+import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
+import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
+import type { CreateStripeCustomerPort } from "../../ports/create-stripe-customer.port"
+import { CreateStripeCustomerPortToken } from "../../ports/create-stripe-customer.port"
+import type { CreateSubscriptionCheckoutSessionPort } from "../../ports/create-subscription-checkout-session.port"
+import { CreateSubscriptionCheckoutSessionPortToken } from "../../ports/create-subscription-checkout-session.port"
+import type {
+  CreateSubscriptionCheckoutSessionUseCasePort,
+  CreateSubscriptionCheckoutSessionUseCasePortInput,
+  CreateSubscriptionCheckoutSessionUseCasePortOutput
+} from "./create-subscription-checkout-session.usecase.port"
+
+@injectable()
+export class CreateSubscriptionCheckoutSessionUseCase
+  implements CreateSubscriptionCheckoutSessionUseCasePort
+{
+  constructor(
+    @inject(TransactorToken)
+    private readonly transactor: Transactor,
+    @inject(GetAuthUserPortToken)
+    private readonly getAuthUser: GetAuthUserPort,
+    @inject(CustomerRepositoryToken)
+    private readonly customerRepository: CustomerRepository,
+    @inject(CreateStripeCustomerPortToken)
+    private readonly createStripeCustomer: CreateStripeCustomerPort,
+    @inject(CreateSubscriptionCheckoutSessionPortToken)
+    private readonly createSubscriptionCheckoutSession: CreateSubscriptionCheckoutSessionPort
+  ) {}
+
+  async handle(
+    input: CreateSubscriptionCheckoutSessionUseCasePortInput
+  ): Promise<CreateSubscriptionCheckoutSessionUseCasePortOutput> {
+    // 1. 認証ユーザー取得
+    const { authUser } = await this.getAuthUser.handle()
+
+    // 2. Customer取得または作成（トランザクション内）
+    const customer = await this.transactor.execute(async () => {
+      return await this.getOrCreateCustomer(authUser.id, authUser.email.value)
+    })
+
+    // 3. Subscription Checkout Session作成
+    const { sessionUrl } = await this.createSubscriptionCheckoutSession.handle({
+      stripeCustomerId: customer.stripeCustomerId,
+      priceId: input.priceId,
+      successUrl: input.successUrl,
+      cancelUrl: input.cancelUrl
+    })
+
+    // 4. sessionUrlを返却（Subscriptionレコードはcheckout.session.completedで作成）
+    return { sessionUrl }
+  }
+
+  private async getOrCreateCustomer(
+    userId: string,
+    email: string
+  ): Promise<Customer> {
+    const existing = await this.customerRepository.findByUserId(userId)
+    if (existing) {
+      return existing
+    }
+
+    const { stripeCustomerId } = await this.createStripeCustomer.handle({
+      userId,
+      email
+    })
+    const customer = Customer.create({
+      id: randomUUID(),
+      userId,
+      stripeCustomerId,
+      email
+    })
+    await this.customerRepository.save(customer)
+    return customer
+  }
+}

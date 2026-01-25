@@ -1,7 +1,14 @@
 import { randomUUID } from "node:crypto"
+import type Stripe from "stripe"
 import { inject, injectable } from "tsyringe"
 import type { CustomerRepository } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
+import {
+  INVOICE_STATUS,
+  Invoice
+} from "@/backend/modules/billing/domain/invoice/invoice"
+import type { InvoiceRepository } from "@/backend/modules/billing/domain/invoice/invoice.repository"
+import { InvoiceRepositoryToken } from "@/backend/modules/billing/domain/invoice/invoice.repository"
 import {
   PAYMENT_STATUS,
   Payment,
@@ -9,6 +16,9 @@ import {
 } from "@/backend/modules/billing/domain/payment/payment"
 import type { PaymentRepository } from "@/backend/modules/billing/domain/payment/payment.repository"
 import { PaymentRepositoryToken } from "@/backend/modules/billing/domain/payment/payment.repository"
+import { Subscription } from "@/backend/modules/billing/domain/subscription/subscription"
+import type { SubscriptionRepository } from "@/backend/modules/billing/domain/subscription/subscription.repository"
+import { SubscriptionRepositoryToken } from "@/backend/modules/billing/domain/subscription/subscription.repository"
 import { WebhookEvent } from "@/backend/modules/billing/domain/webhook-event/webhook-event"
 import {
   WebhookEventAlreadyProcessedError,
@@ -18,12 +28,7 @@ import type { WebhookEventRepository } from "@/backend/modules/billing/domain/we
 import { WebhookEventRepositoryToken } from "@/backend/modules/billing/domain/webhook-event/webhook-event.repository"
 import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
 import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
-import type {
-  CheckoutSessionCompletedEvent,
-  PaymentIntentEvent,
-  ProcessWebhookPort,
-  WebhookEventData
-} from "../../ports/process-webhook.port"
+import type { ProcessWebhookPort } from "../../ports/process-webhook.port"
 import { ProcessWebhookPortToken } from "../../ports/process-webhook.port"
 import type {
   ProcessWebhookUseCasePort,
@@ -42,7 +47,11 @@ export class ProcessWebhookUseCase implements ProcessWebhookUseCasePort {
     @inject(PaymentRepositoryToken)
     private readonly paymentRepository: PaymentRepository,
     @inject(CustomerRepositoryToken)
-    private readonly customerRepository: CustomerRepository
+    private readonly customerRepository: CustomerRepository,
+    @inject(SubscriptionRepositoryToken)
+    private readonly subscriptionRepository: SubscriptionRepository,
+    @inject(InvoiceRepositoryToken)
+    private readonly invoiceRepository: InvoiceRepository
   ) {}
 
   async handle(input: ProcessWebhookUseCasePortInput): Promise<void> {
@@ -58,10 +67,10 @@ export class ProcessWebhookUseCase implements ProcessWebhookUseCasePort {
     })
   }
 
-  private async processEvent(event: WebhookEventData): Promise<void> {
+  private async processEvent(event: Stripe.Event): Promise<void> {
     // イベント重複チェック
     const existingEvent = await this.webhookEventRepository.findByStripeEventId(
-      event.stripeEventId
+      event.id
     )
     if (existingEvent?.processed) {
       throw new WebhookEventAlreadyProcessedError()
@@ -70,8 +79,8 @@ export class ProcessWebhookUseCase implements ProcessWebhookUseCasePort {
     // イベント記録
     const webhookEvent = WebhookEvent.create({
       id: existingEvent?.id ?? randomUUID(),
-      stripeEventId: event.stripeEventId,
-      eventType: event.type === "unknown" ? event.eventType : event.type
+      stripeEventId: event.id,
+      eventType: event.type
     })
     if (!existingEvent) {
       await this.webhookEventRepository.save(webhookEvent)
@@ -88,6 +97,15 @@ export class ProcessWebhookUseCase implements ProcessWebhookUseCasePort {
         case "payment_intent.canceled":
           await this.handlePaymentIntentEvent(event)
           break
+        case "customer.subscription.created":
+        case "customer.subscription.updated":
+        case "customer.subscription.deleted":
+          await this.handleSubscriptionEvent(event)
+          break
+        case "invoice.payment_succeeded":
+        case "invoice.payment_failed":
+          await this.handleInvoiceEvent(event)
+          break
         default:
           // 未対応のイベントは無視
           break
@@ -102,49 +120,63 @@ export class ProcessWebhookUseCase implements ProcessWebhookUseCasePort {
   }
 
   private async handleCheckoutSessionCompleted(
-    event: CheckoutSessionCompletedEvent
+    event: Stripe.CheckoutSessionCompletedEvent
   ): Promise<void> {
-    // PaymentIntent IDがない場合は処理しない
-    if (!event.stripePaymentIntentId) {
+    const session = event.data.object
+
+    // Customer ID取得
+    const customerId = session.customer
+    if (!customerId || typeof customerId !== "string") {
       return
     }
 
-    // Customer IDからCustomerを取得
-    if (!event.stripeCustomerId) {
-      return
-    }
-    const customer = await this.customerRepository.findByStripeCustomerId(
-      event.stripeCustomerId
-    )
+    const customer =
+      await this.customerRepository.findByStripeCustomerId(customerId)
     if (!customer) {
       return
     }
 
-    // 既にPaymentが存在する場合はスキップ
-    const existingPayment =
-      await this.paymentRepository.findByStripePaymentIntentId(
-        event.stripePaymentIntentId
-      )
-    if (existingPayment) {
+    // サブスクリプションモードの場合
+    if (session.mode === "subscription" && session.subscription) {
+      // Subscriptionはcustomer.subscription.createdで作成されるため、ここでは何もしない
       return
     }
 
-    // Paymentレコードを作成
-    const payment = Payment.create({
-      id: randomUUID(),
-      customerId: customer.id,
-      stripePaymentIntentId: event.stripePaymentIntentId,
-      amount: event.amountTotal,
-      currency: event.currency
-    })
-    await this.paymentRepository.save(payment)
+    // 単発決済モードの場合
+    if (session.mode === "payment" && session.payment_intent) {
+      const paymentIntentId = session.payment_intent
+      if (!paymentIntentId || typeof paymentIntentId !== "string") {
+        return
+      }
+      // 既にPaymentが存在する場合はスキップ
+      const existingPayment =
+        await this.paymentRepository.findByStripePaymentIntentId(
+          paymentIntentId
+        )
+      if (existingPayment) {
+        return
+      }
+
+      // Paymentレコードを作成
+      const payment = Payment.create({
+        id: randomUUID(),
+        customerId: customer.id,
+        stripePaymentIntentId: paymentIntentId,
+        amount: session.amount_total ?? 0,
+        currency: session.currency ?? "jpy"
+      })
+      await this.paymentRepository.save(payment)
+    }
   }
 
   private async handlePaymentIntentEvent(
-    event: PaymentIntentEvent
+    event:
+      | Stripe.PaymentIntentCanceledEvent
+      | Stripe.PaymentIntentPaymentFailedEvent
+      | Stripe.PaymentIntentSucceededEvent
   ): Promise<void> {
     const payment = await this.paymentRepository.findByStripePaymentIntentId(
-      event.stripePaymentIntentId
+      event.data.object.id
     )
     if (!payment) {
       return
@@ -156,7 +188,10 @@ export class ProcessWebhookUseCase implements ProcessWebhookUseCasePort {
   }
 
   private mapEventTypeToStatus(
-    eventType: PaymentIntentEvent["type"]
+    eventType:
+      | Stripe.PaymentIntentCanceledEvent["type"]
+      | Stripe.PaymentIntentPaymentFailedEvent["type"]
+      | Stripe.PaymentIntentSucceededEvent["type"]
   ): PaymentStatus {
     switch (eventType) {
       case "payment_intent.succeeded":
@@ -165,6 +200,197 @@ export class ProcessWebhookUseCase implements ProcessWebhookUseCasePort {
         return PAYMENT_STATUS.FAILED
       case "payment_intent.canceled":
         return PAYMENT_STATUS.CANCELED
+    }
+  }
+
+  private async handleSubscriptionEvent(
+    event:
+      | Stripe.CustomerSubscriptionCreatedEvent
+      | Stripe.CustomerSubscriptionUpdatedEvent
+      | Stripe.CustomerSubscriptionDeletedEvent
+  ): Promise<void> {
+    const subscriptionObject = event.data.object
+
+    // Customer ID取得
+    const customerId = subscriptionObject.customer
+    if (!customerId || typeof customerId !== "string") {
+      return
+    }
+
+    // Customer取得
+    const customer =
+      await this.customerRepository.findByStripeCustomerId(customerId)
+    if (!customer) {
+      return
+    }
+
+    const firstItem = subscriptionObject.items.data[0]
+    if (!firstItem) {
+      return
+    }
+
+    switch (event.type) {
+      case "customer.subscription.created": {
+        // 既存のSubscriptionがあるかチェック
+        const existing =
+          await this.subscriptionRepository.findByStripeSubscriptionId(
+            subscriptionObject.id
+          )
+        if (existing) {
+          return
+        }
+
+        const priceId = firstItem.price.id
+
+        // Subscriptionレコードを作成
+        const subscription = Subscription.create({
+          id: randomUUID(),
+          customerId: customer.id,
+          stripeSubscriptionId: subscriptionObject.id,
+          stripePriceId: priceId,
+          status: subscriptionObject.status,
+          currentPeriodStart: firstItem.current_period_start
+            ? new Date(firstItem.current_period_start * 1000)
+            : null,
+          currentPeriodEnd: firstItem.current_period_end
+            ? new Date(firstItem.current_period_end * 1000)
+            : null,
+          cancelAtPeriodEnd: subscriptionObject.cancel_at_period_end
+        })
+        await this.subscriptionRepository.save(subscription)
+        break
+      }
+
+      case "customer.subscription.updated": {
+        const subscription =
+          await this.subscriptionRepository.findByStripeSubscriptionId(
+            subscriptionObject.id
+          )
+        if (!subscription) {
+          return
+        }
+
+        // status, currentPeriodStart/End, stripePriceId, cancelAtPeriodEnd を更新
+        subscription.updateStatus(subscriptionObject.status)
+        subscription.updatePeriod(
+          firstItem.current_period_start
+            ? new Date(firstItem.current_period_start * 1000)
+            : null,
+          firstItem.current_period_end
+            ? new Date(firstItem.current_period_end * 1000)
+            : null
+        )
+        subscription.updatePriceId(firstItem.price.id)
+        subscription.setCancelAtPeriodEnd(
+          subscriptionObject.cancel_at_period_end
+        )
+        await this.subscriptionRepository.save(subscription)
+        break
+      }
+
+      case "customer.subscription.deleted": {
+        const subscription =
+          await this.subscriptionRepository.findByStripeSubscriptionId(
+            subscriptionObject.id
+          )
+        if (!subscription) {
+          return
+        }
+
+        // statusをcanceledに更新
+        subscription.cancel()
+        await this.subscriptionRepository.save(subscription)
+        break
+      }
+    }
+  }
+
+  private async handleInvoiceEvent(
+    event:
+      | Stripe.InvoicePaymentFailedEvent
+      | Stripe.InvoicePaymentSucceededEvent
+  ): Promise<void> {
+    const invoiceObject = event.data.object
+
+    // Customer ID取得
+    const customerId = invoiceObject.customer
+    if (!customerId || typeof customerId !== "string") {
+      return
+    }
+
+    // Customer取得
+    const customer =
+      await this.customerRepository.findByStripeCustomerId(customerId)
+    if (!customer) {
+      return
+    }
+
+    const stripeSubscriptionId =
+      invoiceObject.parent?.subscription_details?.subscription
+    if (!stripeSubscriptionId || typeof stripeSubscriptionId !== "string") {
+      return
+    }
+
+    // 既存のInvoiceがあるかチェック
+    const existingInvoice = await this.invoiceRepository.findByStripeInvoiceId(
+      invoiceObject.id
+    )
+
+    // SubscriptionIDからSubscriptionを取得
+    let subscriptionId: string | null = null
+    if (stripeSubscriptionId) {
+      const subscription =
+        await this.subscriptionRepository.findByStripeSubscriptionId(
+          stripeSubscriptionId
+        )
+      subscriptionId = subscription?.id ?? null
+    }
+
+    const amount = invoiceObject.amount_paid ?? invoiceObject.amount_due ?? 0
+
+    switch (event.type) {
+      case "invoice.payment_succeeded": {
+        if (existingInvoice) {
+          // 既存のInvoiceを更新
+          existingInvoice.markAsPaid(new Date())
+          await this.invoiceRepository.save(existingInvoice)
+        } else {
+          // 新規Invoiceレコードを作成
+          const invoice = Invoice.create({
+            id: randomUUID(),
+            customerId: customer.id,
+            subscriptionId,
+            stripeInvoiceId: invoiceObject.id,
+            amount,
+            currency: invoiceObject.currency,
+            status: INVOICE_STATUS.PAID,
+            paidAt: new Date()
+          })
+          await this.invoiceRepository.save(invoice)
+        }
+        break
+      }
+
+      case "invoice.payment_failed": {
+        if (existingInvoice) {
+          // 既存のInvoiceを更新
+          existingInvoice.markAsUncollectible()
+          await this.invoiceRepository.save(existingInvoice)
+        } else {
+          // 新規Invoiceレコードを作成
+          const invoice = Invoice.create({
+            id: randomUUID(),
+            customerId: customer.id,
+            subscriptionId,
+            stripeInvoiceId: invoiceObject.id,
+            amount,
+            currency: invoiceObject.currency,
+            status: INVOICE_STATUS.OPEN
+          })
+          await this.invoiceRepository.save(invoice)
+        }
+        break
+      }
     }
   }
 }
