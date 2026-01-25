@@ -1,7 +1,15 @@
 "use server"
 
+import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
 import { handleGetAuthAdmin } from "../../handlers/get-auth-admin/get-auth-admin.handler"
-import type { GetAuthAdminActionResponse } from "./get-auth-admin.action.dto"
+
+export type GetAuthAdminActionResponse = ActionResponse<{
+  authAdmin: {
+    id: string
+    email: string
+    name: string
+  }
+}>
 
 export const getAuthAdminAction =
   async (): Promise<GetAuthAdminActionResponse> => {
