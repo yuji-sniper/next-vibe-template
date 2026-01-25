@@ -5,7 +5,7 @@ import { LogOut, Settings } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
-import { useId } from "react"
+import { useId, useState } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import {
   Popover,
@@ -30,6 +30,7 @@ function getInitials(name: string): string {
 }
 
 export function AuthUserMenu() {
+  const [open, setOpen] = useState(false)
   const popoverId = useId()
   const t = useTranslations("userAccount")
   const locale = useLocale()
@@ -54,7 +55,7 @@ export function AuthUserMenu() {
   }
 
   return (
-    <Popover>
+    <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <button
           type="button"
@@ -76,7 +77,8 @@ export function AuthUserMenu() {
         </div>
         <div className="p-1">
           <Link
-            href="#"
+            href={`/${locale}/settings`}
+            onClick={() => setOpen(false)}
             className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm transition-colors hover:bg-accent"
           >
             <Settings className="size-4" />
@@ -84,7 +86,10 @@ export function AuthUserMenu() {
           </Link>
           <button
             type="button"
-            onClick={() => signOutMutation.mutate()}
+            onClick={() => {
+              setOpen(false)
+              signOutMutation.mutate()
+            }}
             disabled={signOutMutation.isPending}
             className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm text-destructive transition-colors hover:bg-accent disabled:opacity-50 cursor-pointer"
           >

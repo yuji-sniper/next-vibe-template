@@ -17,6 +17,22 @@
     "title": "ホーム",
     "heading": "ホーム"
   },
+  "settings": {
+    "title": "設定",
+    "heading": "設定",
+    "deleteAccount": {
+      "title": "アカウント削除",
+      "description": "アカウントを削除すると、すべてのデータが完全に削除されます。この操作は取り消せません。",
+      "button": "アカウントを削除",
+      "dialog": {
+        "title": "本当に削除しますか？",
+        "description": "この操作は取り消せません。アカウントに関連するすべてのデータが完全に削除されます。",
+        "cancel": "キャンセル",
+        "confirm": "削除する",
+        "deleting": "削除中..."
+      }
+    }
+  },
   "errors": {
     "general": {
       "title": "エラーが発生しました。",
@@ -38,6 +54,10 @@
     "home": {
       "title": "ホーム",
       "description": "ホームページ"
+    },
+    "settings": {
+      "title": "設定",
+      "description": "アカウント設定ページ"
     }
   }
 }
