@@ -1,7 +1,5 @@
 import { randomUUID } from "node:crypto"
 import { inject, injectable } from "tsyringe"
-import type { GetAuthUserPort } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
-import { GetAuthUserPortToken } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
 import { Customer } from "@/backend/modules/billing/domain/customer/customer"
 import type { CustomerRepository } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
@@ -11,6 +9,8 @@ import type { CreateStripeCustomerPort } from "../../ports/create-stripe-custome
 import { CreateStripeCustomerPortToken } from "../../ports/create-stripe-customer.port"
 import type { CreateSubscriptionCheckoutSessionPort } from "../../ports/create-subscription-checkout-session.port"
 import { CreateSubscriptionCheckoutSessionPortToken } from "../../ports/create-subscription-checkout-session.port"
+import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
+import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
 import type {
   CreateSubscriptionCheckoutSessionUseCasePort,
   CreateSubscriptionCheckoutSessionUseCasePortInput,
@@ -24,8 +24,8 @@ export class CreateSubscriptionCheckoutSessionUseCase
   constructor(
     @inject(TransactorToken)
     private readonly transactor: Transactor,
-    @inject(GetAuthUserPortToken)
-    private readonly getAuthUser: GetAuthUserPort,
+    @inject(GetCurrentUserPortToken)
+    private readonly getCurrentUser: GetCurrentUserPort,
     @inject(CustomerRepositoryToken)
     private readonly customerRepository: CustomerRepository,
     @inject(CreateStripeCustomerPortToken)
@@ -38,11 +38,11 @@ export class CreateSubscriptionCheckoutSessionUseCase
     input: CreateSubscriptionCheckoutSessionUseCasePortInput
   ): Promise<CreateSubscriptionCheckoutSessionUseCasePortOutput> {
     // 1. 認証ユーザー取得
-    const { authUser } = await this.getAuthUser.handle()
+    const { userId, email } = await this.getCurrentUser.handle()
 
     // 2. Customer取得または作成（トランザクション内）
     const customer = await this.transactor.execute(async () => {
-      return await this.getOrCreateCustomer(authUser.id, authUser.email.value)
+      return await this.getOrCreateCustomer(userId, email)
     })
 
     // 3. Subscription Checkout Session作成

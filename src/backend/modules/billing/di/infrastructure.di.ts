@@ -5,11 +5,13 @@ import { CreateCheckoutSessionPortToken } from "@/backend/modules/billing/applic
 import { CreateStripeCustomerPortToken } from "@/backend/modules/billing/application/commands/ports/create-stripe-customer.port"
 import { CreateSubscriptionCheckoutSessionPortToken } from "@/backend/modules/billing/application/commands/ports/create-subscription-checkout-session.port"
 import { ProcessStripeWebhookPortToken } from "@/backend/modules/billing/application/commands/ports/process-stripe-webhook.port"
+import { GetCurrentUserPortToken } from "@/backend/modules/billing/application/ports/get-current-user.port"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { InvoiceRepositoryToken } from "@/backend/modules/billing/domain/invoice/invoice.repository"
 import { PaymentRepositoryToken } from "@/backend/modules/billing/domain/payment/payment.repository"
 import { SubscriptionRepositoryToken } from "@/backend/modules/billing/domain/subscription/subscription.repository"
 import { WebhookEventRepositoryToken } from "@/backend/modules/billing/domain/webhook-event/webhook-event.repository"
+import { GetCurrentUserAuthModuleAdapter } from "@/backend/modules/billing/infrastructure/modules/auth/get-current-user.auth-module.adapter"
 import { CustomerDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/customer.drizzle.repository"
 import { InvoiceDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/invoice.drizzle.repository"
 import { PaymentDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/payment.drizzle.repository"
@@ -38,6 +40,12 @@ export function initInfrastructureDependency(container: DependencyContainer) {
     SubscriptionDrizzleRepository
   )
   container.registerSingleton(InvoiceRepositoryToken, InvoiceDrizzleRepository)
+
+  // External Module Adapters
+  container.registerSingleton(
+    GetCurrentUserPortToken,
+    GetCurrentUserAuthModuleAdapter
+  )
 
   // Stripe Adapters
   container.registerSingleton(

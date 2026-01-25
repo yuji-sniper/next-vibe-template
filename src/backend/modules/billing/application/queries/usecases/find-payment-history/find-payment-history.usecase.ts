@@ -1,10 +1,10 @@
 import { inject, injectable } from "tsyringe"
-import type { GetAuthUserPort } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
-import { GetAuthUserPortToken } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
 import type { CustomerRepository } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
 import type { PaymentRepository } from "@/backend/modules/billing/domain/payment/payment.repository"
 import { PaymentRepositoryToken } from "@/backend/modules/billing/domain/payment/payment.repository"
+import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
+import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
 import type {
   FindPaymentHistoryUseCasePort,
   FindPaymentHistoryUseCasePortOutput
@@ -15,8 +15,8 @@ export class FindPaymentHistoryUseCase
   implements FindPaymentHistoryUseCasePort
 {
   constructor(
-    @inject(GetAuthUserPortToken)
-    private readonly getAuthUser: GetAuthUserPort,
+    @inject(GetCurrentUserPortToken)
+    private readonly getCurrentUser: GetCurrentUserPort,
     @inject(CustomerRepositoryToken)
     private readonly customerRepository: CustomerRepository,
     @inject(PaymentRepositoryToken)
@@ -25,10 +25,10 @@ export class FindPaymentHistoryUseCase
 
   async handle(): Promise<FindPaymentHistoryUseCasePortOutput> {
     // 1. 認証ユーザー取得
-    const { authUser } = await this.getAuthUser.handle()
+    const { userId } = await this.getCurrentUser.handle()
 
     // 2. Customer取得
-    const customer = await this.customerRepository.findByUserId(authUser.id)
+    const customer = await this.customerRepository.findByUserId(userId)
     if (!customer) {
       return { payments: [] }
     }
