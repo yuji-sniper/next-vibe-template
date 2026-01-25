@@ -4,3 +4,10 @@ export class AuthUserUnauthorizedError extends Error {
     this.name = "AuthUserUnauthorizedError"
   }
 }
+
+export class AuthUserDeleteFailedError extends Error {
+  constructor() {
+    super("Failed to delete user")
+    this.name = "AuthUserDeleteFailedError"
+  }
+}

@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useLocale } from "next-intl"
 import { useState } from "react"
+import { deleteAuthUserAction } from "@/backend/modules/auth/presentation/actions/delete-auth-user/delete-auth-user.action"
 import { SettingsPresentational } from "./presentational"
 
 export function SettingsContainer() {
@@ -14,9 +15,10 @@ export function SettingsContainer() {
 
   const deleteAccountMutation = useMutation({
     mutationFn: async () => {
-      // TODO: バックエンドのアカウント削除APIを実装後に呼び出す
-      // 現在はプレースホルダーとして実装
-      throw new Error("アカウント削除APIは未実装です")
+      const result = await deleteAuthUserAction()
+      if (!result.ok) {
+        throw new Error(result.error.message)
+      }
     },
     onSuccess: () => {
       queryClient.clear()
