@@ -14,9 +14,9 @@
     "lint": "biome check",
     "format": "biome format --write",
     "prepare": "husky",
-    "drizzle:gen": "drizzle-kit generate --config src/backend/infrastructure/db/postgresql/drizzle/drizzle.config.ts",
-    "drizzle:migrate": "drizzle-kit migrate --config src/backend/infrastructure/db/postgresql/drizzle/drizzle.config.ts",
-    "drizzle:drop": "drizzle-kit drop --config src/backend/infrastructure/db/postgresql/drizzle/drizzle.config.ts"
+    "drizzle:gen": "drizzle-kit generate --config src/backend/modules/shared/infrastructure/db/postgresql/drizzle/drizzle.config.ts",
+    "drizzle:migrate": "drizzle-kit migrate --config src/backend/modules/shared/infrastructure/db/postgresql/drizzle/drizzle.config.ts",
+    "drizzle:drop": "drizzle-kit drop --config src/backend/modules/shared/infrastructure/db/postgresql/drizzle/drizzle.config.ts"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
