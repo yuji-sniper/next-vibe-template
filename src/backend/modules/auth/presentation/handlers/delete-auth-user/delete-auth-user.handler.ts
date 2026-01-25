@@ -42,7 +42,7 @@ export const handleDeleteAuthUser =
         return {
           ok: false,
           error: {
-            code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
+            code: AUTH_ERROR_CODES.DELETE_FAILED,
             status: 500,
             message: "Failed to delete user"
           }
