@@ -15,7 +15,7 @@ gh issue view $ARGUMENTS --repo yuji-sniper/next-vibe-template
 ```
 
 2. Issueの内容を確認し、以下を把握してください:
-   - タイトル
-   - 説明
+- タイトル
+- 説明
 
 3. Issueの内容に基づいて、rulesに従って実装プランを立ててください。
