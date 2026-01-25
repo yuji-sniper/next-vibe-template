@@ -5,12 +5,12 @@ import type { CustomerRepository } from "@/backend/modules/billing/domain/custom
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
 import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
 import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
+import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
+import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
 import type { CreateCheckoutSessionPort } from "../../ports/create-checkout-session.port"
 import { CreateCheckoutSessionPortToken } from "../../ports/create-checkout-session.port"
 import type { CreateStripeCustomerPort } from "../../ports/create-stripe-customer.port"
 import { CreateStripeCustomerPortToken } from "../../ports/create-stripe-customer.port"
-import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
-import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
 import type {
   CreateCheckoutSessionUseCasePort,
   CreateCheckoutSessionUseCasePortInput,

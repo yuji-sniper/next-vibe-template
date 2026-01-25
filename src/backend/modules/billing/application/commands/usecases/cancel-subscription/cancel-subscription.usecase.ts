@@ -1,6 +1,4 @@
 import { inject, injectable } from "tsyringe"
-import type { GetAuthUserPort } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
-import { GetAuthUserPortToken } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
 import { CustomerNotFoundError } from "@/backend/modules/billing/domain/customer/customer.errors"
 import type { CustomerRepository } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
@@ -9,6 +7,8 @@ import type { SubscriptionRepository } from "@/backend/modules/billing/domain/su
 import { SubscriptionRepositoryToken } from "@/backend/modules/billing/domain/subscription/subscription.repository"
 import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
 import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
+import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
+import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
 import type { CancelSubscriptionPort } from "../../ports/cancel-subscription.port"
 import { CancelSubscriptionPortToken } from "../../ports/cancel-subscription.port"
 import type {
@@ -24,8 +24,8 @@ export class CancelSubscriptionUseCase
   constructor(
     @inject(TransactorToken)
     private readonly transactor: Transactor,
-    @inject(GetAuthUserPortToken)
-    private readonly getAuthUser: GetAuthUserPort,
+    @inject(GetCurrentUserPortToken)
+    private readonly getCurrentUser: GetCurrentUserPort,
     @inject(CustomerRepositoryToken)
     private readonly customerRepository: CustomerRepository,
     @inject(SubscriptionRepositoryToken)
@@ -38,10 +38,10 @@ export class CancelSubscriptionUseCase
     input?: CancelSubscriptionUseCasePortInput
   ): Promise<CancelSubscriptionUseCasePortOutput> {
     // 1. 認証ユーザー取得
-    const { authUser } = await this.getAuthUser.handle()
+    const { userId } = await this.getCurrentUser.handle()
 
     // 2. Customer取得
-    const customer = await this.customerRepository.findByUserId(authUser.id)
+    const customer = await this.customerRepository.findByUserId(userId)
     if (!customer) {
       throw new CustomerNotFoundError()
     }
