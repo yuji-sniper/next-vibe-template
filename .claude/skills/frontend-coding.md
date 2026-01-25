@@ -14,12 +14,17 @@ src/
 ├── app/                    # Next.js App Router
 │   ├── (user)/[locale]/    # ユーザー向けページ
 │   │   ├── (authenticated)/ # 認証後ページ
+│   │   │   └── {page}/
+│   │   │       ├── page.tsx
+│   │   │       └── _components/  # ページ固有コンポーネント
+│   │   │           ├── container.tsx      # ロジック層
+│   │   │           └── presentational.tsx # 表示層
 │   │   └── (public)/        # 公開ページ
 │   └── (admin)/admin/      # 管理者向けページ
 ├── components/             # 共通UIコンポーネント
 │   ├── ui/                 # Radix UIベース
 │   └── layout/             # レイアウトコンポーネント
-├── features/               # 機能別フォルダ
+├── features/               # 機能別フォルダ（複数ページで共有）
 │   └── {feature}/
 │       ├── types/          # 型定義
 │       ├── queries/        # React Query設定
@@ -137,6 +142,132 @@ export const FeatureContainer = () => {
       loading={mutation.isPending}
     />
   )
+}
+```
+
+## ページ固有コンポーネント（コンテナ・プレゼンテーショナルパターン）
+
+ページ固有のコンポーネントは `_components` フォルダに配置し、**コンテナ・プレゼンテーショナルパターン**を使用する。
+
+```
+app/(user)/[locale]/(authenticated)/settings/
+├── page.tsx                    # サーバーコンポーネント
+└── _components/
+    ├── container.tsx           # ロジック層（状態管理、API呼び出し）
+    └── presentational.tsx      # 表示層（UIレンダリング）
+```
+
+### コンポーネント配置の使い分け
+
+| 配置場所 | 用途 |
+|---------|------|
+| `app/.../page/_components/` | ページ固有のコンポーネント |
+| `features/{feature}/components/` | 複数ページで共有するコンポーネント |
+| `components/ui/` | 汎用UIコンポーネント |
+
+### container.tsx（ロジック層）
+
+```tsx
+// app/(user)/[locale]/(authenticated)/settings/_components/container.tsx
+"use client"
+
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useRouter } from "next/navigation"
+import { useLocale } from "next-intl"
+import { useState } from "react"
+import { SettingsPresentational } from "./presentational"
+
+export function SettingsContainer() {
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const locale = useLocale()
+  const router = useRouter()
+  const queryClient = useQueryClient()
+
+  const deleteMutation = useMutation({
+    mutationFn: async () => {
+      // API呼び出し
+    },
+    onSuccess: () => {
+      queryClient.clear()
+      router.push(`/${locale}/sign-in`)
+    }
+  })
+
+  return (
+    <SettingsPresentational
+      isDialogOpen={isDialogOpen}
+      isDeleting={deleteMutation.isPending}
+      onOpenDialog={() => setIsDialogOpen(true)}
+      onCloseDialog={() => setIsDialogOpen(false)}
+      onDelete={() => deleteMutation.mutate()}
+    />
+  )
+}
+```
+
+### presentational.tsx（表示層）
+
+```tsx
+// app/(user)/[locale]/(authenticated)/settings/_components/presentational.tsx
+"use client"
+
+import { useTranslations } from "next-intl"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+
+type SettingsPresentationalProps = {
+  isDialogOpen: boolean
+  isDeleting: boolean
+  onOpenDialog: () => void
+  onCloseDialog: () => void
+  onDelete: () => void
+}
+
+export function SettingsPresentational({
+  isDialogOpen,
+  isDeleting,
+  onOpenDialog,
+  onCloseDialog,
+  onDelete
+}: SettingsPresentationalProps) {
+  const t = useTranslations("settings")
+
+  return (
+    <div className="container max-w-2xl py-8">
+      <h1 className="mb-8 text-2xl font-bold">{t("heading")}</h1>
+      <Card>
+        <CardHeader>
+          <CardTitle>{t("deleteAccount.title")}</CardTitle>
+          <CardDescription>{t("deleteAccount.description")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Button variant="destructive" onClick={onOpenDialog}>
+            {t("deleteAccount.button")}
+          </Button>
+        </CardContent>
+      </Card>
+      {/* AlertDialog は省略 */}
+    </div>
+  )
+}
+```
+
+### page.tsx からの呼び出し
+
+```tsx
+// app/(user)/[locale]/(authenticated)/settings/page.tsx
+import { setRequestLocale } from "next-intl/server"
+import { SettingsContainer } from "./_components/container"
+
+type Props = {
+  params: Promise<{ locale: string }>
+}
+
+export default async function SettingsPage({ params }: Props) {
+  const { locale } = await params
+  setRequestLocale(locale)
+
+  return <SettingsContainer />
 }
 ```
 
@@ -401,6 +532,8 @@ pnpm type:check
 新規実装時の確認事項:
 
 - [ ] `"use client"` の有無を確認
+- [ ] ページ固有コンポーネントは `_components/` に配置（container.tsx + presentational.tsx）
+- [ ] 共有コンポーネントは `features/{feature}/components/` に配置
 - [ ] 型定義は features/{feature}/types/ に配置
 - [ ] i18n 対応（ja.json, en.json に翻訳追加）
 - [ ] data-slot 属性でコンポーネント識別
