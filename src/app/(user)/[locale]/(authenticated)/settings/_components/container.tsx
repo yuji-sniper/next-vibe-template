@@ -1,9 +1,11 @@
 "use client"
 
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useLocale } from "next-intl"
 import { useState } from "react"
+import { toast } from "sonner"
+import { useDeleteAuthUserMutation } from "@/features/auth/hooks/mutations/useDeleteAuthUserMutation"
 import { SettingsPresentational } from "./presentational"
 
 export function SettingsContainer() {
@@ -12,17 +14,7 @@ export function SettingsContainer() {
   const router = useRouter()
   const queryClient = useQueryClient()
 
-  const deleteAccountMutation = useMutation({
-    mutationFn: async () => {
-      // TODO: バックエンドのアカウント削除APIを実装後に呼び出す
-      // 現在はプレースホルダーとして実装
-      throw new Error("アカウント削除APIは未実装です")
-    },
-    onSuccess: () => {
-      queryClient.clear()
-      router.push(`/${locale}/sign-in`)
-    }
-  })
+  const deleteAccountMutation = useDeleteAuthUserMutation()
 
   const handleOpenDialog = () => {
     setIsDialogOpen(true)
@@ -32,8 +24,14 @@ export function SettingsContainer() {
     setIsDialogOpen(false)
   }
 
-  const handleDeleteAccount = () => {
-    deleteAccountMutation.mutate()
+  const handleDeleteAccount = async () => {
+    try {
+      await deleteAccountMutation.mutateAsync()
+      queryClient.clear()
+      router.push(`/${locale}/sign-in`)
+    } catch {
+      toast.error("アカウントの削除に失敗しました")
+    }
   }
 
   return (

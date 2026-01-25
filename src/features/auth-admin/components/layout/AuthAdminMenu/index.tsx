@@ -1,8 +1,7 @@
 "use client"
 
 import { useMutation, useQueryClient } from "@tanstack/react-query"
-import { LogOut, Settings } from "lucide-react"
-import Link from "next/link"
+import { LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useId } from "react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -72,13 +71,6 @@ export function AuthAdminMenu() {
           <p className="text-xs text-muted-foreground">{authAdmin.email}</p>
         </div>
         <div className="p-1">
-          <Link
-            href="#"
-            className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm transition-colors hover:bg-accent"
-          >
-            <Settings className="size-4" />
-            設定
-          </Link>
           <button
             type="button"
             onClick={() => signOutMutation.mutate()}

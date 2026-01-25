@@ -1,7 +1,8 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
 import { redirect } from "next/navigation"
 import { setRequestLocale } from "next-intl/server"
-import { AuthUserLayoutWrapper } from "@/features/auth/components/layout/AuthUserLayoutWrapper"
+import { Toaster } from "@/components/ui/sonner"
+import { AuthUserMenu } from "@/features/auth/components/layout/AuthUserMenu"
 import { getAuthUserQuery } from "@/features/auth/queries/get-auth-user"
 import { authUserKey } from "@/features/auth/queries/keys"
 import { getQueryClient } from "@/lib/react-query/query-client"
@@ -29,8 +30,18 @@ export default async function UserAuthenticatedLayout({
   }
 
   return (
-    <HydrationBoundary state={dehydrate(queryClient)}>
-      <AuthUserLayoutWrapper>{children}</AuthUserLayoutWrapper>
-    </HydrationBoundary>
+    <div className="min-h-screen">
+      <header className="sticky top-0 z-50 border-b bg-background">
+        <div className="container flex h-14 items-center justify-end">
+          <AuthUserMenu />
+        </div>
+      </header>
+      <main>
+        <HydrationBoundary state={dehydrate(queryClient)}>
+          {children}
+        </HydrationBoundary>
+      </main>
+      <Toaster />
+    </div>
   )
 }

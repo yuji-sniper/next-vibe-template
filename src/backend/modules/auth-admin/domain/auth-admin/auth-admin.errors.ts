@@ -4,3 +4,10 @@ export class AuthAdminUnauthorizedError extends Error {
     this.name = "AuthAdminUnauthorizedError"
   }
 }
+
+export class AuthAdminDeleteFailedError extends Error {
+  constructor() {
+    super("Failed to delete admin")
+    this.name = "AuthAdminDeleteFailedError"
+  }
+}
