@@ -109,6 +109,8 @@ Infrastructure Layer (adapters/repositories)
 
 ### 1. Server Action
 
+**Action は「薄いラッパー」として機能し、Handler を呼び出すだけ。バリデーションは Handler で行う。**
+
 ```typescript
 // modules/{module}/presentation/actions/{action}/{action}.action.ts
 "use server"
@@ -116,43 +118,86 @@ Infrastructure Layer (adapters/repositories)
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
 import { handleExample } from "../../handlers/example/example.handler"
 
+export type ExampleActionRequest = {
+  name: string
+  email?: string
+}
+
 export type ExampleActionResponse = ActionResponse<{
   example: { id: string; name: string }
 }>
 
-export const exampleAction = async (): Promise<ExampleActionResponse> => {
-  return await handleExample()
+// Action はシンプルに Handler を呼び出すだけ（バリデーションは Handler で行う）
+export const exampleAction = async (
+  request: ExampleActionRequest
+): Promise<ExampleActionResponse> => {
+  return await handleExample(request)
 }
 ```
 
 ### 2. Handler
 
+**Handler は Zod でバリデーションを行い、UseCase を呼び出し、エラーを Result 型に変換する。**
+
 ```typescript
 // modules/{module}/presentation/handlers/{handler}/{handler}.handler.ts
+import { z } from "zod"
 import { resolveContainer } from "@/backend/bootstrap/container"
 import type { ExampleUseCasePort } from "../../application/queries/usecases/example/example.usecase.port"
 import { ExampleUseCasePortToken } from "../../application/queries/usecases/example/example.usecase.port"
 import { ExampleNotFoundError } from "../../domain/example/example.errors"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
+import { formatZodErrors } from "@/backend/modules/shared/presentation/handlers/utils/format-zod-errors"
 import { EXAMPLE_ERROR_CODES } from "@/shared/errors/example.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
+
+// Zod スキーマ定義（Handler 内で定義）
+const exampleSchema = z.object({
+  name: z.string().min(1, "Name is required").max(255),
+  email: z.string().email().optional()
+})
+
+// z.infer でスキーマから型を推論（二重定義を避ける）
+type ExampleHandlerInput = z.infer<typeof exampleSchema>
 
 type ExampleHandlerResult = Result<{
   example: { id: string; name: string }
 }>
 
-export const handleExample = async (): Promise<ExampleHandlerResult> => {
+export const handleExample = async (
+  input: ExampleHandlerInput
+): Promise<ExampleHandlerResult> => {
+  // 1. バリデーション
+  const parsed = exampleSchema.safeParse(input)
+
+  if (!parsed.success) {
+    return {
+      ok: false,
+      error: {
+        code: COMMON_ERROR_CODES.VALIDATION_ERROR,
+        status: 422,
+        message: "Validation failed",
+        fieldErrors: formatZodErrors(parsed.error)  // { "path.to.field": "error message" }
+      }
+    }
+  }
+
+  // 2. UseCase 実行
   const usecase = await resolveContainer<ExampleUseCasePort>(
     ExampleUseCasePortToken
   )
 
   try {
-    const output = await usecase.handle()
+    const output = await usecase.handle({
+      name: parsed.data.name,
+      email: parsed.data.email
+    })
     return {
       ok: true,
-      data: { example: output }
+      data: { example: output.example }
     }
   } catch (e: unknown) {
+    // 3. Domain Error を Result 型に変換
     if (e instanceof ExampleNotFoundError) {
       return {
         ok: false,
@@ -200,6 +245,13 @@ export const CreateExamplePortToken = Symbol("CreateExamplePort")
 
 ### 4. UseCase Port
 
+**重要: UseCase の Output はドメイン型（Entity クラス）を直接返さず、DTO形式（プリミティブ型）で返す。**
+
+理由：
+- Presentation層がDomain層に直接依存しない（レイヤー間の結合度を下げる）
+- Server ActionでのシリアライゼーションでDateやクラスインスタンスの問題を回避
+- 内部のドメインロジックや状態が外部に露出しない
+
 ```typescript
 // modules/{module}/application/commands/usecases/{usecase}/{usecase}.usecase.port.ts
 
@@ -208,10 +260,21 @@ export interface CreateExampleUseCasePortInput {
   email: string
 }
 
+// ✅ 正しい: DTO形式（プリミティブ型）で定義
 export interface CreateExampleUseCasePortOutput {
-  id: string
-  name: string
+  example: {
+    id: string
+    name: string
+    status: string
+    createdAt: Date
+    updatedAt: Date
+  }
 }
+
+// ❌ 間違い: ドメイン型を直接返す
+// export interface CreateExampleUseCasePortOutput {
+//   example: Example  // Domain Entity を直接返さない
+// }
 
 export interface CreateExampleUseCasePort {
   handle(
@@ -279,9 +342,15 @@ export class CreateExampleUseCase implements CreateExampleUseCasePort {
     // 4. Repository で永続化
     await this.exampleRepository.save(example)
 
+    // 5. DTO形式で返す（Domain Entity を直接返さない）
     return {
-      id: example.id,
-      name: example.name
+      example: {
+        id: example.id,
+        name: example.name,
+        status: example.status,
+        createdAt: example.createdAt,
+        updatedAt: example.updatedAt
+      }
     }
   }
 }
@@ -1062,6 +1131,7 @@ private toDomain(row: {
 - [ ] Server Action に `"use server"` 指定
 - [ ] UseCase に `@injectable()` デコレータ
 - [ ] UseCase は UseCase Port インターフェースを実装
+- [ ] **UseCase の Output は DTO形式（プリミティブ型）で返す（Domain Entity を直接返さない）**
 - [ ] ポートは Symbol トークンで定義（`*Token = Symbol("*")`）
 - [ ] Port は Input/Output/Interface/Token を定義
 - [ ] Domain Entity は `create()` と `reconstruct()` を実装
@@ -1075,6 +1145,8 @@ private toDomain(row: {
 - [ ] Drizzle Schema で適切なインデックスを定義
 - [ ] Drizzle Schema の JSONB カラムに `$type<>()` で型指定
 - [ ] DI 登録を `registerSingleton` で追加
+- [ ] Handler で Zod バリデーションを実装（Action ではなく Handler で行う）
 - [ ] Handler で Domain Error を Result 型に変換
 - [ ] Handler でエラーコードを共通定数から参照
+- [ ] Action は「薄いラッパー」として Handler を呼び出すだけ
 - [ ] `pnpm type:check` が通ること（必須）
