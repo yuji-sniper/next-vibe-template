@@ -9,12 +9,16 @@ import { GetCurrentUserPortToken } from "@/backend/modules/billing/application/p
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { InvoiceRepositoryToken } from "@/backend/modules/billing/domain/invoice/invoice.repository"
 import { PaymentRepositoryToken } from "@/backend/modules/billing/domain/payment/payment.repository"
+import { PriceRepositoryToken } from "@/backend/modules/billing/domain/price/price.repository"
+import { ProductRepositoryToken } from "@/backend/modules/billing/domain/product/product.repository"
 import { SubscriptionRepositoryToken } from "@/backend/modules/billing/domain/subscription/subscription.repository"
 import { WebhookEventRepositoryToken } from "@/backend/modules/billing/domain/webhook-event/webhook-event.repository"
 import { GetCurrentUserAuthModuleAdapter } from "@/backend/modules/billing/infrastructure/modules/auth/get-current-user.auth-module.adapter"
 import { CustomerDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/customer.drizzle.repository"
 import { InvoiceDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/invoice.drizzle.repository"
 import { PaymentDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/payment.drizzle.repository"
+import { PriceDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/price.drizzle.repository"
+import { ProductDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/product.drizzle.repository"
 import { SubscriptionDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/subscription.drizzle.repository"
 import { WebhookEventDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/webhook-event.drizzle.repository"
 import { CancelSubscriptionStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/cancel-subscription.stripe.adapter"
@@ -40,6 +44,8 @@ export function initInfrastructureDependency(container: DependencyContainer) {
     SubscriptionDrizzleRepository
   )
   container.registerSingleton(InvoiceRepositoryToken, InvoiceDrizzleRepository)
+  container.registerSingleton(ProductRepositoryToken, ProductDrizzleRepository)
+  container.registerSingleton(PriceRepositoryToken, PriceDrizzleRepository)
 
   // External Module Adapters
   container.registerSingleton(
