@@ -2,6 +2,7 @@ import "reflect-metadata"
 import { container, type InjectionToken } from "tsyringe"
 import { initAuthDependency } from "../modules/auth/di"
 import { initAuthAdminDependency } from "../modules/auth-admin/di"
+import { initBillingDependency } from "../modules/billing/di"
 import { initSharedDependency } from "../modules/shared/di"
 
 let initialized = false
@@ -14,6 +15,8 @@ const getContainer = () => {
     initAuthDependency(container)
     // auth-admin
     initAuthAdminDependency(container)
+    // billing
+    initBillingDependency(container)
 
     initialized = true
   }

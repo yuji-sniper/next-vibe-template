@@ -1,5 +1,6 @@
 ---
 name: frontend-coding
+trigger: /frontend-coding
 description: Next.js App Routerベースのフロントエンド実装スキル。UIコンポーネント、ページ、レイアウト、フォーム、React Queryフック、i18n対応の実装時に使用。backend/配下は除外。Radix UI + Tailwind CSS + TypeScript + next-intl + React Query + Better-Auth のパターンに従う。
 ---
 

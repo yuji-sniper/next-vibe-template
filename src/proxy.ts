@@ -26,7 +26,8 @@ function setCorsHeaders(response: NextResponse, host: string | null) {
   const allowedHosts = Object.keys(hostPathMap)
 
   if (host && allowedHosts.includes(host)) {
-    const origin = env.NODE_ENV !== "production" ? "*" : `https://${host}`
+    const origin =
+      process.env.NODE_ENV !== "production" ? "*" : `https://${host}`
 
     response.headers.set("Access-Control-Allow-Origin", origin)
     response.headers.set("Access-Control-Allow-Credentials", "true")

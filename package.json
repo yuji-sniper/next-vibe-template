@@ -12,11 +12,12 @@
     "start": "next start",
     "type:check": "tsc --noEmit",
     "lint": "biome check",
+    "lint:fix": "biome check --write",
     "format": "biome format --write",
     "prepare": "husky",
-    "drizzle:gen": "drizzle-kit generate --config src/backend/infrastructure/db/postgresql/drizzle/drizzle.config.ts",
-    "drizzle:migrate": "drizzle-kit migrate --config src/backend/infrastructure/db/postgresql/drizzle/drizzle.config.ts",
-    "drizzle:drop": "drizzle-kit drop --config src/backend/infrastructure/db/postgresql/drizzle/drizzle.config.ts"
+    "drizzle:gen": "drizzle-kit generate --config src/backend/modules/shared/infrastructure/db/postgresql/drizzle/drizzle.config.ts",
+    "drizzle:migrate": "drizzle-kit migrate --config src/backend/modules/shared/infrastructure/db/postgresql/drizzle/drizzle.config.ts",
+    "drizzle:drop": "drizzle-kit drop --config src/backend/modules/shared/infrastructure/db/postgresql/drizzle/drizzle.config.ts"
   },
   "dependencies": {
     "@radix-ui/react-alert-dialog": "^1.1.15",
@@ -41,6 +42,7 @@
     "react-use": "^17.6.0",
     "reflect-metadata": "^0.2.2",
     "sonner": "^2.0.7",
+    "stripe": "^20.2.0",
     "tailwind-merge": "^3.4.0",
     "tsyringe": "^4.10.0",
     "uuid": "^13.0.0",
