@@ -1,5 +1,6 @@
 ---
 name: backend-coding
+trigger: /backend-coding
 description: Next.jsプロジェクトのバックエンド実装スキル。クリーンアーキテクチャ + DDD + tsyringe DIパターンに基づく実装。src/backend/modules/配下のドメイン、ユースケース、リポジトリ、ハンドラー、Server Actionの実装時に使用。Drizzle ORM + PostgreSQL + Better-Auth + Zodバリデーションのパターンに従う。
 ---
 
