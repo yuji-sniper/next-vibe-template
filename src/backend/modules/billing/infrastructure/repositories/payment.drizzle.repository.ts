@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
-import { Payment } from "@/backend/modules/billing/domain/payment/payment"
 import type { PaymentStatus } from "@/backend/modules/billing/domain/payment/payment"
+import { Payment } from "@/backend/modules/billing/domain/payment/payment"
 import type { PaymentRepository } from "@/backend/modules/billing/domain/payment/payment.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/get-db"
 import { payments } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/schemas"

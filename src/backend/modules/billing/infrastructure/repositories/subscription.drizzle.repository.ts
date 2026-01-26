@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
-import { Subscription } from "@/backend/modules/billing/domain/subscription/subscription"
 import type { SubscriptionStatus } from "@/backend/modules/billing/domain/subscription/subscription"
+import { Subscription } from "@/backend/modules/billing/domain/subscription/subscription"
 import type { SubscriptionRepository } from "@/backend/modules/billing/domain/subscription/subscription.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/get-db"
 import { subscriptions } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/schemas"

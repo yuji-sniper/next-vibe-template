@@ -1,9 +1,9 @@
 import { resolveContainer } from "@/backend/bootstrap/container"
+import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
 import {
   type CreateCheckoutSessionUseCasePort,
   CreateCheckoutSessionUseCasePortToken
 } from "@/backend/modules/billing/application/commands/usecases/create-checkout-session/create-checkout-session.usecase.port"
-import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
 import { CustomerCreateFailedError } from "@/backend/modules/billing/domain/customer/customer.errors"
 import { PaymentCreateFailedError } from "@/backend/modules/billing/domain/payment/payment.errors"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"

@@ -2,8 +2,6 @@ import type Stripe from "stripe"
 import { inject, injectable } from "tsyringe"
 import type { CustomerRepository } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
-import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
-import { UuidV7GeneratorPortToken } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import {
   INVOICE_STATUS,
   Invoice
@@ -29,6 +27,8 @@ import type { WebhookEventRepository } from "@/backend/modules/billing/domain/we
 import { WebhookEventRepositoryToken } from "@/backend/modules/billing/domain/webhook-event/webhook-event.repository"
 import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
 import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
+import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
+import { UuidV7GeneratorPortToken } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import type { ProcessStripeWebhookPort } from "../../ports/process-stripe-webhook.port"
 import { ProcessStripeWebhookPortToken } from "../../ports/process-stripe-webhook.port"
 import type {

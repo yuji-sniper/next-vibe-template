@@ -1,9 +1,9 @@
 import { resolveContainer } from "@/backend/bootstrap/container"
+import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
 import {
   type FindPaymentHistoryUseCasePort,
   FindPaymentHistoryUseCasePortToken
 } from "@/backend/modules/billing/application/queries/usecases/find-payment-history/find-payment-history.usecase.port"
-import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"

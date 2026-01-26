@@ -1,7 +1,7 @@
 import { eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
-import { Invoice } from "@/backend/modules/billing/domain/invoice/invoice"
 import type { InvoiceStatus } from "@/backend/modules/billing/domain/invoice/invoice"
+import { Invoice } from "@/backend/modules/billing/domain/invoice/invoice"
 import type { InvoiceRepository } from "@/backend/modules/billing/domain/invoice/invoice.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/get-db"
 import { invoices } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/schemas"
