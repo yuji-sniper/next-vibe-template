@@ -36,3 +36,10 @@ export class ProductNotSyncedError extends Error {
     this.name = "ProductNotSyncedError"
   }
 }
+
+export class ProductCannotArchiveViaUpdateError extends Error {
+  constructor() {
+    super("Cannot archive product via update. Use archive endpoint instead.")
+    this.name = "ProductCannotArchiveViaUpdateError"
+  }
+}

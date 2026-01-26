@@ -3,14 +3,26 @@ interface Ok<T> {
   data: T
 }
 
-interface Err {
+interface ValidationErr {
   ok: false
   error: {
     code: string
-    status: number
+    status: 422
+    message: string
+    fieldErrors: Record<string, string>
+  }
+}
+
+interface OtherErr {
+  ok: false
+  error: {
+    code: string
+    status: Exclude<number, 422>
     message: string
     details?: Record<string, unknown>
   }
 }
+
+export type Err = ValidationErr | OtherErr
 
 export type Result<T> = Ok<T> | Err

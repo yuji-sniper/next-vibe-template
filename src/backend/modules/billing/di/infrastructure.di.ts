@@ -3,8 +3,10 @@ import { CancelSubscriptionPortToken } from "@/backend/modules/billing/applicati
 import { ChangeSubscriptionPlanPortToken } from "@/backend/modules/billing/application/commands/ports/change-subscription-plan.port"
 import { CreateCheckoutSessionPortToken } from "@/backend/modules/billing/application/commands/ports/create-checkout-session.port"
 import { CreateStripeCustomerPortToken } from "@/backend/modules/billing/application/commands/ports/create-stripe-customer.port"
+import { CreateStripeProductPortToken } from "@/backend/modules/billing/application/commands/ports/create-stripe-product.port"
 import { CreateSubscriptionCheckoutSessionPortToken } from "@/backend/modules/billing/application/commands/ports/create-subscription-checkout-session.port"
 import { ProcessStripeWebhookPortToken } from "@/backend/modules/billing/application/commands/ports/process-stripe-webhook.port"
+import { UpdateStripeProductPortToken } from "@/backend/modules/billing/application/commands/ports/update-stripe-product.port"
 import { GetCurrentUserPortToken } from "@/backend/modules/billing/application/ports/get-current-user.port"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { InvoiceRepositoryToken } from "@/backend/modules/billing/domain/invoice/invoice.repository"
@@ -25,8 +27,10 @@ import { CancelSubscriptionStripeAdapter } from "@/backend/modules/billing/infra
 import { ChangeSubscriptionPlanStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/change-subscription-plan.stripe.adapter"
 import { CreateCheckoutSessionStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/create-checkout-session.stripe.adapter"
 import { CreateStripeCustomerStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/create-stripe-customer.stripe.adapter"
+import { CreateStripeProductStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/create-stripe-product.stripe.adapter"
 import { CreateSubscriptionCheckoutSessionStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/create-subscription-checkout-session.stripe.adapter"
 import { ProcessStripeWebhookStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/process-stripe-webhook.stripe.adapter"
+import { UpdateStripeProductStripeAdapter } from "@/backend/modules/billing/infrastructure/stripe/update-stripe-product.stripe.adapter"
 
 export function initInfrastructureDependency(container: DependencyContainer) {
   // Repositories
@@ -77,5 +81,13 @@ export function initInfrastructureDependency(container: DependencyContainer) {
   container.registerSingleton(
     ChangeSubscriptionPlanPortToken,
     ChangeSubscriptionPlanStripeAdapter
+  )
+  container.registerSingleton(
+    CreateStripeProductPortToken,
+    CreateStripeProductStripeAdapter
+  )
+  container.registerSingleton(
+    UpdateStripeProductPortToken,
+    UpdateStripeProductStripeAdapter
   )
 }
