@@ -46,13 +46,10 @@ export class ProductDrizzleRepository implements ProductRepository {
 
   async findAll(options?: { activeOnly?: boolean }): Promise<Product[]> {
     const db = this.getDb.handle()
-    let query = db.select().from(products)
-
-    if (options?.activeOnly) {
-      query = query.where(eq(products.active, true)) as typeof query
-    }
-
-    const result = await query
+    const result = await db
+      .select()
+      .from(products)
+      .where(options?.activeOnly ? eq(products.active, true) : undefined)
 
     return result.map((row) => this.toDomain(row))
   }

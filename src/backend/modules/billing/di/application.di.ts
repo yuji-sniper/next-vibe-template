@@ -17,8 +17,18 @@ import { ProcessStripeWebhookUseCase } from "@/backend/modules/billing/applicati
 import { ProcessStripeWebhookUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/process-stripe-webhook/process-stripe-webhook.usecase.port"
 import { UpdateProductUseCase } from "@/backend/modules/billing/application/commands/usecases/update-product/update-product.usecase"
 import { UpdateProductUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/update-product/update-product.usecase.port"
+import { FindActivePlansUseCase } from "@/backend/modules/billing/application/queries/usecases/find-active-plans/find-active-plans.usecase"
+import { FindActivePlansUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-active-plans/find-active-plans.usecase.port"
 import { FindPaymentHistoryUseCase } from "@/backend/modules/billing/application/queries/usecases/find-payment-history/find-payment-history.usecase"
 import { FindPaymentHistoryUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-payment-history/find-payment-history.usecase.port"
+import { FindPriceByIdUseCase } from "@/backend/modules/billing/application/queries/usecases/find-price-by-id/find-price-by-id.usecase"
+import { FindPriceByIdUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-price-by-id/find-price-by-id.usecase.port"
+import { FindPricesByProductIdUseCase } from "@/backend/modules/billing/application/queries/usecases/find-prices-by-product-id/find-prices-by-product-id.usecase"
+import { FindPricesByProductIdUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-prices-by-product-id/find-prices-by-product-id.usecase.port"
+import { FindProductByIdUseCase } from "@/backend/modules/billing/application/queries/usecases/find-product-by-id/find-product-by-id.usecase"
+import { FindProductByIdUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-product-by-id/find-product-by-id.usecase.port"
+import { FindProductsUseCase } from "@/backend/modules/billing/application/queries/usecases/find-products/find-products.usecase"
+import { FindProductsUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-products/find-products.usecase.port"
 import { FindSubscriptionUseCase } from "@/backend/modules/billing/application/queries/usecases/find-subscription/find-subscription.usecase"
 import { FindSubscriptionUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-subscription/find-subscription.usecase.port"
 
@@ -61,4 +71,21 @@ export function initApplicationDependency(container: DependencyContainer) {
   )
   container.registerSingleton(CreatePriceUseCasePortToken, CreatePriceUseCase)
   container.registerSingleton(ArchivePriceUseCasePortToken, ArchivePriceUseCase)
+  container.registerSingleton(FindProductsUseCasePortToken, FindProductsUseCase)
+  container.registerSingleton(
+    FindProductByIdUseCasePortToken,
+    FindProductByIdUseCase
+  )
+  container.registerSingleton(
+    FindPricesByProductIdUseCasePortToken,
+    FindPricesByProductIdUseCase
+  )
+  container.registerSingleton(
+    FindPriceByIdUseCasePortToken,
+    FindPriceByIdUseCase
+  )
+  container.registerSingleton(
+    FindActivePlansUseCasePortToken,
+    FindActivePlansUseCase
+  )
 }
