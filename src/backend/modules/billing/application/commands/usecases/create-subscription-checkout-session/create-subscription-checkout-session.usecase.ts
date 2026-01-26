@@ -1,16 +1,17 @@
-import { randomUUID } from "node:crypto"
 import { inject, injectable } from "tsyringe"
 import { Customer } from "@/backend/modules/billing/domain/customer/customer"
 import type { CustomerRepository } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
 import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
 import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
+import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
+import { UuidV7GeneratorPortToken } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
+import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
+import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
 import type { CreateStripeCustomerPort } from "../../ports/create-stripe-customer.port"
 import { CreateStripeCustomerPortToken } from "../../ports/create-stripe-customer.port"
 import type { CreateSubscriptionCheckoutSessionPort } from "../../ports/create-subscription-checkout-session.port"
 import { CreateSubscriptionCheckoutSessionPortToken } from "../../ports/create-subscription-checkout-session.port"
-import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
-import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
 import type {
   CreateSubscriptionCheckoutSessionUseCasePort,
   CreateSubscriptionCheckoutSessionUseCasePortInput,
@@ -31,7 +32,9 @@ export class CreateSubscriptionCheckoutSessionUseCase
     @inject(CreateStripeCustomerPortToken)
     private readonly createStripeCustomer: CreateStripeCustomerPort,
     @inject(CreateSubscriptionCheckoutSessionPortToken)
-    private readonly createSubscriptionCheckoutSession: CreateSubscriptionCheckoutSessionPort
+    private readonly createSubscriptionCheckoutSession: CreateSubscriptionCheckoutSessionPort,
+    @inject(UuidV7GeneratorPortToken)
+    private readonly uuidV7Generator: UuidV7GeneratorPort
   ) {}
 
   async handle(
@@ -71,7 +74,7 @@ export class CreateSubscriptionCheckoutSessionUseCase
       email
     })
     const customer = Customer.create({
-      id: randomUUID(),
+      id: this.uuidV7Generator.generate(),
       userId,
       stripeCustomerId,
       email

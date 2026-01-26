@@ -1,8 +1,9 @@
-import { randomUUID } from "node:crypto"
 import type Stripe from "stripe"
 import { inject, injectable } from "tsyringe"
 import type { CustomerRepository } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
+import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
+import { UuidV7GeneratorPortToken } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import {
   INVOICE_STATUS,
   Invoice
@@ -53,7 +54,9 @@ export class ProcessStripeWebhookUseCase
     @inject(SubscriptionRepositoryToken)
     private readonly subscriptionRepository: SubscriptionRepository,
     @inject(InvoiceRepositoryToken)
-    private readonly invoiceRepository: InvoiceRepository
+    private readonly invoiceRepository: InvoiceRepository,
+    @inject(UuidV7GeneratorPortToken)
+    private readonly uuidV7Generator: UuidV7GeneratorPort
   ) {}
 
   async handle(input: ProcessStripeWebhookUseCasePortInput): Promise<void> {
@@ -80,7 +83,7 @@ export class ProcessStripeWebhookUseCase
 
     // イベント記録
     const webhookEvent = WebhookEvent.create({
-      id: existingEvent?.id ?? randomUUID(),
+      id: existingEvent?.id ?? this.uuidV7Generator.generate(),
       stripeEventId: event.id,
       eventType: event.type
     })
@@ -161,7 +164,7 @@ export class ProcessStripeWebhookUseCase
 
       // Paymentレコードを作成
       const payment = Payment.create({
-        id: randomUUID(),
+        id: this.uuidV7Generator.generate(),
         customerId: customer.id,
         stripePaymentIntentId: paymentIntentId,
         amount: session.amount_total ?? 0,
@@ -246,7 +249,7 @@ export class ProcessStripeWebhookUseCase
 
         // Subscriptionレコードを作成
         const subscription = Subscription.create({
-          id: randomUUID(),
+          id: this.uuidV7Generator.generate(),
           customerId: customer.id,
           stripeSubscriptionId: subscriptionObject.id,
           stripePriceId: priceId,
@@ -359,7 +362,7 @@ export class ProcessStripeWebhookUseCase
         } else {
           // 新規Invoiceレコードを作成
           const invoice = Invoice.create({
-            id: randomUUID(),
+            id: this.uuidV7Generator.generate(),
             customerId: customer.id,
             subscriptionId,
             stripeInvoiceId: invoiceObject.id,
@@ -381,7 +384,7 @@ export class ProcessStripeWebhookUseCase
         } else {
           // 新規Invoiceレコードを作成
           const invoice = Invoice.create({
-            id: randomUUID(),
+            id: this.uuidV7Generator.generate(),
             customerId: customer.id,
             subscriptionId,
             stripeInvoiceId: invoiceObject.id,
