@@ -53,7 +53,7 @@ export class UpdateProductUseCase implements UpdateProductUseCasePort {
     }
 
     // 3. Stripe連携済みなら Stripe API 更新
-    if (product.isSyncedWithStripe && product.stripeProductId) {
+    if (product.stripeProductId) {
       await this.updateStripeProduct.handle({
         stripeProductId: product.stripeProductId,
         name: input.name,

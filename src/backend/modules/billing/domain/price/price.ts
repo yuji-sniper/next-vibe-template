@@ -93,8 +93,4 @@ export class Price {
   get isRecurring(): boolean {
     return this.type === "recurring"
   }
-
-  get isSyncedWithStripe(): boolean {
-    return this.stripePriceId !== null
-  }
 }

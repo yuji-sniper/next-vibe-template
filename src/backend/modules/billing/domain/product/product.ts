@@ -101,8 +101,4 @@ export class Product {
     this.active = false
     this.updatedAt = new Date()
   }
-
-  get isSyncedWithStripe(): boolean {
-    return this.stripeProductId !== null
-  }
 }
