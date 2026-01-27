@@ -18,7 +18,7 @@ import {
   SidebarSeparator
 } from "@/components/ui/sidebar"
 import { useGetAuthAdminQuery } from "@/features/auth-admin/hooks/queries/useGetAuthAdminQuery"
-import { useSignOutAdmin } from "./use-sign-out-admin"
+import { useSignOutAdmin } from "../_hooks/use-sign-out-admin"
 
 const navItems = [
   {
