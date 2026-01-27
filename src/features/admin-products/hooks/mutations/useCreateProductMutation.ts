@@ -1,16 +1,15 @@
 "use client"
 
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
+import { getQueryClient } from "@/lib/react-query/query-client"
 import { createProductMutation } from "../../mutations/create-product"
 import { adminProductsKey } from "../../queries/keys"
 
 export const useCreateProductMutation = () => {
-  const queryClient = useQueryClient()
-
   return useMutation({
     mutationFn: createProductMutation,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: adminProductsKey })
+      getQueryClient().invalidateQueries({ queryKey: adminProductsKey })
     }
   })
 }

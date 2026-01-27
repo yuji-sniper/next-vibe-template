@@ -1,20 +1,19 @@
+"use client"
+
 import { useMutation } from "@tanstack/react-query"
 import { getQueryClient } from "@/lib/react-query/query-client"
-import {
-  type ArchivePriceInput,
-  archivePriceMutation
-} from "../../mutations/archive-price"
+import { createPriceMutation } from "../../mutations/create-price"
 import { adminProductDetailKey } from "../../queries/keys"
 
-type UseArchivePriceMutationOptions = {
+type UseCreatePriceMutationProps = {
   productId: string
 }
 
-export const useArchivePriceMutation = ({
+export const useCreatePriceMutation = ({
   productId
-}: UseArchivePriceMutationOptions) => {
+}: UseCreatePriceMutationProps) => {
   return useMutation({
-    mutationFn: (input: ArchivePriceInput) => archivePriceMutation(input),
+    mutationFn: createPriceMutation,
     onSuccess: () => {
       getQueryClient().invalidateQueries({
         queryKey: adminProductDetailKey(productId)

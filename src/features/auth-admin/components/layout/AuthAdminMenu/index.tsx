@@ -1,6 +1,6 @@
 "use client"
 
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { LogOut } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useId } from "react"
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/popover"
 import { useGetAuthAdminQuery } from "@/features/auth-admin/hooks/queries/useGetAuthAdminQuery"
 import { authAdminClient } from "@/lib/better-auth/auth-admin-client"
+import { getQueryClient } from "@/lib/react-query/query-client"
 
 /**
  * 名前の最初の2文字を取得する
@@ -30,7 +31,6 @@ function getInitials(name: string): string {
 export function AuthAdminMenu() {
   const popoverId = useId()
   const router = useRouter()
-  const queryClient = useQueryClient()
 
   const { data } = useGetAuthAdminQuery({ orError: false })
   const authAdmin = data?.authAdmin
@@ -40,7 +40,7 @@ export function AuthAdminMenu() {
       await authAdminClient.signOut()
     },
     onSuccess: () => {
-      queryClient.clear()
+      getQueryClient().clear()
       router.push("/sign-in")
     }
   })
