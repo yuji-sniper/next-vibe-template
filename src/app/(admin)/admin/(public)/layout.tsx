@@ -18,5 +18,9 @@ export default async function AdminPublicLayout({
     redirect("/dashboard")
   }
 
-  return children
+  return (
+    <div className="dark bg-background text-foreground min-h-screen">
+      {children}
+    </div>
+  )
 }
