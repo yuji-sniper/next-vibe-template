@@ -226,9 +226,27 @@ app/(user)/[locale]/(authenticated)/settings/
 
 | 配置場所 | 用途 |
 |---------|------|
-| `app/.../page/_components/` | ページ固有のコンポーネント |
-| `features/{feature}/components/` | 複数ページで共有するコンポーネント |
+| `app/.../page/_components/` | ページ固有のコンポーネント（container.tsx, presentational.tsx） |
+| `app/.../{親ディレクトリ}/_components/` | 同一機能の複数ページで共有するコンポーネント（例: 作成・編集で共通のフォーム） |
+| `features/{feature}/components/` | 複数機能で共有するコンポーネント |
 | `components/ui/` | 汎用UIコンポーネント |
+
+**例: 作成・編集で共通のフォームコンポーネント**
+
+```
+app/(admin)/admin/(authenticated)/products/
+├── _components/
+│   └── product-form.tsx     ← 作成・編集で共有
+├── new/
+│   └── _components/
+│       ├── container.tsx    ← 作成ページ専用ロジック
+│       └── presentational.tsx
+└── [id]/
+    └── edit/
+        └── _components/
+            ├── container.tsx    ← 編集ページ専用ロジック
+            └── presentational.tsx
+```
 
 ### container.tsx（ロジック層）
 
@@ -470,6 +488,33 @@ export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 
 `as` による型アサーションは型安全性を損なうため使用しない。代わりに明示的なマッピングで型を変換する。
 
+**重要: Zodスキーマから `z.infer` で型を推論する**
+
+フォームなどでZodスキーマを定義している場合、手動で型を定義せず `z.infer` を使用する。スキーマと型が常に同期され、乖離を防げる。
+
+```tsx
+// features/{feature}/types/product-form.ts
+import { z } from "zod"
+
+export const productFormSchema = z.object({
+  name: z.string().min(1, "商品名は必須です").max(255),
+  description: z.string().max(5000).optional().or(z.literal("")),
+  features: z.array(z.string()).optional(),
+  displayOrder: z.number().int().min(0).optional()
+})
+
+// ❌ NG: 手動で型を定義（スキーマと乖離する可能性）
+// export type ProductFormValues = {
+//   name: string
+//   description?: string
+//   features?: string[]
+//   displayOrder?: number
+// }
+
+// ✅ OK: z.infer でスキーマから型を推論
+export type ProductFormValues = z.infer<typeof productFormSchema>
+```
+
 ```tsx
 // features/{feature}/types/product.ts
 
@@ -555,6 +600,36 @@ export const useGetFeatureQuery = () => {
 ```
 
 ### Mutation定義
+
+**重要: Mutation関数の入力型もフロントエンド側で定義する**
+
+バックエンドのAction型を直接importせず、フロントエンド側で定義した型を使用する。
+
+```tsx
+// features/{feature}/mutations/create-product.ts
+import { createProductAction } from "@/backend/modules/billing/presentation/actions/create-product/create-product.action"
+import { ServerError } from "@/utils/error/server-error"
+// ✅ OK: フロントエンド側で定義した型を使用
+import type { ProductFormValues } from "../types/product-form"
+
+// ❌ NG: バックエンドの型を直接import
+// import type { CreateProductActionRequest } from "@/backend/modules/billing/presentation/actions/create-product/create-product.action"
+
+export const createProductMutation = async (input: ProductFormValues) => {
+  const res = await createProductAction(input)
+
+  if (!res.ok) {
+    throw new ServerError(
+      res.error.code,
+      res.error.status,
+      res.error.message,
+      res.error.details
+    )
+  }
+
+  return res.data
+}
+```
 
 ```tsx
 // features/{feature}/mutations/delete-feature.ts
@@ -1117,8 +1192,10 @@ pnpm type:check
 ### コンポーネント配置
 - [ ] `"use client"` の有無を確認
 - [ ] ページ固有コンポーネントは `_components/` に配置（container.tsx + presentational.tsx）
-- [ ] 共有コンポーネントは `features/{feature}/components/` に配置
+- [ ] 同一機能の複数ページで共有するコンポーネントは親ディレクトリの `_components/` に配置
+- [ ] 複数機能で共有するコンポーネントは `features/{feature}/components/` に配置
 - [ ] 型定義は `features/{feature}/types/` に独立して定義（バックエンドから import しない）
+- [ ] Zodスキーマがある場合は `z.infer` で型を推論（手動定義しない）
 
 ### React Query
 - [ ] Query定義は `features/{feature}/queries/` に配置
