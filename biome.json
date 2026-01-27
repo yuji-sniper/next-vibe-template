@@ -7,7 +7,7 @@
   },
   "files": {
     "ignoreUnknown": true,
-    "includes": ["src/**/*.ts", "src/**/*.tsx", "!node_modules", "!.next", "!dist", "!build"]
+    "includes": ["**", "!**/migrations"]
   },
   "formatter": {
     "enabled": true,
