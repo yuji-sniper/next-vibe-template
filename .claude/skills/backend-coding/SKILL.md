@@ -1063,6 +1063,32 @@ import type { ProductRepository } from "@/backend/modules/billing/domain/product
 import { Product } from "../../domain/product/product"
 ```
 
+## 型アサーション（as）を避ける
+
+型アサーション（`as`）は型安全性を損なうため、可能な限り使用しない。
+
+**例外として許容されるケース:**
+- Drizzle の toDomain() で、DBから取得した文字列をドメインの列挙型にマッピングする場合
+
+```typescript
+// ❌ NG: 型アサーションを使用
+const products = res.data.products as Product[]
+
+// ✅ OK: 明示的なマッピングで型変換
+const products: Product[] = res.data.products.map((p) => ({
+  id: p.id,
+  name: p.name,
+  // ...
+}))
+
+// ✅ OK（例外）: Repository の toDomain() でのドメイン型マッピング
+private toDomain(row: { status: string }): Example {
+  return Example.reconstruct({
+    status: row.status as ExampleStatus,  // DBの文字列 → ドメイン列挙型
+  })
+}
+```
+
 ## バリューオブジェクト（VO）の判断基準
 
 以下の場合にVOを作成する：
@@ -1149,4 +1175,5 @@ private toDomain(row: {
 - [ ] Handler で Domain Error を Result 型に変換
 - [ ] Handler でエラーコードを共通定数から参照
 - [ ] Action は「薄いラッパー」として Handler を呼び出すだけ
+- [ ] 型アサーション（as）を避ける（Repository の toDomain() での列挙型マッピングは例外）
 - [ ] `pnpm type:check` が通ること（必須）

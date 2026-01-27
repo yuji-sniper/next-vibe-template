@@ -173,6 +173,7 @@ export const FeatureButton = ({ onClick, disabled, loading }: Props) => {
 import { useState } from "react"
 import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useTranslations, useLocale } from "next-intl"
+import { toast } from "sonner"
 import { useRouter } from "@/i18n/navigation"
 import { FeatureButton } from "../../ui/FeatureButton"
 
@@ -186,13 +187,23 @@ export const FeatureContainer = () => {
     mutationFn: async () => { /* API呼び出し */ },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["feature-key"] })
-      router.push(`/${locale}/success`)
     }
   })
 
+  // ✅ mutateAsync + try-catch パターン（推奨）
+  const handleAction = async () => {
+    try {
+      await mutation.mutateAsync()
+      toast.success("処理が完了しました")
+      router.push(`/${locale}/success`)
+    } catch {
+      toast.error("処理に失敗しました")
+    }
+  }
+
   return (
     <FeatureButton
-      onClick={() => mutation.mutate()}
+      onClick={handleAction}
       loading={mutation.isPending}
     />
   )
@@ -229,6 +240,7 @@ import { useMutation, useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useLocale } from "next-intl"
 import { useState } from "react"
+import { toast } from "sonner"
 import { SettingsPresentational } from "./presentational"
 
 export function SettingsContainer() {
@@ -243,9 +255,19 @@ export function SettingsContainer() {
     },
     onSuccess: () => {
       queryClient.clear()
-      router.push(`/${locale}/sign-in`)
     }
   })
+
+  // ✅ mutateAsync + try-catch パターン（推奨）
+  const handleDelete = async () => {
+    try {
+      await deleteMutation.mutateAsync()
+      toast.success("アカウントを削除しました")
+      router.push(`/${locale}/sign-in`)
+    } catch {
+      toast.error("削除に失敗しました")
+    }
+  }
 
   return (
     <SettingsPresentational
@@ -253,7 +275,7 @@ export function SettingsContainer() {
       isDeleting={deleteMutation.isPending}
       onOpenDialog={() => setIsDialogOpen(true)}
       onCloseDialog={() => setIsDialogOpen(false)}
-      onDelete={() => deleteMutation.mutate()}
+      onDelete={handleDelete}
     />
   )
 }
@@ -438,6 +460,53 @@ export const QueryProvider = ({ children }: { children: React.ReactNode }) => {
 }
 ```
 
+### 型定義
+
+**重要: フロントエンドの型定義はバックエンドから import しない**
+
+型定義は `features/{feature}/types/` に独立して定義する。バックエンドの型を直接 import すると、フロントエンドとバックエンドの結合度が高くなり、変更時の影響範囲が大きくなるため避ける。
+
+**重要: 型アサーション（as）の使用を避ける**
+
+`as` による型アサーションは型安全性を損なうため使用しない。代わりに明示的なマッピングで型を変換する。
+
+```tsx
+// features/{feature}/types/product.ts
+
+// ❌ NG: バックエンドから型をインポート
+// export type { Product } from "@/backend/modules/billing/presentation/actions/find-products/find-products.action"
+
+// ✅ OK: フロントエンド側で独立して型定義
+export type Product = {
+  id: string
+  name: string
+  description: string | null
+  active: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+export type ProductFilterStatus = "all" | "active" | "archived"
+```
+
+```tsx
+// features/{feature}/queries/get-products.ts
+
+// ❌ NG: 型アサーション（as）を使用
+// return { products: res.data.products as Product[] }
+
+// ✅ OK: 明示的なマッピングで型変換
+const products: Product[] = res.data.products.map((p) => ({
+  id: p.id,
+  name: p.name,
+  description: p.description,
+  active: p.active,
+  createdAt: p.createdAt,
+  updatedAt: p.updatedAt
+}))
+return { products }
+```
+
 ### Query Key 定義
 
 ```tsx
@@ -452,21 +521,11 @@ export const featureDetailKey = (id: string) => ["feature", id] as const
 // features/{feature}/queries/get-feature.ts
 import { getFeatureAction } from "@/backend/features/{feature}/actions/get-feature"
 import { ServerError } from "@/utils/error/server-error"
-import { featureKey } from "./keys"
 
-export { featureKey }
-
-type GetFeatureQueryParams = {
-  orError?: boolean
-}
-
-export const getFeatureQuery = async ({ orError = true }: GetFeatureQueryParams = {}) => {
+export const getFeatureQuery = async () => {
   const res = await getFeatureAction()
 
   if (!res.ok) {
-    if (!orError) {
-      return { data: undefined }
-    }
     throw new ServerError(
       res.error.code,
       res.error.status,
@@ -484,16 +543,13 @@ export const getFeatureQuery = async ({ orError = true }: GetFeatureQueryParams 
 ```tsx
 // features/{feature}/hooks/queries/useGetFeatureQuery.ts
 import { useQuery } from "@tanstack/react-query"
-import { featureKey, getFeatureQuery } from "../../queries/get-feature"
+import { featureKey } from "../../queries/keys"
+import { getFeatureQuery } from "../../queries/get-feature"
 
-type Props = {
-  orError?: boolean
-}
-
-export const useGetFeatureQuery = (props: Props = {}) => {
+export const useGetFeatureQuery = () => {
   return useQuery({
     queryKey: featureKey,
-    queryFn: () => getFeatureQuery({ orError: props.orError })
+    queryFn: getFeatureQuery
   })
 }
 ```
@@ -880,7 +936,7 @@ export default async function AuthenticatedLayout({
 
   const { authUser } = await queryClient.fetchQuery({
     queryKey: authUserKey,
-    queryFn: () => getAuthUserQuery({ orError: false })
+    queryFn: getAuthUserQuery
   })
 
   if (!authUser) {
@@ -1062,7 +1118,7 @@ pnpm type:check
 - [ ] `"use client"` の有無を確認
 - [ ] ページ固有コンポーネントは `_components/` に配置（container.tsx + presentational.tsx）
 - [ ] 共有コンポーネントは `features/{feature}/components/` に配置
-- [ ] 型定義は `features/{feature}/types/` に配置
+- [ ] 型定義は `features/{feature}/types/` に独立して定義（バックエンドから import しない）
 
 ### React Query
 - [ ] Query定義は `features/{feature}/queries/` に配置
