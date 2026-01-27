@@ -19,8 +19,10 @@ export default async function AdminPublicLayout({
   }
 
   return (
-    <div className="dark bg-background text-foreground min-h-screen">
-      {children}
-    </div>
+    <html lang="en" className="dark">
+      <body className="bg-background text-foreground min-h-screen">
+        {children}
+      </body>
+    </html>
   )
 }
