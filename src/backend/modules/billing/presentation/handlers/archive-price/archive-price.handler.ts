@@ -8,8 +8,10 @@ import {
   PriceArchiveFailedError,
   PriceNotFoundError
 } from "@/backend/modules/billing/domain/price/price.errors"
+import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { formatZodErrors } from "@/backend/modules/shared/presentation/handlers/utils/format-zod-errors"
+import { AUTH_ADMIN_ERROR_CODES } from "@/shared/errors/auth-admin.errors"
 import { BILLING_ERROR_CODES } from "@/shared/errors/billing.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
@@ -52,6 +54,17 @@ export const handleArchivePrice = async (
       data: undefined
     }
   } catch (e: unknown) {
+    if (e instanceof UnauthorizedError) {
+      return {
+        ok: false,
+        error: {
+          code: AUTH_ADMIN_ERROR_CODES.UNAUTHORIZED,
+          status: 401,
+          message: "Unauthorized"
+        }
+      }
+    }
+
     if (e instanceof PriceNotFoundError) {
       return {
         ok: false,

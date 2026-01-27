@@ -1,4 +1,6 @@
 import { inject, injectable } from "tsyringe"
+import type { RequireAuthAdminPort } from "@/backend/modules/billing/application/ports/require-auth-admin.port"
+import { RequireAuthAdminPortToken } from "@/backend/modules/billing/application/ports/require-auth-admin.port"
 import { Price } from "@/backend/modules/billing/domain/price/price"
 import type { PriceRepository } from "@/backend/modules/billing/domain/price/price.repository"
 import { PriceRepositoryToken } from "@/backend/modules/billing/domain/price/price.repository"
@@ -21,6 +23,8 @@ import type {
 @injectable()
 export class CreatePriceUseCase implements CreatePriceUseCasePort {
   constructor(
+    @inject(RequireAuthAdminPortToken)
+    private readonly requireAuthAdmin: RequireAuthAdminPort,
     @inject(ProductRepositoryToken)
     private readonly productRepository: ProductRepository,
     @inject(PriceRepositoryToken)
@@ -34,20 +38,23 @@ export class CreatePriceUseCase implements CreatePriceUseCasePort {
   async handle(
     input: CreatePriceUseCaseInput
   ): Promise<CreatePriceUseCaseOutput> {
-    // 1. 商品存在確認
+    // 1. Admin認可チェック
+    await this.requireAuthAdmin.handle()
+
+    // 2. 商品存在確認
     const product = await this.productRepository.findById(input.productId)
     if (!product) {
       throw new ProductNotFoundError(input.productId)
     }
 
-    // 2. 商品が Stripe 連携済みか確認
+    // 3. 商品が Stripe 連携済みか確認
     if (!product.stripeProductId) {
       throw new ProductNotSyncedError(input.productId)
     }
 
     const currency = input.currency ?? "jpy"
 
-    // 3. Price エンティティ作成（Stripe ID 未設定）
+    // 4. Price エンティティ作成（Stripe ID 未設定）
     const price = Price.create({
       id: this.uuidV7Generator.generate(),
       productId: input.productId,
@@ -60,7 +67,7 @@ export class CreatePriceUseCase implements CreatePriceUseCasePort {
       metadata: input.metadata
     })
 
-    // 4. Stripe API で価格作成
+    // 5. Stripe API で価格作成
     const stripeResult = await this.createStripePrice.handle({
       productId: product.stripeProductId,
       unitAmount: input.unitAmount,
@@ -75,10 +82,10 @@ export class CreatePriceUseCase implements CreatePriceUseCasePort {
       metadata: input.metadata
     })
 
-    // 5. Stripe ID を設定
+    // 6. Stripe ID を設定
     price.setStripePriceId(stripeResult.id)
 
-    // 6. DB に保存
+    // 7. DB に保存
     await this.priceRepository.save(price)
 
     return {

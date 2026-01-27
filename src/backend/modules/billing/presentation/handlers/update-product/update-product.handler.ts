@@ -8,8 +8,10 @@ import {
   ProductNotFoundError,
   ProductUpdateFailedError
 } from "@/backend/modules/billing/domain/product/product.errors"
+import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { formatZodErrors } from "@/backend/modules/shared/presentation/handlers/utils/format-zod-errors"
+import { AUTH_ADMIN_ERROR_CODES } from "@/shared/errors/auth-admin.errors"
 import { BILLING_ERROR_CODES } from "@/shared/errors/billing.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
@@ -90,6 +92,17 @@ export const handleUpdateProduct = async (
       }
     }
   } catch (e: unknown) {
+    if (e instanceof UnauthorizedError) {
+      return {
+        ok: false,
+        error: {
+          code: AUTH_ADMIN_ERROR_CODES.UNAUTHORIZED,
+          status: 401,
+          message: "Unauthorized"
+        }
+      }
+    }
+
     if (e instanceof ProductNotFoundError) {
       return {
         ok: false,

@@ -1,4 +1,6 @@
 import { inject, injectable } from "tsyringe"
+import type { RequireAuthAdminPort } from "@/backend/modules/billing/application/ports/require-auth-admin.port"
+import { RequireAuthAdminPortToken } from "@/backend/modules/billing/application/ports/require-auth-admin.port"
 import { Product } from "@/backend/modules/billing/domain/product/product"
 import type { ProductRepository } from "@/backend/modules/billing/domain/product/product.repository"
 import { ProductRepositoryToken } from "@/backend/modules/billing/domain/product/product.repository"
@@ -15,6 +17,8 @@ import type {
 @injectable()
 export class CreateProductUseCase implements CreateProductUseCasePort {
   constructor(
+    @inject(RequireAuthAdminPortToken)
+    private readonly requireAuthAdmin: RequireAuthAdminPort,
     @inject(ProductRepositoryToken)
     private readonly productRepository: ProductRepository,
     @inject(CreateStripeProductPortToken)
@@ -26,7 +30,10 @@ export class CreateProductUseCase implements CreateProductUseCasePort {
   async handle(
     input: CreateProductUseCaseInput
   ): Promise<CreateProductUseCaseOutput> {
-    // 1. Product エンティティ作成（Stripe ID未設定）
+    // 1. Admin認可チェック
+    await this.requireAuthAdmin.handle()
+
+    // 2. Product エンティティ作成（Stripe ID未設定）
     const product = Product.create({
       id: this.uuidV7Generator.generate(),
       name: input.name,
@@ -36,17 +43,17 @@ export class CreateProductUseCase implements CreateProductUseCasePort {
       metadata: input.metadata
     })
 
-    // 2. Stripe API で商品作成
+    // 3. Stripe API で商品作成
     const stripeResult = await this.createStripeProduct.handle({
       name: input.name,
       description: input.description,
       metadata: input.metadata
     })
 
-    // 3. Stripe ID を設定
+    // 4. Stripe ID を設定
     product.setStripeProductId(stripeResult.id)
 
-    // 4. DB に保存
+    // 5. DB に保存
     await this.productRepository.save(product)
 
     return {

@@ -1,4 +1,6 @@
 import { inject, injectable } from "tsyringe"
+import type { RequireAuthAdminPort } from "@/backend/modules/billing/application/ports/require-auth-admin.port"
+import { RequireAuthAdminPortToken } from "@/backend/modules/billing/application/ports/require-auth-admin.port"
 import { ProductNotFoundError } from "@/backend/modules/billing/domain/product/product.errors"
 import type { ProductRepository } from "@/backend/modules/billing/domain/product/product.repository"
 import { ProductRepositoryToken } from "@/backend/modules/billing/domain/product/product.repository"
@@ -13,6 +15,8 @@ import type {
 @injectable()
 export class UpdateProductUseCase implements UpdateProductUseCasePort {
   constructor(
+    @inject(RequireAuthAdminPortToken)
+    private readonly requireAuthAdmin: RequireAuthAdminPort,
     @inject(ProductRepositoryToken)
     private readonly productRepository: ProductRepository,
     @inject(UpdateStripeProductPortToken)
@@ -22,13 +26,16 @@ export class UpdateProductUseCase implements UpdateProductUseCasePort {
   async handle(
     input: UpdateProductUseCaseInput
   ): Promise<UpdateProductUseCaseOutput> {
-    // 1. 商品取得（存在確認）
+    // 1. Admin認可チェック
+    await this.requireAuthAdmin.handle()
+
+    // 2. 商品取得（存在確認）
     const product = await this.productRepository.findById(input.productId)
     if (!product) {
       throw new ProductNotFoundError(input.productId)
     }
 
-    // 2. エンティティの更新
+    // 3. エンティティの更新
     if (input.name !== undefined) {
       product.updateName(input.name)
     }
@@ -52,7 +59,7 @@ export class UpdateProductUseCase implements UpdateProductUseCasePort {
       product.updateMetadata(input.metadata)
     }
 
-    // 3. Stripe連携済みなら Stripe API 更新
+    // 4. Stripe連携済みなら Stripe API 更新
     if (product.stripeProductId) {
       await this.updateStripeProduct.handle({
         stripeProductId: product.stripeProductId,
@@ -63,7 +70,7 @@ export class UpdateProductUseCase implements UpdateProductUseCasePort {
       })
     }
 
-    // 4. DB 更新
+    // 5. DB 更新
     await this.productRepository.save(product)
 
     return {

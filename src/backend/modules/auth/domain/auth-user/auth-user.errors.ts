@@ -1,4 +1,6 @@
-export class AuthUserUnauthorizedError extends Error {
+import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
+
+export class AuthUserUnauthorizedError extends UnauthorizedError {
   constructor() {
     super("Unauthorized")
     this.name = "AuthUserUnauthorizedError"

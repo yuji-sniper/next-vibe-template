@@ -1,11 +1,11 @@
 import { resolveContainer } from "@/backend/bootstrap/container"
-import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
 import {
   type CreateCheckoutSessionUseCasePort,
   CreateCheckoutSessionUseCasePortToken
 } from "@/backend/modules/billing/application/commands/usecases/create-checkout-session/create-checkout-session.usecase.port"
 import { CustomerCreateFailedError } from "@/backend/modules/billing/domain/customer/customer.errors"
 import { PaymentCreateFailedError } from "@/backend/modules/billing/domain/payment/payment.errors"
+import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
 import { BILLING_ERROR_CODES } from "@/shared/errors/billing.errors"
@@ -40,7 +40,7 @@ export const handleCreateCheckoutSession = async (
       data: { sessionUrl: output.sessionUrl }
     }
   } catch (e: unknown) {
-    if (e instanceof AuthUserUnauthorizedError) {
+    if (e instanceof UnauthorizedError) {
       return {
         ok: false,
         error: {

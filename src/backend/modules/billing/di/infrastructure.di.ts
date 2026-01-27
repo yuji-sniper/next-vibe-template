@@ -10,6 +10,7 @@ import { CreateSubscriptionCheckoutSessionPortToken } from "@/backend/modules/bi
 import { ProcessStripeWebhookPortToken } from "@/backend/modules/billing/application/commands/ports/process-stripe-webhook.port"
 import { UpdateStripeProductPortToken } from "@/backend/modules/billing/application/commands/ports/update-stripe-product.port"
 import { GetCurrentUserPortToken } from "@/backend/modules/billing/application/ports/get-current-user.port"
+import { RequireAuthAdminPortToken } from "@/backend/modules/billing/application/ports/require-auth-admin.port"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { InvoiceRepositoryToken } from "@/backend/modules/billing/domain/invoice/invoice.repository"
 import { PaymentRepositoryToken } from "@/backend/modules/billing/domain/payment/payment.repository"
@@ -18,6 +19,7 @@ import { ProductRepositoryToken } from "@/backend/modules/billing/domain/product
 import { SubscriptionRepositoryToken } from "@/backend/modules/billing/domain/subscription/subscription.repository"
 import { WebhookEventRepositoryToken } from "@/backend/modules/billing/domain/webhook-event/webhook-event.repository"
 import { GetCurrentUserAuthModuleAdapter } from "@/backend/modules/billing/infrastructure/modules/auth/get-current-user.auth-module.adapter"
+import { RequireAuthAdminAuthAdminModuleAdapter } from "@/backend/modules/billing/infrastructure/modules/auth-admin/require-auth-admin.auth-admin-module.adapter"
 import { CustomerDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/customer.drizzle.repository"
 import { InvoiceDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/invoice.drizzle.repository"
 import { PaymentDrizzleRepository } from "@/backend/modules/billing/infrastructure/repositories/payment.drizzle.repository"
@@ -59,6 +61,10 @@ export function initInfrastructureDependency(container: DependencyContainer) {
   container.registerSingleton(
     GetCurrentUserPortToken,
     GetCurrentUserAuthModuleAdapter
+  )
+  container.registerSingleton(
+    RequireAuthAdminPortToken,
+    RequireAuthAdminAuthAdminModuleAdapter
   )
 
   // Stripe Adapters

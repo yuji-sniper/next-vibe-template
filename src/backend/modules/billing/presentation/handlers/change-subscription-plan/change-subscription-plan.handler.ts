@@ -1,5 +1,4 @@
 import { resolveContainer } from "@/backend/bootstrap/container"
-import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
 import {
   type ChangeSubscriptionPlanUseCasePort,
   ChangeSubscriptionPlanUseCasePortToken
@@ -9,6 +8,7 @@ import {
   SubscriptionNotFoundError,
   SubscriptionUpdateFailedError
 } from "@/backend/modules/billing/domain/subscription/subscription.errors"
+import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
 import { BILLING_ERROR_CODES } from "@/shared/errors/billing.errors"
@@ -43,7 +43,7 @@ export const handleChangeSubscriptionPlan = async (
       }
     }
   } catch (e: unknown) {
-    if (e instanceof AuthUserUnauthorizedError) {
+    if (e instanceof UnauthorizedError) {
       return {
         ok: false,
         error: {

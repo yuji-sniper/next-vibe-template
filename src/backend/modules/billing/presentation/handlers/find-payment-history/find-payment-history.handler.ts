@@ -1,9 +1,9 @@
 import { resolveContainer } from "@/backend/bootstrap/container"
-import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
 import {
   type FindPaymentHistoryUseCasePort,
   FindPaymentHistoryUseCasePortToken
 } from "@/backend/modules/billing/application/queries/usecases/find-payment-history/find-payment-history.usecase.port"
+import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
@@ -42,7 +42,7 @@ export const handleFindPaymentHistory =
         }
       }
     } catch (e: unknown) {
-      if (e instanceof AuthUserUnauthorizedError) {
+      if (e instanceof UnauthorizedError) {
         return {
           ok: false,
           error: {

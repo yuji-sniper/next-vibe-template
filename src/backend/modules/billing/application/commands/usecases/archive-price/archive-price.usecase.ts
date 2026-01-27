@@ -1,4 +1,6 @@
 import { inject, injectable } from "tsyringe"
+import type { RequireAuthAdminPort } from "@/backend/modules/billing/application/ports/require-auth-admin.port"
+import { RequireAuthAdminPortToken } from "@/backend/modules/billing/application/ports/require-auth-admin.port"
 import { PriceNotFoundError } from "@/backend/modules/billing/domain/price/price.errors"
 import type { PriceRepository } from "@/backend/modules/billing/domain/price/price.repository"
 import { PriceRepositoryToken } from "@/backend/modules/billing/domain/price/price.repository"
@@ -12,6 +14,8 @@ import type {
 @injectable()
 export class ArchivePriceUseCase implements ArchivePriceUseCasePort {
   constructor(
+    @inject(RequireAuthAdminPortToken)
+    private readonly requireAuthAdmin: RequireAuthAdminPort,
     @inject(PriceRepositoryToken)
     private readonly priceRepository: PriceRepository,
     @inject(ArchiveStripePricePortToken)
@@ -19,20 +23,23 @@ export class ArchivePriceUseCase implements ArchivePriceUseCasePort {
   ) {}
 
   async handle(input: ArchivePriceUseCaseInput): Promise<void> {
-    // 1. 価格取得（存在確認）
+    // 1. Admin認可チェック
+    await this.requireAuthAdmin.handle()
+
+    // 2. 価格取得（存在確認）
     const price = await this.priceRepository.findById(input.priceId)
     if (!price) {
       throw new PriceNotFoundError(input.priceId)
     }
 
-    // 2. Stripe連携済みなら Stripe で非アクティブ化
+    // 3. Stripe連携済みなら Stripe で非アクティブ化
     if (price.stripePriceId) {
       await this.archiveStripePrice.handle({
         stripePriceId: price.stripePriceId
       })
     }
 
-    // 3. DB で active=false に更新
+    // 4. DB で active=false に更新
     price.archive()
     await this.priceRepository.save(price)
   }
