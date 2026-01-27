@@ -81,6 +81,21 @@ src/
 
 ## コンポーネント実装パターン
 
+### shadcn/ui コンポーネントの追加
+
+新しいshadcn/uiコンポーネントを追加する場合は、以下のコマンドを使用する:
+
+```bash
+pnpm dlx shadcn@latest add <component-name>
+```
+
+例:
+```bash
+pnpm dlx shadcn@latest add button
+pnpm dlx shadcn@latest add dialog
+pnpm dlx shadcn@latest add form
+```
+
 ### UIコンポーネント (components/ui/)
 
 ```tsx
