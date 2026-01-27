@@ -117,21 +117,21 @@ export const FeatureButton = ({ onClick, disabled, loading }: Props) => {
 "use client"
 
 import { useState } from "react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { useTranslations, useLocale } from "next-intl"
 import { useRouter } from "@/i18n/navigation"
+import { getQueryClient } from "@/lib/react-query/query-client"
 import { FeatureButton } from "../../ui/FeatureButton"
 
 export const FeatureContainer = () => {
   const t = useTranslations("feature")
   const locale = useLocale()
   const router = useRouter()
-  const queryClient = useQueryClient()
 
   const mutation = useMutation({
     mutationFn: async () => { /* API呼び出し */ },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["feature-key"] })
+      getQueryClient().invalidateQueries({ queryKey: ["feature-key"] })
       router.push(`/${locale}/success`)
     }
   })
@@ -171,24 +171,24 @@ app/(user)/[locale]/(authenticated)/settings/
 // app/(user)/[locale]/(authenticated)/settings/_components/container.tsx
 "use client"
 
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useLocale } from "next-intl"
 import { useState } from "react"
+import { getQueryClient } from "@/lib/react-query/query-client"
 import { SettingsPresentational } from "./presentational"
 
 export function SettingsContainer() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const locale = useLocale()
   const router = useRouter()
-  const queryClient = useQueryClient()
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
       // API呼び出し
     },
     onSuccess: () => {
-      queryClient.clear()
+      getQueryClient().clear()
       router.push(`/${locale}/sign-in`)
     }
   })
@@ -326,6 +326,41 @@ export default async function DashboardPage({ params }: Props) {
 ```
 
 ## React Query パターン
+
+### QueryClient の取得
+
+**重要:** `useQueryClient()` フックの代わりに `getQueryClient()` を使用する。
+
+```tsx
+// ❌ Bad: useQueryClient() を使用
+import { useMutation, useQueryClient } from "@tanstack/react-query"
+
+export const useFeatureMutation = () => {
+  const queryClient = useQueryClient()  // 不要なhook呼び出し
+
+  return useMutation({
+    mutationFn: featureMutation,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: featureKey })
+    }
+  })
+}
+
+// ✅ Good: getQueryClient() を使用
+import { useMutation } from "@tanstack/react-query"
+import { getQueryClient } from "@/lib/react-query/query-client"
+
+export const useFeatureMutation = () => {
+  return useMutation({
+    mutationFn: featureMutation,
+    onSuccess: () => {
+      getQueryClient().invalidateQueries({ queryKey: featureKey })
+    }
+  })
+}
+```
+
+`getQueryClient()` はブラウザではシングルトンを返すため、Provider経由で取得する `useQueryClient()` と同じインスタンスが得られる。コードがシンプルになり、hook呼び出しを減らせる。
 
 ### Query定義
 
