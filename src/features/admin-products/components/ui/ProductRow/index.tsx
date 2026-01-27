@@ -43,9 +43,9 @@ export const ProductRow = ({ product, onArchive }: ProductRowProps) => {
       </TableCell>
       <TableCell>
         {product.active ? (
-          <Badge variant="secondary">アクティブ</Badge>
+          <Badge variant="outline">アクティブ</Badge>
         ) : (
-          <Badge variant="outline">アーカイブ済み</Badge>
+          <Badge variant="secondary">アーカイブ済み</Badge>
         )}
       </TableCell>
       <TableCell className="text-center">{product.displayOrder}</TableCell>

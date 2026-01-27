@@ -18,7 +18,7 @@ export const ProductActions = ({
   return (
     <div className="flex items-center gap-2">
       <Button variant="ghost" size="icon-sm" asChild>
-        <Link href={`/admin/products/${productId}/edit`}>
+        <Link href={`/admin/products/${productId}`}>
           <PencilIcon className="size-4" />
           <span className="sr-only">編集</span>
         </Link>
