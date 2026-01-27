@@ -15,7 +15,8 @@ export const productFormSchema = z.object({
     .number()
     .int("表示順は整数で入力してください")
     .min(0, "表示順は0以上で入力してください")
-    .optional()
+    .optional(),
+  active: z.boolean().optional()
 })
 
 export type ProductFormValues = z.infer<typeof productFormSchema>

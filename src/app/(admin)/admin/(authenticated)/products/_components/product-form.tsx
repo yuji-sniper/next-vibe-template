@@ -15,6 +15,7 @@ import {
   FormMessage
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import {
   type ProductFormValues,
@@ -22,6 +23,7 @@ import {
 } from "@/features/admin-products/types/product-form"
 
 type ProductFormProps = {
+  mode?: "create" | "edit"
   defaultValues?: Partial<ProductFormValues>
   onSubmit: (values: ProductFormValues) => void
   isPending: boolean
@@ -34,6 +36,7 @@ type FeatureItem = {
 }
 
 export const ProductForm = ({
+  mode = "create",
   defaultValues,
   onSubmit,
   isPending,
@@ -51,7 +54,8 @@ export const ProductForm = ({
     defaultValues: {
       name: defaultValues?.name ?? "",
       description: defaultValues?.description ?? "",
-      displayOrder: defaultValues?.displayOrder ?? 0
+      displayOrder: defaultValues?.displayOrder ?? 0,
+      active: defaultValues?.active ?? true
     }
   })
 
@@ -71,6 +75,7 @@ export const ProductForm = ({
     name: string
     description?: string
     displayOrder?: number
+    active?: boolean
   }) => {
     const featureValues = features
       .map((f) => f.value.trim())
@@ -80,7 +85,8 @@ export const ProductForm = ({
       name: data.name,
       description: data.description,
       features: featureValues.length > 0 ? featureValues : undefined,
-      displayOrder: data.displayOrder
+      displayOrder: data.displayOrder,
+      active: mode === "edit" ? data.active : undefined
     })
   }
 
@@ -190,6 +196,29 @@ export const ProductForm = ({
             </FormItem>
           )}
         />
+
+        {mode === "edit" && (
+          <FormField
+            control={form.control}
+            name="active"
+            render={({ field }) => (
+              <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
+                <div className="space-y-0.5">
+                  <FormLabel className="text-base">アクティブ</FormLabel>
+                  <FormDescription>
+                    無効にすると商品は非表示になります
+                  </FormDescription>
+                </div>
+                <FormControl>
+                  <Switch
+                    checked={field.value}
+                    onCheckedChange={field.onChange}
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+        )}
 
         <div className="flex justify-end pt-4">
           <Button type="submit" disabled={isPending}>
