@@ -30,6 +30,8 @@ export const handleGetAuthAdmin =
         data: output
       }
     } catch (e: unknown) {
+      console.error(e)
+
       if (e instanceof AuthAdminUnauthorizedError) {
         return {
           ok: false,

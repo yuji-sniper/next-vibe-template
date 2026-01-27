@@ -27,6 +27,8 @@ export const handleDeleteAuthUser =
         data: undefined
       }
     } catch (e: unknown) {
+      console.error(e)
+
       if (e instanceof AuthUserUnauthorizedError) {
         return {
           ok: false,

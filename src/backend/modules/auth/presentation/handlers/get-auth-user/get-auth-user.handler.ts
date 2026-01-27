@@ -31,6 +31,8 @@ export const handleGetAuthUser =
         data: output
       }
     } catch (e: unknown) {
+      console.error(e)
+
       if (e instanceof AuthUserUnauthorizedError) {
         return {
           ok: false,
