@@ -1,6 +1,8 @@
 import type { DependencyContainer } from "tsyringe"
 import { ArchivePriceUseCase } from "@/backend/modules/billing/application/commands/usecases/archive-price/archive-price.usecase"
 import { ArchivePriceUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/archive-price/archive-price.usecase.port"
+import { ArchiveProductUseCase } from "@/backend/modules/billing/application/commands/usecases/archive-product/archive-product.usecase"
+import { ArchiveProductUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/archive-product/archive-product.usecase.port"
 import { CancelSubscriptionUseCase } from "@/backend/modules/billing/application/commands/usecases/cancel-subscription/cancel-subscription.usecase"
 import { CancelSubscriptionUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/cancel-subscription/cancel-subscription.usecase.port"
 import { ChangeSubscriptionPlanUseCase } from "@/backend/modules/billing/application/commands/usecases/change-subscription-plan/change-subscription-plan.usecase"
@@ -71,6 +73,10 @@ export function initApplicationDependency(container: DependencyContainer) {
   )
   container.registerSingleton(CreatePriceUseCasePortToken, CreatePriceUseCase)
   container.registerSingleton(ArchivePriceUseCasePortToken, ArchivePriceUseCase)
+  container.registerSingleton(
+    ArchiveProductUseCasePortToken,
+    ArchiveProductUseCase
+  )
   container.registerSingleton(FindProductsUseCasePortToken, FindProductsUseCase)
   container.registerSingleton(
     FindProductByIdUseCasePortToken,
