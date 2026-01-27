@@ -108,6 +108,8 @@ export const handleFindProductById = async (
       }
     }
   } catch (e: unknown) {
+    console.error(e)
+
     // 3. Domain Error を Result 型に変換
     if (e instanceof ProductNotFoundError) {
       return {

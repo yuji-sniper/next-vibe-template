@@ -67,7 +67,9 @@ export const handleFindProducts = async (
         }))
       }
     }
-  } catch {
+  } catch (e: unknown) {
+    console.error(e)
+
     return {
       ok: false,
       error: {

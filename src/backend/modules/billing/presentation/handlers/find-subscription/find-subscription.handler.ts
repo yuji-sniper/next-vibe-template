@@ -57,6 +57,8 @@ export const handleFindSubscription =
         }
       }
     } catch (e: unknown) {
+      console.error(e)
+
       if (e instanceof UnauthorizedError) {
         return {
           ok: false,

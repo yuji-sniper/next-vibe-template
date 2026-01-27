@@ -39,6 +39,8 @@ export const handleProcessStripeWebhook = async (
       data: { received: true }
     }
   } catch (e: unknown) {
+    console.error(e)
+
     if (e instanceof WebhookVerificationFailedError) {
       return {
         ok: false,
@@ -69,7 +71,6 @@ export const handleProcessStripeWebhook = async (
       }
     }
 
-    console.error("Webhook error:", e)
     return {
       ok: false,
       error: {

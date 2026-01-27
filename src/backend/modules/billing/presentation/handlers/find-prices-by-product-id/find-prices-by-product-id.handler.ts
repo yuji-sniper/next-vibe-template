@@ -85,7 +85,9 @@ export const handleFindPricesByProductId = async (
         }))
       }
     }
-  } catch {
+  } catch (e: unknown) {
+    console.error(e)
+
     return {
       ok: false,
       error: {

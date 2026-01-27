@@ -42,7 +42,9 @@ export const handleFindActivePlans =
           plans: output.plans
         }
       }
-    } catch {
+    } catch (e: unknown) {
+      console.error(e)
+
       return {
         ok: false,
         error: {

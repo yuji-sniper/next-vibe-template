@@ -54,6 +54,8 @@ export const handleArchivePrice = async (
       data: undefined
     }
   } catch (e: unknown) {
+    console.error(e)
+
     if (e instanceof UnauthorizedError) {
       return {
         ok: false,

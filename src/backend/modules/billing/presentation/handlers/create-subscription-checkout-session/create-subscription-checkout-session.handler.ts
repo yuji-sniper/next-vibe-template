@@ -41,6 +41,8 @@ export const handleCreateSubscriptionCheckoutSession = async (
       data: { sessionUrl: output.sessionUrl }
     }
   } catch (e: unknown) {
+    console.error(e)
+
     if (e instanceof UnauthorizedError) {
       return {
         ok: false,
