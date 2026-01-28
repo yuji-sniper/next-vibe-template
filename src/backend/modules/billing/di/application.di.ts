@@ -13,8 +13,6 @@ import { CreatePriceUseCase } from "@/backend/modules/billing/application/comman
 import { CreatePriceUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/create-price/create-price.usecase.port"
 import { CreateProductUseCase } from "@/backend/modules/billing/application/commands/usecases/create-product/create-product.usecase"
 import { CreateProductUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/create-product/create-product.usecase.port"
-import { CreateSubscriptionCheckoutSessionUseCase } from "@/backend/modules/billing/application/commands/usecases/create-subscription-checkout-session/create-subscription-checkout-session.usecase"
-import { CreateSubscriptionCheckoutSessionUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/create-subscription-checkout-session/create-subscription-checkout-session.usecase.port"
 import { ProcessStripeWebhookUseCase } from "@/backend/modules/billing/application/commands/usecases/process-stripe-webhook/process-stripe-webhook.usecase"
 import { ProcessStripeWebhookUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/process-stripe-webhook/process-stripe-webhook.usecase.port"
 import { UpdateProductUseCase } from "@/backend/modules/billing/application/commands/usecases/update-product/update-product.usecase"
@@ -46,10 +44,6 @@ export function initApplicationDependency(container: DependencyContainer) {
   container.registerSingleton(
     FindPaymentHistoryUseCasePortToken,
     FindPaymentHistoryUseCase
-  )
-  container.registerSingleton(
-    CreateSubscriptionCheckoutSessionUseCasePortToken,
-    CreateSubscriptionCheckoutSessionUseCase
   )
   container.registerSingleton(
     CancelSubscriptionUseCasePortToken,

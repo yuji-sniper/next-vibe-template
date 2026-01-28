@@ -74,7 +74,7 @@ export const PlanCard = ({
   }
 
   return (
-    <Card data-slot="plan-card" className="flex flex-col">
+    <Card data-slot="plan-card" className="flex w-full max-w-sm flex-col">
       <CardHeader>
         <CardTitle data-slot="plan-card-title">{plan.product.name}</CardTitle>
         {plan.product.description && (

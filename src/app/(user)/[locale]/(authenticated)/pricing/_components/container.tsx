@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "sonner"
-import { useCreateSubscriptionCheckoutSessionMutation } from "@/features/pricing/hooks/mutations/useCreateSubscriptionCheckoutSessionMutation"
+import { useCreateCheckoutSessionMutation } from "@/features/pricing/hooks/mutations/useCreateCheckoutSessionMutation"
 import { useGetActivePlansQuery } from "@/features/pricing/hooks/queries/useGetActivePlansQuery"
 import type { BillingInterval } from "@/features/pricing/types/plan"
 import { PricingPresentational } from "./presentational"
@@ -16,7 +16,7 @@ export function PricingContainer() {
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null)
 
   const { data, isLoading, error } = useGetActivePlansQuery()
-  const checkoutMutation = useCreateSubscriptionCheckoutSessionMutation()
+  const checkoutMutation = useCreateCheckoutSessionMutation()
 
   const plans = data?.plans ?? []
 

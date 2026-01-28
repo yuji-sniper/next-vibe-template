@@ -17,10 +17,7 @@ export const PlanGrid = ({
   loadingPriceId
 }: Props) => {
   return (
-    <div
-      data-slot="plan-grid"
-      className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-    >
+    <div data-slot="plan-grid" className="flex flex-wrap justify-center gap-6">
       {plans.map((plan) => (
         <PlanCard
           key={plan.product.id}
