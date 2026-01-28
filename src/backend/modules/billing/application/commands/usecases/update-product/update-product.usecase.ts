@@ -4,6 +4,8 @@ import { RequireAuthAdminPortToken } from "@/backend/modules/billing/application
 import { ProductNotFoundError } from "@/backend/modules/billing/domain/product/product.errors"
 import type { ProductRepository } from "@/backend/modules/billing/domain/product/product.repository"
 import { ProductRepositoryToken } from "@/backend/modules/billing/domain/product/product.repository"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { UpdateStripeProductPort } from "../../ports/update-stripe-product.port"
 import { UpdateStripeProductPortToken } from "../../ports/update-stripe-product.port"
 import type {
@@ -15,6 +17,8 @@ import type {
 @injectable()
 export class UpdateProductUseCase implements UpdateProductUseCasePort {
   constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
     @inject(RequireAuthAdminPortToken)
     private readonly requireAuthAdmin: RequireAuthAdminPort,
     @inject(ProductRepositoryToken)
@@ -26,12 +30,15 @@ export class UpdateProductUseCase implements UpdateProductUseCasePort {
   async handle(
     input: UpdateProductUseCaseInput
   ): Promise<UpdateProductUseCaseOutput> {
+    this.logger.info("Updating product started", { productId: input.productId })
+
     // 1. Admin認可チェック
     await this.requireAuthAdmin.handle()
 
     // 2. 商品取得（存在確認）
     const product = await this.productRepository.findById(input.productId)
     if (!product) {
+      this.logger.warn("Product not found", { productId: input.productId })
       throw new ProductNotFoundError(input.productId)
     }
 
@@ -61,6 +68,10 @@ export class UpdateProductUseCase implements UpdateProductUseCasePort {
 
     // 4. Stripe連携済みなら Stripe API 更新
     if (product.stripeProductId) {
+      this.logger.info("Updating Stripe product", {
+        productId: input.productId,
+        stripeProductId: product.stripeProductId
+      })
       await this.updateStripeProduct.handle({
         stripeProductId: product.stripeProductId,
         name: input.name,
@@ -72,6 +83,10 @@ export class UpdateProductUseCase implements UpdateProductUseCasePort {
 
     // 5. DB 更新
     await this.productRepository.save(product)
+
+    this.logger.info("Product updated successfully", {
+      productId: input.productId
+    })
 
     return {
       product: {

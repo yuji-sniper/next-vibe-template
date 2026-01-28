@@ -7,6 +7,8 @@ import type { PriceRepository } from "@/backend/modules/billing/domain/price/pri
 import { PriceRepositoryToken } from "@/backend/modules/billing/domain/price/price.repository"
 import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
 import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import { UuidV7GeneratorPortToken } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
@@ -29,6 +31,8 @@ export class CreateCheckoutSessionUseCase
   implements CreateCheckoutSessionUseCasePort
 {
   constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
     @inject(TransactorToken)
     private readonly transactor: Transactor,
     @inject(GetCurrentUserPortToken)
@@ -48,12 +52,17 @@ export class CreateCheckoutSessionUseCase
   async handle(
     input: CreateCheckoutSessionUseCasePortInput
   ): Promise<CreateCheckoutSessionUseCasePortOutput> {
+    this.logger.info("Creating checkout session started", {
+      priceId: input.priceId
+    })
+
     // 1. 認証ユーザー取得
     const { userId, email } = await this.getCurrentUser.handle()
 
     // 2. Price取得
     const price = await this.priceRepository.findById(input.priceId)
     if (!price || !price.stripePriceId) {
+      this.logger.warn("Price not found", { priceId: input.priceId })
       throw new PriceNotFoundError()
     }
 
@@ -67,12 +76,23 @@ export class CreateCheckoutSessionUseCase
       ? CHECKOUT_SESSION_MODE.SUBSCRIPTION
       : CHECKOUT_SESSION_MODE.PAYMENT
 
+    this.logger.info("Creating Stripe checkout session", {
+      priceId: input.priceId,
+      stripePriceId: price.stripePriceId,
+      customerId: customer.id,
+      mode
+    })
     const { sessionUrl } = await this.createCheckoutSession.handle({
       stripeCustomerId: customer.stripeCustomerId,
       stripePriceId: price.stripePriceId,
       successUrl: input.successUrl,
       cancelUrl: input.cancelUrl,
       mode
+    })
+
+    this.logger.info("Checkout session created successfully", {
+      priceId: input.priceId,
+      customerId: customer.id
     })
 
     // 5. sessionUrlを返却（レコードはcheckout.session.completedで作成）

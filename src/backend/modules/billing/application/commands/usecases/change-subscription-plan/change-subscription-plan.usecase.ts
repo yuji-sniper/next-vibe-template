@@ -5,6 +5,8 @@ import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/custom
 import { SubscriptionNotFoundError } from "@/backend/modules/billing/domain/subscription/subscription.errors"
 import type { SubscriptionRepository } from "@/backend/modules/billing/domain/subscription/subscription.repository"
 import { SubscriptionRepositoryToken } from "@/backend/modules/billing/domain/subscription/subscription.repository"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
 import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
 import type { ChangeSubscriptionPlanPort } from "../../ports/change-subscription-plan.port"
@@ -20,6 +22,8 @@ export class ChangeSubscriptionPlanUseCase
   implements ChangeSubscriptionPlanUseCasePort
 {
   constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
     @inject(GetCurrentUserPortToken)
     private readonly getCurrentUser: GetCurrentUserPort,
     @inject(CustomerRepositoryToken)
@@ -33,12 +37,17 @@ export class ChangeSubscriptionPlanUseCase
   async handle(
     input: ChangeSubscriptionPlanUseCasePortInput
   ): Promise<ChangeSubscriptionPlanUseCasePortOutput> {
+    this.logger.info("Changing subscription plan started", {
+      newPriceId: input.newPriceId
+    })
+
     // 1. 認証ユーザー取得
     const { userId } = await this.getCurrentUser.handle()
 
     // 2. Customer取得
     const customer = await this.customerRepository.findByUserId(userId)
     if (!customer) {
+      this.logger.warn("Customer not found", { userId })
       throw new CustomerNotFoundError()
     }
 
@@ -47,10 +56,16 @@ export class ChangeSubscriptionPlanUseCase
       customer.id
     )
     if (!subscription) {
+      this.logger.warn("Subscription not found", { customerId: customer.id })
       throw new SubscriptionNotFoundError()
     }
 
     // 4. Stripe API: subscription.update({ items: [{ price: newPriceId }] })
+    this.logger.info("Changing Stripe subscription plan", {
+      subscriptionId: subscription.id,
+      stripeSubscriptionId: subscription.stripeSubscriptionId,
+      newPriceId: input.newPriceId
+    })
     const result = await this.changeSubscriptionPlan.handle({
       stripeSubscriptionId: subscription.stripeSubscriptionId,
       newPriceId: input.newPriceId
@@ -59,6 +74,11 @@ export class ChangeSubscriptionPlanUseCase
     // 5. DBのSubscription.stripePriceId更新
     subscription.updatePriceId(result.stripePriceId)
     await this.subscriptionRepository.save(subscription)
+
+    this.logger.info("Subscription plan changed successfully", {
+      subscriptionId: subscription.id,
+      stripePriceId: result.stripePriceId
+    })
 
     return {
       subscriptionId: subscription.id,

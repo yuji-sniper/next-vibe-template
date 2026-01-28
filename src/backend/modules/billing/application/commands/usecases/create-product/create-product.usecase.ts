@@ -4,6 +4,8 @@ import { RequireAuthAdminPortToken } from "@/backend/modules/billing/application
 import { Product } from "@/backend/modules/billing/domain/product/product"
 import type { ProductRepository } from "@/backend/modules/billing/domain/product/product.repository"
 import { ProductRepositoryToken } from "@/backend/modules/billing/domain/product/product.repository"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import { UuidV7GeneratorPortToken } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import type { CreateStripeProductPort } from "../../ports/create-stripe-product.port"
@@ -17,6 +19,8 @@ import type {
 @injectable()
 export class CreateProductUseCase implements CreateProductUseCasePort {
   constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
     @inject(RequireAuthAdminPortToken)
     private readonly requireAuthAdmin: RequireAuthAdminPort,
     @inject(ProductRepositoryToken)
@@ -30,6 +34,8 @@ export class CreateProductUseCase implements CreateProductUseCasePort {
   async handle(
     input: CreateProductUseCaseInput
   ): Promise<CreateProductUseCaseOutput> {
+    this.logger.info("Creating product started", { name: input.name })
+
     // 1. Admin認可チェック
     await this.requireAuthAdmin.handle()
 
@@ -44,6 +50,7 @@ export class CreateProductUseCase implements CreateProductUseCasePort {
     })
 
     // 3. Stripe API で商品作成
+    this.logger.info("Creating Stripe product", { name: input.name })
     const stripeResult = await this.createStripeProduct.handle({
       name: input.name,
       description: input.description,
@@ -55,6 +62,11 @@ export class CreateProductUseCase implements CreateProductUseCasePort {
 
     // 5. DB に保存
     await this.productRepository.save(product)
+
+    this.logger.info("Product created successfully", {
+      productId: product.id,
+      stripeProductId: stripeResult.id
+    })
 
     return {
       product: {

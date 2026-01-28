@@ -10,6 +10,8 @@ import {
 } from "@/backend/modules/billing/domain/product/product.errors"
 import type { ProductRepository } from "@/backend/modules/billing/domain/product/product.repository"
 import { ProductRepositoryToken } from "@/backend/modules/billing/domain/product/product.repository"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import { UuidV7GeneratorPortToken } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import type { CreateStripePricePort } from "../../ports/create-stripe-price.port"
@@ -23,6 +25,8 @@ import type {
 @injectable()
 export class CreatePriceUseCase implements CreatePriceUseCasePort {
   constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
     @inject(RequireAuthAdminPortToken)
     private readonly requireAuthAdmin: RequireAuthAdminPort,
     @inject(ProductRepositoryToken)
@@ -38,17 +42,23 @@ export class CreatePriceUseCase implements CreatePriceUseCasePort {
   async handle(
     input: CreatePriceUseCaseInput
   ): Promise<CreatePriceUseCaseOutput> {
+    this.logger.info("Creating price started", { productId: input.productId })
+
     // 1. Admin認可チェック
     await this.requireAuthAdmin.handle()
 
     // 2. 商品存在確認
     const product = await this.productRepository.findById(input.productId)
     if (!product) {
+      this.logger.warn("Product not found", { productId: input.productId })
       throw new ProductNotFoundError(input.productId)
     }
 
     // 3. 商品が Stripe 連携済みか確認
     if (!product.stripeProductId) {
+      this.logger.warn("Product not synced with Stripe", {
+        productId: input.productId
+      })
       throw new ProductNotSyncedError(input.productId)
     }
 
@@ -68,6 +78,12 @@ export class CreatePriceUseCase implements CreatePriceUseCasePort {
     })
 
     // 5. Stripe API で価格作成
+    this.logger.info("Creating Stripe price", {
+      productId: input.productId,
+      stripeProductId: product.stripeProductId,
+      unitAmount: input.unitAmount,
+      currency
+    })
     const stripeResult = await this.createStripePrice.handle({
       productId: product.stripeProductId,
       unitAmount: input.unitAmount,
@@ -87,6 +103,11 @@ export class CreatePriceUseCase implements CreatePriceUseCasePort {
 
     // 7. DB に保存
     await this.priceRepository.save(price)
+
+    this.logger.info("Price created successfully", {
+      priceId: price.id,
+      stripePriceId: stripeResult.id
+    })
 
     return {
       price: {
