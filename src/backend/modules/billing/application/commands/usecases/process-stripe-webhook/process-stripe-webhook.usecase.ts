@@ -162,13 +162,22 @@ export class ProcessStripeWebhookUseCase
         return
       }
 
+      // payment_statusに基づいてステータスを決定
+      // checkout.session.completedはpayment_intent.succeededの後に発火するため、
+      // ここでステータスを確定させる
+      const status =
+        session.payment_status === "paid"
+          ? PAYMENT_STATUS.SUCCEEDED
+          : PAYMENT_STATUS.PENDING
+
       // Paymentレコードを作成
       const payment = Payment.create({
         id: this.uuidV7Generator.generate(),
         customerId: customer.id,
         stripePaymentIntentId: paymentIntentId,
         amount: session.amount_total ?? 0,
-        currency: session.currency ?? "jpy"
+        currency: session.currency ?? "jpy",
+        status
       })
       await this.paymentRepository.save(payment)
     }
@@ -180,8 +189,10 @@ export class ProcessStripeWebhookUseCase
       | Stripe.PaymentIntentPaymentFailedEvent
       | Stripe.PaymentIntentSucceededEvent
   ): Promise<void> {
+    const stripePaymentIntentId = event.data.object.id
+
     const payment = await this.paymentRepository.findByStripePaymentIntentId(
-      event.data.object.id
+      stripePaymentIntentId
     )
     if (!payment) {
       return
