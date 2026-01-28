@@ -1,100 +1,125 @@
-import { resolveContainer } from "@/backend/bootstrap/container"
-import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
-import {
-  type CancelSubscriptionUseCasePort,
-  CancelSubscriptionUseCasePortToken
-} from "@/backend/modules/billing/application/commands/usecases/cancel-subscription/cancel-subscription.usecase.port"
+import { inject, injectable } from "tsyringe"
+import type { CancelSubscriptionUseCasePort } from "@/backend/modules/billing/application/commands/usecases/cancel-subscription/cancel-subscription.usecase.port"
+import { CancelSubscriptionUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/cancel-subscription/cancel-subscription.usecase.port"
 import { CustomerNotFoundError } from "@/backend/modules/billing/domain/customer/customer.errors"
 import {
   SubscriptionCancelFailedError,
   SubscriptionNotFoundError
 } from "@/backend/modules/billing/domain/subscription/subscription.errors"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
 import { BILLING_ERROR_CODES } from "@/shared/errors/billing.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
-type CancelSubscriptionHandlerInput = {
+export type CancelSubscriptionHandlerInput = {
   cancelAtPeriodEnd?: boolean
 }
 
-type CancelSubscriptionHandlerResult = Result<{
+export type CancelSubscriptionHandlerResult = Result<{
   subscriptionId: string
   cancelAtPeriodEnd: boolean
   currentPeriodEnd: string | null
 }>
 
-export const handleCancelSubscription = async (
-  input?: CancelSubscriptionHandlerInput
-): Promise<CancelSubscriptionHandlerResult> => {
-  const usecase = await resolveContainer<CancelSubscriptionUseCasePort>(
-    CancelSubscriptionUseCasePortToken
-  )
+export const CancelSubscriptionHandlerToken = Symbol(
+  "CancelSubscriptionHandler"
+)
 
-  try {
-    const output = await usecase.handle({
-      cancelAtPeriodEnd: input?.cancelAtPeriodEnd
-    })
+export interface CancelSubscriptionHandler {
+  handle(
+    input?: CancelSubscriptionHandlerInput
+  ): Promise<CancelSubscriptionHandlerResult>
+}
 
-    return {
-      ok: true,
-      data: {
-        subscriptionId: output.subscriptionId,
-        cancelAtPeriodEnd: output.cancelAtPeriodEnd,
-        currentPeriodEnd: output.currentPeriodEnd?.toISOString() ?? null
-      }
-    }
-  } catch (e: unknown) {
-    if (e instanceof AuthUserUnauthorizedError) {
+@injectable()
+export class CancelSubscriptionHandlerImpl
+  implements CancelSubscriptionHandler
+{
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(CancelSubscriptionUseCasePortToken)
+    private readonly cancelSubscriptionUseCase: CancelSubscriptionUseCasePort
+  ) {}
+
+  async handle(
+    input?: CancelSubscriptionHandlerInput
+  ): Promise<CancelSubscriptionHandlerResult> {
+    try {
+      const output = await this.cancelSubscriptionUseCase.handle({
+        cancelAtPeriodEnd: input?.cancelAtPeriodEnd
+      })
+
       return {
-        ok: false,
-        error: {
-          code: AUTH_ERROR_CODES.UNAUTHORIZED,
-          status: 401,
-          message: "Unauthorized"
+        ok: true,
+        data: {
+          subscriptionId: output.subscriptionId,
+          cancelAtPeriodEnd: output.cancelAtPeriodEnd,
+          currentPeriodEnd: output.currentPeriodEnd?.toISOString() ?? null
         }
       }
-    }
-
-    if (e instanceof CustomerNotFoundError) {
-      return {
-        ok: false,
-        error: {
-          code: BILLING_ERROR_CODES.CUSTOMER_NOT_FOUND,
-          status: 404,
-          message: "Customer not found"
+    } catch (e: unknown) {
+      if (e instanceof UnauthorizedError) {
+        return {
+          ok: false,
+          error: {
+            code: AUTH_ERROR_CODES.UNAUTHORIZED,
+            status: 401,
+            message: "Unauthorized"
+          }
         }
       }
-    }
 
-    if (e instanceof SubscriptionNotFoundError) {
-      return {
-        ok: false,
-        error: {
-          code: BILLING_ERROR_CODES.SUBSCRIPTION_NOT_FOUND,
-          status: 404,
-          message: "Subscription not found"
+      if (e instanceof CustomerNotFoundError) {
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.CUSTOMER_NOT_FOUND,
+            status: 404,
+            message: "Customer not found"
+          }
         }
       }
-    }
 
-    if (e instanceof SubscriptionCancelFailedError) {
+      if (e instanceof SubscriptionNotFoundError) {
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.SUBSCRIPTION_NOT_FOUND,
+            status: 404,
+            message: "Subscription not found"
+          }
+        }
+      }
+
+      if (e instanceof SubscriptionCancelFailedError) {
+        this.logger.error("Failed to cancel subscription", {
+          error: e instanceof Error ? e.message : String(e)
+        })
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.SUBSCRIPTION_CANCEL_FAILED,
+            status: 500,
+            message: "Failed to cancel subscription"
+          }
+        }
+      }
+
+      this.logger.error("Unexpected error in CancelSubscriptionHandler", {
+        error: e instanceof Error ? e.message : String(e)
+      })
+
       return {
         ok: false,
         error: {
-          code: BILLING_ERROR_CODES.SUBSCRIPTION_CANCEL_FAILED,
+          code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
           status: 500,
-          message: "Failed to cancel subscription"
+          message: "Internal server error"
         }
-      }
-    }
-
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
-        status: 500,
-        message: "Internal server error"
       }
     }
   }

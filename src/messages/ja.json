@@ -33,6 +33,26 @@
       }
     }
   },
+  "pricing": {
+    "title": "料金プラン",
+    "heading": "料金プラン",
+    "description": "あなたに最適なプランをお選びください",
+    "monthly": "月額",
+    "yearly": "年額",
+    "perMonth": "/ 月",
+    "perYear": "/ 年",
+    "oneTime": "一回払い",
+    "subscribe": "申し込む",
+    "subscribing": "処理中...",
+    "features": "機能",
+    "empty": {
+      "title": "プランがありません",
+      "description": "現在利用可能なプランはありません。"
+    },
+    "errors": {
+      "checkoutFailed": "チェックアウトの開始に失敗しました"
+    }
+  },
   "errors": {
     "general": {
       "title": "エラーが発生しました。",
@@ -58,6 +78,10 @@
     "settings": {
       "title": "設定",
       "description": "アカウント設定ページ"
+    },
+    "pricing": {
+      "title": "料金プラン",
+      "description": "料金プランページ"
     }
   }
 }

@@ -7,6 +7,8 @@ import type { SubscriptionRepository } from "@/backend/modules/billing/domain/su
 import { SubscriptionRepositoryToken } from "@/backend/modules/billing/domain/subscription/subscription.repository"
 import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
 import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
 import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
 import type { CancelSubscriptionPort } from "../../ports/cancel-subscription.port"
@@ -22,6 +24,8 @@ export class CancelSubscriptionUseCase
   implements CancelSubscriptionUseCasePort
 {
   constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
     @inject(TransactorToken)
     private readonly transactor: Transactor,
     @inject(GetCurrentUserPortToken)
@@ -37,12 +41,15 @@ export class CancelSubscriptionUseCase
   async handle(
     input?: CancelSubscriptionUseCasePortInput
   ): Promise<CancelSubscriptionUseCasePortOutput> {
+    this.logger.info("Canceling subscription started")
+
     // 1. 認証ユーザー取得
     const { userId } = await this.getCurrentUser.handle()
 
     // 2. Customer取得
     const customer = await this.customerRepository.findByUserId(userId)
     if (!customer) {
+      this.logger.warn("Customer not found", { userId })
       throw new CustomerNotFoundError()
     }
 
@@ -51,11 +58,17 @@ export class CancelSubscriptionUseCase
       customer.id
     )
     if (!subscription) {
+      this.logger.warn("Subscription not found", { customerId: customer.id })
       throw new SubscriptionNotFoundError()
     }
 
     // 4. Stripe API: subscription.update({ cancel_at_period_end: true })
     const cancelAtPeriodEnd = input?.cancelAtPeriodEnd ?? true
+    this.logger.info("Canceling Stripe subscription", {
+      subscriptionId: subscription.id,
+      stripeSubscriptionId: subscription.stripeSubscriptionId,
+      cancelAtPeriodEnd
+    })
     const result = await this.cancelSubscription.handle({
       stripeSubscriptionId: subscription.stripeSubscriptionId,
       cancelAtPeriodEnd
@@ -65,6 +78,11 @@ export class CancelSubscriptionUseCase
     await this.transactor.execute(async () => {
       subscription.setCancelAtPeriodEnd(result.cancelAtPeriodEnd)
       await this.subscriptionRepository.save(subscription)
+    })
+
+    this.logger.info("Subscription canceled successfully", {
+      subscriptionId: subscription.id,
+      cancelAtPeriodEnd: result.cancelAtPeriodEnd
     })
 
     return {

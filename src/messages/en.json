@@ -33,6 +33,26 @@
       }
     }
   },
+  "pricing": {
+    "title": "Pricing",
+    "heading": "Pricing Plans",
+    "description": "Choose the plan that's right for you",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "perMonth": "/ month",
+    "perYear": "/ year",
+    "oneTime": "One-time",
+    "subscribe": "Subscribe",
+    "subscribing": "Processing...",
+    "features": "Features",
+    "empty": {
+      "title": "No plans available",
+      "description": "There are no plans available at this time."
+    },
+    "errors": {
+      "checkoutFailed": "Failed to start checkout"
+    }
+  },
   "errors": {
     "general": {
       "title": "An error occurred.",
@@ -58,6 +78,10 @@
     "settings": {
       "title": "Settings",
       "description": "Account settings page"
+    },
+    "pricing": {
+      "title": "Pricing",
+      "description": "Pricing plans page"
     }
   }
 }

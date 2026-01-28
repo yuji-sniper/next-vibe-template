@@ -1,14 +1,14 @@
-import { resolveContainer } from "@/backend/bootstrap/container"
-import {
-  type FindAuthAdminUseCasePort,
-  FindAuthAdminUseCasePortToken
-} from "@/backend/modules/auth-admin/application/queries/usecases/find-auth-admin/find-auth-admin.usecase.port"
+import { inject, injectable } from "tsyringe"
+import type { FindAuthAdminUseCasePort } from "@/backend/modules/auth-admin/application/queries/usecases/find-auth-admin/find-auth-admin.usecase.port"
+import { FindAuthAdminUseCasePortToken } from "@/backend/modules/auth-admin/application/queries/usecases/find-auth-admin/find-auth-admin.usecase.port"
 import { AuthAdminUnauthorizedError } from "@/backend/modules/auth-admin/domain/auth-admin/auth-admin.errors"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { AUTH_ADMIN_ERROR_CODES } from "@/shared/errors/auth-admin.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
-type GetAuthAdminControllerResult = Result<{
+export type GetAuthAdminHandlerResult = Result<{
   authAdmin: {
     id: string
     email: string
@@ -16,14 +16,24 @@ type GetAuthAdminControllerResult = Result<{
   }
 }>
 
-export const handleGetAuthAdmin =
-  async (): Promise<GetAuthAdminControllerResult> => {
-    const usecase = await resolveContainer<FindAuthAdminUseCasePort>(
-      FindAuthAdminUseCasePortToken
-    )
+export const GetAuthAdminHandlerToken = Symbol("GetAuthAdminHandler")
 
+export interface GetAuthAdminHandler {
+  handle(): Promise<GetAuthAdminHandlerResult>
+}
+
+@injectable()
+export class GetAuthAdminHandlerImpl implements GetAuthAdminHandler {
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(FindAuthAdminUseCasePortToken)
+    private readonly findAuthAdminUseCase: FindAuthAdminUseCasePort
+  ) {}
+
+  async handle(): Promise<GetAuthAdminHandlerResult> {
     try {
-      const output = await usecase.handle()
+      const output = await this.findAuthAdminUseCase.handle()
 
       return {
         ok: true,
@@ -41,6 +51,10 @@ export const handleGetAuthAdmin =
         }
       }
 
+      this.logger.error("Unexpected error in GetAuthAdminHandler", {
+        error: e instanceof Error ? e.message : String(e)
+      })
+
       return {
         ok: false,
         error: {
@@ -51,3 +65,4 @@ export const handleGetAuthAdmin =
       }
     }
   }
+}

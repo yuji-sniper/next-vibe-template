@@ -1,7 +1,10 @@
 "use server"
 
+import { resolveContainer } from "@/backend/bootstrap/container"
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
-import { handleCreateCheckoutSession } from "../../handlers/create-checkout-session/create-checkout-session.handler"
+import { withRequestContext } from "@/backend/modules/shared/presentation/middleware/with-request-context"
+import type { CreateCheckoutSessionHandler } from "../../handlers/create-checkout-session/create-checkout-session.handler"
+import { CreateCheckoutSessionHandlerToken } from "../../handlers/create-checkout-session/create-checkout-session.handler"
 
 export type CreateCheckoutSessionActionRequest = {
   priceId: string
@@ -16,5 +19,10 @@ export type CreateCheckoutSessionActionResponse = ActionResponse<{
 export const createCheckoutSessionAction = async (
   request: CreateCheckoutSessionActionRequest
 ): Promise<CreateCheckoutSessionActionResponse> => {
-  return await handleCreateCheckoutSession(request)
+  return withRequestContext(async () => {
+    const handler = await resolveContainer<CreateCheckoutSessionHandler>(
+      CreateCheckoutSessionHandlerToken
+    )
+    return handler.handle(request)
+  })
 }

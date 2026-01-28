@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { hasLocale, NextIntlClientProvider } from "next-intl"
 import { getMessages, setRequestLocale } from "next-intl/server"
 import { routing } from "@/i18n/routing"
+import { QueryProvider } from "@/providers/QueryProvider"
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
@@ -25,8 +26,14 @@ export default async function LocaleLayout({
   const messages = await getMessages()
 
   return (
-    <NextIntlClientProvider messages={messages}>
-      {children}
-    </NextIntlClientProvider>
+    <html lang="en">
+      <body>
+        <QueryProvider>
+          <NextIntlClientProvider messages={messages}>
+            {children}
+          </NextIntlClientProvider>
+        </QueryProvider>
+      </body>
+    </html>
   )
 }

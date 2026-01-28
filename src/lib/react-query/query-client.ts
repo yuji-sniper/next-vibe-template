@@ -1,7 +1,28 @@
-import { QueryClient } from "@tanstack/react-query"
+import { MutationCache, QueryCache, QueryClient } from "@tanstack/react-query"
+import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
+import { AUTH_ADMIN_ERROR_CODES } from "@/shared/errors/auth-admin.errors"
+import { ServerError } from "@/utils/error/server-error"
+
+const handleUnauthorizedError = (error: unknown) => {
+  if (typeof window === "undefined") return
+
+  if (error instanceof ServerError) {
+    if (error.code === AUTH_ADMIN_ERROR_CODES.UNAUTHORIZED) {
+      window.location.href = "/sign-in"
+    } else if (error.code === AUTH_ERROR_CODES.UNAUTHORIZED) {
+      window.location.href = "/sign-in"
+    }
+  }
+}
 
 const createQueryClient = () => {
   return new QueryClient({
+    queryCache: new QueryCache({
+      onError: handleUnauthorizedError
+    }),
+    mutationCache: new MutationCache({
+      onError: handleUnauthorizedError
+    }),
     defaultOptions: {
       queries: {
         /**

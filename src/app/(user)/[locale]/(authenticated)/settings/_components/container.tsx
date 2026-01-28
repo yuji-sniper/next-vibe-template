@@ -1,18 +1,17 @@
 "use client"
 
-import { useQueryClient } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useLocale } from "next-intl"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useDeleteAuthUserMutation } from "@/features/auth/hooks/mutations/useDeleteAuthUserMutation"
+import { getQueryClient } from "@/lib/react-query/query-client"
 import { SettingsPresentational } from "./presentational"
 
 export function SettingsContainer() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const locale = useLocale()
   const router = useRouter()
-  const queryClient = useQueryClient()
 
   const deleteAccountMutation = useDeleteAuthUserMutation()
 
@@ -27,7 +26,7 @@ export function SettingsContainer() {
   const handleDeleteAccount = async () => {
     try {
       await deleteAccountMutation.mutateAsync()
-      queryClient.clear()
+      getQueryClient().clear()
       router.push(`/${locale}/sign-in`)
     } catch {
       toast.error("アカウントの削除に失敗しました")

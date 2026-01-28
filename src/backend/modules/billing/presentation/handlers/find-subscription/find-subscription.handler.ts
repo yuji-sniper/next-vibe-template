@@ -1,15 +1,15 @@
-import { resolveContainer } from "@/backend/bootstrap/container"
-import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
-import {
-  type FindSubscriptionUseCasePort,
-  FindSubscriptionUseCasePortToken
-} from "@/backend/modules/billing/application/queries/usecases/find-subscription/find-subscription.usecase.port"
+import { inject, injectable } from "tsyringe"
+import type { FindSubscriptionUseCasePort } from "@/backend/modules/billing/application/queries/usecases/find-subscription/find-subscription.usecase.port"
+import { FindSubscriptionUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-subscription/find-subscription.usecase.port"
 import type { SubscriptionStatus } from "@/backend/modules/billing/domain/subscription/subscription"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
-type FindSubscriptionHandlerResult = Result<{
+export type FindSubscriptionHandlerResult = Result<{
   subscription:
     | {
         id: string
@@ -26,14 +26,24 @@ type FindSubscriptionHandlerResult = Result<{
     | undefined
 }>
 
-export const handleFindSubscription =
-  async (): Promise<FindSubscriptionHandlerResult> => {
-    const usecase = await resolveContainer<FindSubscriptionUseCasePort>(
-      FindSubscriptionUseCasePortToken
-    )
+export const FindSubscriptionHandlerToken = Symbol("FindSubscriptionHandler")
 
+export interface FindSubscriptionHandler {
+  handle(): Promise<FindSubscriptionHandlerResult>
+}
+
+@injectable()
+export class FindSubscriptionHandlerImpl implements FindSubscriptionHandler {
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(FindSubscriptionUseCasePortToken)
+    private readonly findSubscriptionUseCase: FindSubscriptionUseCasePort
+  ) {}
+
+  async handle(): Promise<FindSubscriptionHandlerResult> {
     try {
-      const output = await usecase.handle()
+      const output = await this.findSubscriptionUseCase.handle()
 
       return {
         ok: true,
@@ -57,7 +67,7 @@ export const handleFindSubscription =
         }
       }
     } catch (e: unknown) {
-      if (e instanceof AuthUserUnauthorizedError) {
+      if (e instanceof UnauthorizedError) {
         return {
           ok: false,
           error: {
@@ -67,6 +77,10 @@ export const handleFindSubscription =
           }
         }
       }
+
+      this.logger.error("Unexpected error in FindSubscriptionHandler", {
+        error: e instanceof Error ? e.message : String(e)
+      })
 
       return {
         ok: false,
@@ -78,3 +92,4 @@ export const handleFindSubscription =
       }
     }
   }
+}

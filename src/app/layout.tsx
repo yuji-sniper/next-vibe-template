@@ -1,4 +1,3 @@
-import { RootLayoutWrapper } from "@/components/layout/wrapper/RootLayoutWrapper"
 import "./globals.css"
 
 export default function RootLayout({
@@ -6,11 +5,5 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode
 }>) {
-  return (
-    <html lang="en">
-      <body>
-        <RootLayoutWrapper>{children}</RootLayoutWrapper>
-      </body>
-    </html>
-  )
+  return children
 }

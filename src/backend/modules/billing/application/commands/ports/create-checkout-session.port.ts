@@ -1,8 +1,17 @@
+export const CHECKOUT_SESSION_MODE = {
+  PAYMENT: "payment",
+  SUBSCRIPTION: "subscription"
+} as const
+
+export type CheckoutSessionMode =
+  (typeof CHECKOUT_SESSION_MODE)[keyof typeof CHECKOUT_SESSION_MODE]
+
 export interface CreateCheckoutSessionPortInput {
   stripeCustomerId: string
-  priceId: string
+  stripePriceId: string
   successUrl: string
   cancelUrl: string
+  mode: CheckoutSessionMode
 }
 
 export interface CreateCheckoutSessionPortOutput {

@@ -27,6 +27,8 @@ import type { WebhookEventRepository } from "@/backend/modules/billing/domain/we
 import { WebhookEventRepositoryToken } from "@/backend/modules/billing/domain/webhook-event/webhook-event.repository"
 import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
 import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import { UuidV7GeneratorPortToken } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import type { ProcessStripeWebhookPort } from "../../ports/process-stripe-webhook.port"
@@ -41,6 +43,8 @@ export class ProcessStripeWebhookUseCase
   implements ProcessStripeWebhookUseCasePort
 {
   constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
     @inject(TransactorToken)
     private readonly transactor: Transactor,
     @inject(ProcessStripeWebhookPortToken)
@@ -60,15 +64,27 @@ export class ProcessStripeWebhookUseCase
   ) {}
 
   async handle(input: ProcessStripeWebhookUseCasePortInput): Promise<void> {
+    this.logger.info("Processing Stripe webhook started")
+
     // 1. 署名検証 & イベントパース（アダプター）- トランザクション外
     const { event } = await this.processStripeWebhook.handle({
       payload: input.payload,
       signature: input.signature
     })
 
+    this.logger.info("Stripe webhook event received", {
+      eventId: event.id,
+      eventType: event.type
+    })
+
     // 2. リポジトリ操作はトランザクション内で実行
     await this.transactor.execute(async () => {
       await this.processEvent(event)
+    })
+
+    this.logger.info("Stripe webhook processed successfully", {
+      eventId: event.id,
+      eventType: event.type
     })
   }
 
@@ -78,6 +94,10 @@ export class ProcessStripeWebhookUseCase
       event.id
     )
     if (existingEvent?.processed) {
+      this.logger.warn("Webhook event already processed", {
+        eventId: event.id,
+        eventType: event.type
+      })
       throw new WebhookEventAlreadyProcessedError()
     }
 
@@ -95,31 +115,54 @@ export class ProcessStripeWebhookUseCase
     try {
       switch (event.type) {
         case "checkout.session.completed":
+          this.logger.info("Handling checkout.session.completed", {
+            eventId: event.id
+          })
           await this.handleCheckoutSessionCompleted(event)
           break
         case "payment_intent.succeeded":
         case "payment_intent.payment_failed":
         case "payment_intent.canceled":
+          this.logger.info("Handling payment_intent event", {
+            eventId: event.id,
+            eventType: event.type
+          })
           await this.handlePaymentIntentEvent(event)
           break
         case "customer.subscription.created":
         case "customer.subscription.updated":
         case "customer.subscription.deleted":
+          this.logger.info("Handling subscription event", {
+            eventId: event.id,
+            eventType: event.type
+          })
           await this.handleSubscriptionEvent(event)
           break
         case "invoice.payment_succeeded":
         case "invoice.payment_failed":
+          this.logger.info("Handling invoice event", {
+            eventId: event.id,
+            eventType: event.type
+          })
           await this.handleInvoiceEvent(event)
           break
         default:
-          // 未対応のイベントは無視
+          this.logger.info("Ignoring unhandled event type", {
+            eventId: event.id,
+            eventType: event.type
+          })
           break
       }
 
       // 処理済みフラグを更新
       webhookEvent.markAsProcessed()
       await this.webhookEventRepository.save(webhookEvent)
-    } catch {
+    } catch (error) {
+      this.logger.error("Webhook processing failed", {
+        eventId: event.id,
+        eventType: event.type,
+        error
+      })
       throw new WebhookProcessingFailedError()
     }
   }
@@ -162,13 +205,22 @@ export class ProcessStripeWebhookUseCase
         return
       }
 
+      // payment_statusに基づいてステータスを決定
+      // checkout.session.completedはpayment_intent.succeededの後に発火するため、
+      // ここでステータスを確定させる
+      const status =
+        session.payment_status === "paid"
+          ? PAYMENT_STATUS.SUCCEEDED
+          : PAYMENT_STATUS.PENDING
+
       // Paymentレコードを作成
       const payment = Payment.create({
         id: this.uuidV7Generator.generate(),
         customerId: customer.id,
         stripePaymentIntentId: paymentIntentId,
         amount: session.amount_total ?? 0,
-        currency: session.currency ?? "jpy"
+        currency: session.currency ?? "jpy",
+        status
       })
       await this.paymentRepository.save(payment)
     }
@@ -180,8 +232,10 @@ export class ProcessStripeWebhookUseCase
       | Stripe.PaymentIntentPaymentFailedEvent
       | Stripe.PaymentIntentSucceededEvent
   ): Promise<void> {
+    const stripePaymentIntentId = event.data.object.id
+
     const payment = await this.paymentRepository.findByStripePaymentIntentId(
-      event.data.object.id
+      stripePaymentIntentId
     )
     if (!payment) {
       return

@@ -1,5 +1,5 @@
 import { injectable } from "tsyringe"
-import { PaymentCreateFailedError } from "@/backend/modules/billing/domain/payment/payment.errors"
+import { CheckoutSessionFailedError } from "@/backend/modules/billing/domain/checkout-session/checkout-session.errors"
 import type {
   CreateCheckoutSessionPort,
   CreateCheckoutSessionPortInput,
@@ -19,17 +19,17 @@ export class CreateCheckoutSessionStripeAdapter
         customer: input.stripeCustomerId,
         line_items: [
           {
-            price: input.priceId,
+            price: input.stripePriceId,
             quantity: 1
           }
         ],
-        mode: "payment",
+        mode: input.mode,
         success_url: input.successUrl,
         cancel_url: input.cancelUrl
       })
 
       if (!session.url) {
-        throw new PaymentCreateFailedError()
+        throw new CheckoutSessionFailedError()
       }
 
       return {
@@ -37,10 +37,10 @@ export class CreateCheckoutSessionStripeAdapter
         sessionUrl: session.url
       }
     } catch (error) {
-      if (error instanceof PaymentCreateFailedError) {
+      if (error instanceof CheckoutSessionFailedError) {
         throw error
       }
-      throw new PaymentCreateFailedError()
+      throw new CheckoutSessionFailedError()
     }
   }
 }

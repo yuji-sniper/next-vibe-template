@@ -34,13 +34,13 @@ export class PaymentDrizzleRepository implements PaymentRepository {
   }
 
   async findByStripePaymentIntentId(
-    paymentIntentId: string
+    stripePaymentIntentId: string
   ): Promise<Payment | null> {
     const db = this.getDb.handle()
     const result = await db
       .select()
       .from(payments)
-      .where(eq(payments.stripePaymentIntentId, paymentIntentId))
+      .where(eq(payments.stripePaymentIntentId, stripePaymentIntentId))
       .limit(1)
 
     if (result.length === 0) {

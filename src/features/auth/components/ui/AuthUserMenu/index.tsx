@@ -1,6 +1,6 @@
 "use client"
 
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { LogOut, Settings } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/popover"
 import { useGetAuthUserQuery } from "@/features/auth/hooks/queries/useGetAuthUserQuery"
 import { authClient } from "@/lib/better-auth/auth-client"
+import { getQueryClient } from "@/lib/react-query/query-client"
 
 /**
  * 名前の最初の2文字を取得する
@@ -35,7 +36,6 @@ export function AuthUserMenu() {
   const t = useTranslations("userAccount")
   const locale = useLocale()
   const router = useRouter()
-  const queryClient = useQueryClient()
 
   const { data } = useGetAuthUserQuery({ orError: false })
   const authUser = data?.authUser
@@ -45,7 +45,7 @@ export function AuthUserMenu() {
       await authClient.signOut()
     },
     onSuccess: () => {
-      queryClient.clear()
+      getQueryClient().clear()
       router.push(`/${locale}/sign-in`)
     }
   })

@@ -1,8 +1,11 @@
 "use server"
 
+import { resolveContainer } from "@/backend/bootstrap/container"
 import type { SubscriptionStatus } from "@/backend/modules/billing/domain/subscription/subscription"
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
-import { handleFindSubscription } from "../../handlers/find-subscription/find-subscription.handler"
+import { withRequestContext } from "@/backend/modules/shared/presentation/middleware/with-request-context"
+import type { FindSubscriptionHandler } from "../../handlers/find-subscription/find-subscription.handler"
+import { FindSubscriptionHandlerToken } from "../../handlers/find-subscription/find-subscription.handler"
 
 export type FindSubscriptionActionResponse = ActionResponse<{
   subscription:
@@ -23,5 +26,10 @@ export type FindSubscriptionActionResponse = ActionResponse<{
 
 export const findSubscriptionAction =
   async (): Promise<FindSubscriptionActionResponse> => {
-    return await handleFindSubscription()
+    return withRequestContext(async () => {
+      const handler = await resolveContainer<FindSubscriptionHandler>(
+        FindSubscriptionHandlerToken
+      )
+      return handler.handle()
+    })
   }

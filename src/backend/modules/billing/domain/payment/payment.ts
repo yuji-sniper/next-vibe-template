@@ -24,6 +24,7 @@ export class Payment {
     stripePaymentIntentId: string
     amount: number
     currency?: string
+    status?: PaymentStatus
   }): Payment {
     return new Payment(
       params.id,
@@ -31,7 +32,7 @@ export class Payment {
       params.stripePaymentIntentId,
       params.amount,
       params.currency ?? "jpy",
-      PAYMENT_STATUS.PENDING,
+      params.status ?? PAYMENT_STATUS.PENDING,
       new Date()
     )
   }

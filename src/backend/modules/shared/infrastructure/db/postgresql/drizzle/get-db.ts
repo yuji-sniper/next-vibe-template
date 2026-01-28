@@ -1,26 +1,20 @@
-import type { ExtractTablesWithRelations } from "drizzle-orm"
-import type { PgTransaction } from "drizzle-orm/pg-core"
-import type { PostgresJsQueryResultHKT } from "drizzle-orm/postgres-js"
 import { inject, injectable } from "tsyringe"
+import type {
+  DbTransaction,
+  GetDbPort
+} from "@/backend/modules/shared/application/ports/db/get-db.port"
 import { AlsContext } from "../../../node/als/als-context"
-import { type Db, db } from "./client"
-import type * as schema from "./schemas"
+import { db } from "./client"
 import { PG_DRIZZLE_TRANSACTION_KEY } from "./transactor"
 
-type DbTransaction = PgTransaction<
-  PostgresJsQueryResultHKT,
-  typeof schema,
-  ExtractTablesWithRelations<typeof schema>
->
-
 @injectable()
-export class GetDb {
+export class GetDb implements GetDbPort {
   constructor(
     @inject(AlsContext)
     private readonly alsContext: AlsContext
   ) {}
 
-  handle(): Db | DbTransaction {
+  handle() {
     const tx = this.alsContext.get<DbTransaction>(PG_DRIZZLE_TRANSACTION_KEY)
     if (tx) {
       return tx

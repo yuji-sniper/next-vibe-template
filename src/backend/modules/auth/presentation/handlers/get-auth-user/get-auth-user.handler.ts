@@ -1,14 +1,14 @@
-import { resolveContainer } from "@/backend/bootstrap/container"
-import {
-  type FindAuthUserUseCasePort,
-  FindAuthUserUseCasePortToken
-} from "@/backend/modules/auth/application/queries/usecases/find-auth-user/find-auth-user.usecase.port"
+import { inject, injectable } from "tsyringe"
+import type { FindAuthUserUseCasePort } from "@/backend/modules/auth/application/queries/usecases/find-auth-user/find-auth-user.usecase.port"
+import { FindAuthUserUseCasePortToken } from "@/backend/modules/auth/application/queries/usecases/find-auth-user/find-auth-user.usecase.port"
 import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
-type GetAuthUserControllerResult = Result<{
+export type GetAuthUserHandlerResult = Result<{
   authUser: {
     id: string
     email: string
@@ -17,14 +17,24 @@ type GetAuthUserControllerResult = Result<{
   }
 }>
 
-export const handleGetAuthUser =
-  async (): Promise<GetAuthUserControllerResult> => {
-    const usecase = await resolveContainer<FindAuthUserUseCasePort>(
-      FindAuthUserUseCasePortToken
-    )
+export const GetAuthUserHandlerToken = Symbol("GetAuthUserHandler")
 
+export interface GetAuthUserHandler {
+  handle(): Promise<GetAuthUserHandlerResult>
+}
+
+@injectable()
+export class GetAuthUserHandlerImpl implements GetAuthUserHandler {
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(FindAuthUserUseCasePortToken)
+    private readonly findAuthUserUseCase: FindAuthUserUseCasePort
+  ) {}
+
+  async handle(): Promise<GetAuthUserHandlerResult> {
     try {
-      const output = await usecase.handle()
+      const output = await this.findAuthUserUseCase.handle()
 
       return {
         ok: true,
@@ -42,6 +52,10 @@ export const handleGetAuthUser =
         }
       }
 
+      this.logger.error("Unexpected error in GetAuthUserHandler", {
+        error: e instanceof Error ? e.message : String(e)
+      })
+
       return {
         ok: false,
         error: {
@@ -52,3 +66,4 @@ export const handleGetAuthUser =
       }
     }
   }
+}

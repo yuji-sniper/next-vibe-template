@@ -1,7 +1,10 @@
 "use server"
 
+import { resolveContainer } from "@/backend/bootstrap/container"
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
-import { handleGetAuthAdmin } from "../../handlers/get-auth-admin/get-auth-admin.handler"
+import { withRequestContext } from "@/backend/modules/shared/presentation/middleware/with-request-context"
+import type { GetAuthAdminHandler } from "../../handlers/get-auth-admin/get-auth-admin.handler"
+import { GetAuthAdminHandlerToken } from "../../handlers/get-auth-admin/get-auth-admin.handler"
 
 export type GetAuthAdminActionResponse = ActionResponse<{
   authAdmin: {
@@ -13,5 +16,10 @@ export type GetAuthAdminActionResponse = ActionResponse<{
 
 export const getAuthAdminAction =
   async (): Promise<GetAuthAdminActionResponse> => {
-    return await handleGetAuthAdmin()
+    return withRequestContext(async () => {
+      const handler = await resolveContainer<GetAuthAdminHandler>(
+        GetAuthAdminHandlerToken
+      )
+      return handler.handle()
+    })
   }
