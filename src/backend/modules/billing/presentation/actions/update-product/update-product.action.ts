@@ -1,7 +1,10 @@
 "use server"
 
+import { resolveContainer } from "@/backend/bootstrap/container"
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
-import { handleUpdateProduct } from "../../handlers/update-product/update-product.handler"
+import { withRequestContext } from "@/backend/modules/shared/presentation/middleware/with-request-context"
+import type { UpdateProductHandler } from "../../handlers/update-product/update-product.handler"
+import { UpdateProductHandlerToken } from "../../handlers/update-product/update-product.handler"
 
 export type UpdateProductActionRequest = {
   productId: string
@@ -31,5 +34,10 @@ export type UpdateProductActionResponse = ActionResponse<{
 export const updateProductAction = async (
   request: UpdateProductActionRequest
 ): Promise<UpdateProductActionResponse> => {
-  return await handleUpdateProduct(request)
+  return withRequestContext(async () => {
+    const handler = await resolveContainer<UpdateProductHandler>(
+      UpdateProductHandlerToken
+    )
+    return handler.handle(request)
+  })
 }

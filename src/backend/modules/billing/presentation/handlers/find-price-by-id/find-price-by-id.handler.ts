@@ -1,10 +1,10 @@
+import { inject, injectable } from "tsyringe"
 import { z } from "zod"
-import { resolveContainer } from "@/backend/bootstrap/container"
-import {
-  type FindPriceByIdUseCasePort,
-  FindPriceByIdUseCasePortToken
-} from "@/backend/modules/billing/application/queries/usecases/find-price-by-id/find-price-by-id.usecase.port"
+import type { FindPriceByIdUseCasePort } from "@/backend/modules/billing/application/queries/usecases/find-price-by-id/find-price-by-id.usecase.port"
+import { FindPriceByIdUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-price-by-id/find-price-by-id.usecase.port"
 import { PriceNotFoundError } from "@/backend/modules/billing/domain/price/price.errors"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { formatZodErrors } from "@/backend/modules/shared/presentation/handlers/utils/format-zod-errors"
 import { BILLING_ERROR_CODES } from "@/shared/errors/billing.errors"
@@ -14,9 +14,9 @@ const findPriceByIdSchema = z.object({
   priceId: z.string().min(1, "Price ID is required")
 })
 
-type FindPriceByIdHandlerInput = z.infer<typeof findPriceByIdSchema>
+export type FindPriceByIdHandlerInput = z.infer<typeof findPriceByIdSchema>
 
-type FindPriceByIdHandlerResult = Result<{
+export type FindPriceByIdHandlerResult = Result<{
   price: {
     id: string
     productId: string
@@ -34,75 +34,87 @@ type FindPriceByIdHandlerResult = Result<{
   }
 }>
 
-export const handleFindPriceById = async (
-  input: FindPriceByIdHandlerInput
-): Promise<FindPriceByIdHandlerResult> => {
-  // 1. バリデーション
-  const parsed = findPriceByIdSchema.safeParse(input)
+export const FindPriceByIdHandlerToken = Symbol("FindPriceByIdHandler")
 
-  if (!parsed.success) {
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.VALIDATION_ERROR,
-        status: 422,
-        message: "Validation failed",
-        fieldErrors: formatZodErrors(parsed.error)
-      }
-    }
-  }
+export interface FindPriceByIdHandler {
+  handle(input: FindPriceByIdHandlerInput): Promise<FindPriceByIdHandlerResult>
+}
 
-  // 2. UseCase 実行
-  const usecase = await resolveContainer<FindPriceByIdUseCasePort>(
-    FindPriceByIdUseCasePortToken
-  )
+@injectable()
+export class FindPriceByIdHandlerImpl implements FindPriceByIdHandler {
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(FindPriceByIdUseCasePortToken)
+    private readonly findPriceByIdUseCase: FindPriceByIdUseCasePort
+  ) {}
 
-  try {
-    const output = await usecase.handle({
-      priceId: parsed.data.priceId
-    })
+  async handle(
+    input: FindPriceByIdHandlerInput
+  ): Promise<FindPriceByIdHandlerResult> {
+    const parsed = findPriceByIdSchema.safeParse(input)
 
-    return {
-      ok: true,
-      data: {
-        price: {
-          id: output.price.id,
-          productId: output.price.productId,
-          stripePriceId: output.price.stripePriceId,
-          unitAmount: output.price.unitAmount,
-          currency: output.price.currency,
-          type: output.price.type,
-          recurringInterval: output.price.recurringInterval,
-          recurringIntervalCount: output.price.recurringIntervalCount,
-          displayName: output.price.displayName,
-          active: output.price.active,
-          metadata: output.price.metadata,
-          createdAt: output.price.createdAt.toISOString(),
-          updatedAt: output.price.updatedAt.toISOString()
-        }
-      }
-    }
-  } catch (e: unknown) {
-    console.error(e)
-
-    // 3. Domain Error を Result 型に変換
-    if (e instanceof PriceNotFoundError) {
+    if (!parsed.success) {
       return {
         ok: false,
         error: {
-          code: BILLING_ERROR_CODES.PRICE_NOT_FOUND,
-          status: 404,
-          message: "Price not found"
+          code: COMMON_ERROR_CODES.VALIDATION_ERROR,
+          status: 422,
+          message: "Validation failed",
+          fieldErrors: formatZodErrors(parsed.error)
         }
       }
     }
 
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
-        status: 500,
-        message: "Internal server error"
+    try {
+      const output = await this.findPriceByIdUseCase.handle({
+        priceId: parsed.data.priceId
+      })
+
+      return {
+        ok: true,
+        data: {
+          price: {
+            id: output.price.id,
+            productId: output.price.productId,
+            stripePriceId: output.price.stripePriceId,
+            unitAmount: output.price.unitAmount,
+            currency: output.price.currency,
+            type: output.price.type,
+            recurringInterval: output.price.recurringInterval,
+            recurringIntervalCount: output.price.recurringIntervalCount,
+            displayName: output.price.displayName,
+            active: output.price.active,
+            metadata: output.price.metadata,
+            createdAt: output.price.createdAt.toISOString(),
+            updatedAt: output.price.updatedAt.toISOString()
+          }
+        }
+      }
+    } catch (e: unknown) {
+      if (e instanceof PriceNotFoundError) {
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.PRICE_NOT_FOUND,
+            status: 404,
+            message: "Price not found"
+          }
+        }
+      }
+
+      this.logger.error("Unexpected error in FindPriceByIdHandler", {
+        priceId: parsed.data.priceId,
+        error: e instanceof Error ? e.message : String(e)
+      })
+
+      return {
+        ok: false,
+        error: {
+          code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
+          status: 500,
+          message: "Internal server error"
+        }
       }
     }
   }

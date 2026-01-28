@@ -1,9 +1,7 @@
+import { inject, injectable } from "tsyringe"
 import { z } from "zod"
-import { resolveContainer } from "@/backend/bootstrap/container"
-import {
-  type CreatePriceUseCasePort,
-  CreatePriceUseCasePortToken
-} from "@/backend/modules/billing/application/commands/usecases/create-price/create-price.usecase.port"
+import type { CreatePriceUseCasePort } from "@/backend/modules/billing/application/commands/usecases/create-price/create-price.usecase.port"
+import { CreatePriceUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/create-price/create-price.usecase.port"
 import type {
   PriceType,
   RecurringInterval
@@ -13,6 +11,8 @@ import {
   ProductNotFoundError,
   ProductNotSyncedError
 } from "@/backend/modules/billing/domain/product/product.errors"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { formatZodErrors } from "@/backend/modules/shared/presentation/handlers/utils/format-zod-errors"
@@ -33,7 +33,6 @@ const createPriceSchema = z
   })
   .refine(
     (data) => {
-      // recurring の場合は recurringInterval が必須
       if (data.type === "recurring" && !data.recurringInterval) {
         return false
       }
@@ -45,9 +44,9 @@ const createPriceSchema = z
     }
   )
 
-type CreatePriceHandlerInput = z.infer<typeof createPriceSchema>
+export type CreatePriceHandlerInput = z.infer<typeof createPriceSchema>
 
-type CreatePriceHandlerResult = Result<{
+export type CreatePriceHandlerResult = Result<{
   price: {
     id: string
     productId: string
@@ -65,98 +64,117 @@ type CreatePriceHandlerResult = Result<{
   }
 }>
 
-export const handleCreatePrice = async (
-  input: CreatePriceHandlerInput
-): Promise<CreatePriceHandlerResult> => {
-  const parsed = createPriceSchema.safeParse(input)
+export const CreatePriceHandlerToken = Symbol("CreatePriceHandler")
 
-  if (!parsed.success) {
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.VALIDATION_ERROR,
-        status: 422,
-        message: "Validation failed",
-        fieldErrors: formatZodErrors(parsed.error)
-      }
-    }
-  }
+export interface CreatePriceHandler {
+  handle(input: CreatePriceHandlerInput): Promise<CreatePriceHandlerResult>
+}
 
-  const usecase = await resolveContainer<CreatePriceUseCasePort>(
-    CreatePriceUseCasePortToken
-  )
+@injectable()
+export class CreatePriceHandlerImpl implements CreatePriceHandler {
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(CreatePriceUseCasePortToken)
+    private readonly createPriceUseCase: CreatePriceUseCasePort
+  ) {}
 
-  try {
-    const output = await usecase.handle({
-      productId: parsed.data.productId,
-      unitAmount: parsed.data.unitAmount,
-      currency: parsed.data.currency,
-      type: parsed.data.type,
-      recurringInterval: parsed.data.recurringInterval,
-      recurringIntervalCount: parsed.data.recurringIntervalCount,
-      displayName: parsed.data.displayName,
-      metadata: parsed.data.metadata
-    })
+  async handle(
+    input: CreatePriceHandlerInput
+  ): Promise<CreatePriceHandlerResult> {
+    const parsed = createPriceSchema.safeParse(input)
 
-    return {
-      ok: true,
-      data: {
-        price: output.price
-      }
-    }
-  } catch (e: unknown) {
-    console.error(e)
-
-    if (e instanceof UnauthorizedError) {
+    if (!parsed.success) {
       return {
         ok: false,
         error: {
-          code: AUTH_ADMIN_ERROR_CODES.UNAUTHORIZED,
-          status: 401,
-          message: "Unauthorized"
+          code: COMMON_ERROR_CODES.VALIDATION_ERROR,
+          status: 422,
+          message: "Validation failed",
+          fieldErrors: formatZodErrors(parsed.error)
         }
       }
     }
 
-    if (e instanceof ProductNotFoundError) {
+    try {
+      const output = await this.createPriceUseCase.handle({
+        productId: parsed.data.productId,
+        unitAmount: parsed.data.unitAmount,
+        currency: parsed.data.currency,
+        type: parsed.data.type,
+        recurringInterval: parsed.data.recurringInterval,
+        recurringIntervalCount: parsed.data.recurringIntervalCount,
+        displayName: parsed.data.displayName,
+        metadata: parsed.data.metadata
+      })
+
       return {
-        ok: false,
-        error: {
-          code: BILLING_ERROR_CODES.PRODUCT_NOT_FOUND,
-          status: 404,
-          message: "Product not found"
+        ok: true,
+        data: {
+          price: output.price
         }
       }
-    }
-
-    if (e instanceof ProductNotSyncedError) {
-      return {
-        ok: false,
-        error: {
-          code: BILLING_ERROR_CODES.PRODUCT_NOT_SYNCED,
-          status: 400,
-          message: "Product is not synced with Stripe"
+    } catch (e: unknown) {
+      if (e instanceof UnauthorizedError) {
+        return {
+          ok: false,
+          error: {
+            code: AUTH_ADMIN_ERROR_CODES.UNAUTHORIZED,
+            status: 401,
+            message: "Unauthorized"
+          }
         }
       }
-    }
 
-    if (e instanceof PriceCreateFailedError) {
+      if (e instanceof ProductNotFoundError) {
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.PRODUCT_NOT_FOUND,
+            status: 404,
+            message: "Product not found"
+          }
+        }
+      }
+
+      if (e instanceof ProductNotSyncedError) {
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.PRODUCT_NOT_SYNCED,
+            status: 400,
+            message: "Product is not synced with Stripe"
+          }
+        }
+      }
+
+      if (e instanceof PriceCreateFailedError) {
+        this.logger.error("Failed to create price", {
+          productId: parsed.data.productId,
+          error: e instanceof Error ? e.message : String(e)
+        })
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.PRICE_CREATE_FAILED,
+            status: 500,
+            message: "Failed to create price"
+          }
+        }
+      }
+
+      this.logger.error("Unexpected error in CreatePriceHandler", {
+        productId: parsed.data.productId,
+        error: e instanceof Error ? e.message : String(e)
+      })
+
       return {
         ok: false,
         error: {
-          code: BILLING_ERROR_CODES.PRICE_CREATE_FAILED,
+          code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
           status: 500,
-          message: "Failed to create price"
+          message: "Internal server error"
         }
-      }
-    }
-
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
-        status: 500,
-        message: "Internal server error"
       }
     }
   }

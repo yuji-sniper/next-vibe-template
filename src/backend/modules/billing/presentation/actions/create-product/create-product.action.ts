@@ -1,7 +1,10 @@
 "use server"
 
+import { resolveContainer } from "@/backend/bootstrap/container"
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
-import { handleCreateProduct } from "../../handlers/create-product/create-product.handler"
+import { withRequestContext } from "@/backend/modules/shared/presentation/middleware/with-request-context"
+import type { CreateProductHandler } from "../../handlers/create-product/create-product.handler"
+import { CreateProductHandlerToken } from "../../handlers/create-product/create-product.handler"
 
 export type CreateProductActionRequest = {
   name: string
@@ -29,5 +32,10 @@ export type CreateProductActionResponse = ActionResponse<{
 export const createProductAction = async (
   request: CreateProductActionRequest
 ): Promise<CreateProductActionResponse> => {
-  return await handleCreateProduct(request)
+  return withRequestContext(async () => {
+    const handler = await resolveContainer<CreateProductHandler>(
+      CreateProductHandlerToken
+    )
+    return handler.handle(request)
+  })
 }

@@ -1,13 +1,13 @@
+import { inject, injectable } from "tsyringe"
 import { z } from "zod"
-import { resolveContainer } from "@/backend/bootstrap/container"
-import {
-  type UpdateProductUseCasePort,
-  UpdateProductUseCasePortToken
-} from "@/backend/modules/billing/application/commands/usecases/update-product/update-product.usecase.port"
+import type { UpdateProductUseCasePort } from "@/backend/modules/billing/application/commands/usecases/update-product/update-product.usecase.port"
+import { UpdateProductUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/update-product/update-product.usecase.port"
 import {
   ProductNotFoundError,
   ProductUpdateFailedError
 } from "@/backend/modules/billing/domain/product/product.errors"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { formatZodErrors } from "@/backend/modules/shared/presentation/handlers/utils/format-zod-errors"
@@ -25,9 +25,9 @@ const updateProductSchema = z.object({
   metadata: z.record(z.string(), z.string()).optional()
 })
 
-type UpdateProductHandlerInput = z.infer<typeof updateProductSchema>
+export type UpdateProductHandlerInput = z.infer<typeof updateProductSchema>
 
-type UpdateProductHandlerResult = Result<{
+export type UpdateProductHandlerResult = Result<{
   product: {
     id: string
     stripeProductId: string | null
@@ -42,97 +42,116 @@ type UpdateProductHandlerResult = Result<{
   }
 }>
 
-export const handleUpdateProduct = async (
-  input: UpdateProductHandlerInput
-): Promise<UpdateProductHandlerResult> => {
-  const parsed = updateProductSchema.safeParse(input)
+export const UpdateProductHandlerToken = Symbol("UpdateProductHandler")
 
-  if (!parsed.success) {
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.VALIDATION_ERROR,
-        status: 422,
-        message: "Validation failed",
-        fieldErrors: formatZodErrors(parsed.error)
-      }
-    }
-  }
+export interface UpdateProductHandler {
+  handle(input: UpdateProductHandlerInput): Promise<UpdateProductHandlerResult>
+}
 
-  const usecase = await resolveContainer<UpdateProductUseCasePort>(
-    UpdateProductUseCasePortToken
-  )
+@injectable()
+export class UpdateProductHandlerImpl implements UpdateProductHandler {
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(UpdateProductUseCasePortToken)
+    private readonly updateProductUseCase: UpdateProductUseCasePort
+  ) {}
 
-  try {
-    const output = await usecase.handle({
-      productId: parsed.data.productId,
-      name: parsed.data.name,
-      description: parsed.data.description,
-      active: parsed.data.active,
-      features: parsed.data.features,
-      displayOrder: parsed.data.displayOrder,
-      metadata: parsed.data.metadata
-    })
+  async handle(
+    input: UpdateProductHandlerInput
+  ): Promise<UpdateProductHandlerResult> {
+    const parsed = updateProductSchema.safeParse(input)
 
-    return {
-      ok: true,
-      data: {
-        product: {
-          id: output.product.id,
-          stripeProductId: output.product.stripeProductId,
-          name: output.product.name,
-          description: output.product.description,
-          active: output.product.active,
-          features: output.product.features,
-          displayOrder: output.product.displayOrder,
-          metadata: output.product.metadata,
-          createdAt: output.product.createdAt,
-          updatedAt: output.product.updatedAt
-        }
-      }
-    }
-  } catch (e: unknown) {
-    console.error(e)
-
-    if (e instanceof UnauthorizedError) {
+    if (!parsed.success) {
       return {
         ok: false,
         error: {
-          code: AUTH_ADMIN_ERROR_CODES.UNAUTHORIZED,
-          status: 401,
-          message: "Unauthorized"
+          code: COMMON_ERROR_CODES.VALIDATION_ERROR,
+          status: 422,
+          message: "Validation failed",
+          fieldErrors: formatZodErrors(parsed.error)
         }
       }
     }
 
-    if (e instanceof ProductNotFoundError) {
+    try {
+      const output = await this.updateProductUseCase.handle({
+        productId: parsed.data.productId,
+        name: parsed.data.name,
+        description: parsed.data.description,
+        active: parsed.data.active,
+        features: parsed.data.features,
+        displayOrder: parsed.data.displayOrder,
+        metadata: parsed.data.metadata
+      })
+
       return {
-        ok: false,
-        error: {
-          code: BILLING_ERROR_CODES.PRODUCT_NOT_FOUND,
-          status: 404,
-          message: "Product not found"
+        ok: true,
+        data: {
+          product: {
+            id: output.product.id,
+            stripeProductId: output.product.stripeProductId,
+            name: output.product.name,
+            description: output.product.description,
+            active: output.product.active,
+            features: output.product.features,
+            displayOrder: output.product.displayOrder,
+            metadata: output.product.metadata,
+            createdAt: output.product.createdAt,
+            updatedAt: output.product.updatedAt
+          }
         }
       }
-    }
+    } catch (e: unknown) {
+      if (e instanceof UnauthorizedError) {
+        return {
+          ok: false,
+          error: {
+            code: AUTH_ADMIN_ERROR_CODES.UNAUTHORIZED,
+            status: 401,
+            message: "Unauthorized"
+          }
+        }
+      }
 
-    if (e instanceof ProductUpdateFailedError) {
+      if (e instanceof ProductNotFoundError) {
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.PRODUCT_NOT_FOUND,
+            status: 404,
+            message: "Product not found"
+          }
+        }
+      }
+
+      if (e instanceof ProductUpdateFailedError) {
+        this.logger.error("Failed to update product", {
+          productId: parsed.data.productId,
+          error: e instanceof Error ? e.message : String(e)
+        })
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.PRODUCT_UPDATE_FAILED,
+            status: 500,
+            message: "Failed to update product"
+          }
+        }
+      }
+
+      this.logger.error("Unexpected error in UpdateProductHandler", {
+        productId: parsed.data.productId,
+        error: e instanceof Error ? e.message : String(e)
+      })
+
       return {
         ok: false,
         error: {
-          code: BILLING_ERROR_CODES.PRODUCT_UPDATE_FAILED,
+          code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
           status: 500,
-          message: "Failed to update product"
+          message: "Internal server error"
         }
-      }
-    }
-
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
-        status: 500,
-        message: "Internal server error"
       }
     }
   }

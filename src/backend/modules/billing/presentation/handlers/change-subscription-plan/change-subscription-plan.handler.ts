@@ -1,100 +1,125 @@
-import { resolveContainer } from "@/backend/bootstrap/container"
-import {
-  type ChangeSubscriptionPlanUseCasePort,
-  ChangeSubscriptionPlanUseCasePortToken
-} from "@/backend/modules/billing/application/commands/usecases/change-subscription-plan/change-subscription-plan.usecase.port"
+import { inject, injectable } from "tsyringe"
+import type { ChangeSubscriptionPlanUseCasePort } from "@/backend/modules/billing/application/commands/usecases/change-subscription-plan/change-subscription-plan.usecase.port"
+import { ChangeSubscriptionPlanUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/change-subscription-plan/change-subscription-plan.usecase.port"
 import { CustomerNotFoundError } from "@/backend/modules/billing/domain/customer/customer.errors"
 import {
   SubscriptionNotFoundError,
   SubscriptionUpdateFailedError
 } from "@/backend/modules/billing/domain/subscription/subscription.errors"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
 import { BILLING_ERROR_CODES } from "@/shared/errors/billing.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
-type ChangeSubscriptionPlanHandlerInput = {
+export type ChangeSubscriptionPlanHandlerInput = {
   newPriceId: string
 }
 
-type ChangeSubscriptionPlanHandlerResult = Result<{
+export type ChangeSubscriptionPlanHandlerResult = Result<{
   subscriptionId: string
   stripePriceId: string
 }>
 
-export const handleChangeSubscriptionPlan = async (
-  input: ChangeSubscriptionPlanHandlerInput
-): Promise<ChangeSubscriptionPlanHandlerResult> => {
-  const usecase = await resolveContainer<ChangeSubscriptionPlanUseCasePort>(
-    ChangeSubscriptionPlanUseCasePortToken
-  )
+export const ChangeSubscriptionPlanHandlerToken = Symbol(
+  "ChangeSubscriptionPlanHandler"
+)
 
-  try {
-    const output = await usecase.handle({
-      newPriceId: input.newPriceId
-    })
+export interface ChangeSubscriptionPlanHandler {
+  handle(
+    input: ChangeSubscriptionPlanHandlerInput
+  ): Promise<ChangeSubscriptionPlanHandlerResult>
+}
 
-    return {
-      ok: true,
-      data: {
-        subscriptionId: output.subscriptionId,
-        stripePriceId: output.stripePriceId
-      }
-    }
-  } catch (e: unknown) {
-    console.error(e)
+@injectable()
+export class ChangeSubscriptionPlanHandlerImpl
+  implements ChangeSubscriptionPlanHandler
+{
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(ChangeSubscriptionPlanUseCasePortToken)
+    private readonly changeSubscriptionPlanUseCase: ChangeSubscriptionPlanUseCasePort
+  ) {}
 
-    if (e instanceof UnauthorizedError) {
+  async handle(
+    input: ChangeSubscriptionPlanHandlerInput
+  ): Promise<ChangeSubscriptionPlanHandlerResult> {
+    try {
+      const output = await this.changeSubscriptionPlanUseCase.handle({
+        newPriceId: input.newPriceId
+      })
+
       return {
-        ok: false,
-        error: {
-          code: AUTH_ERROR_CODES.UNAUTHORIZED,
-          status: 401,
-          message: "Unauthorized"
+        ok: true,
+        data: {
+          subscriptionId: output.subscriptionId,
+          stripePriceId: output.stripePriceId
         }
       }
-    }
-
-    if (e instanceof CustomerNotFoundError) {
-      return {
-        ok: false,
-        error: {
-          code: BILLING_ERROR_CODES.CUSTOMER_NOT_FOUND,
-          status: 404,
-          message: "Customer not found"
+    } catch (e: unknown) {
+      if (e instanceof UnauthorizedError) {
+        return {
+          ok: false,
+          error: {
+            code: AUTH_ERROR_CODES.UNAUTHORIZED,
+            status: 401,
+            message: "Unauthorized"
+          }
         }
       }
-    }
 
-    if (e instanceof SubscriptionNotFoundError) {
-      return {
-        ok: false,
-        error: {
-          code: BILLING_ERROR_CODES.SUBSCRIPTION_NOT_FOUND,
-          status: 404,
-          message: "Subscription not found"
+      if (e instanceof CustomerNotFoundError) {
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.CUSTOMER_NOT_FOUND,
+            status: 404,
+            message: "Customer not found"
+          }
         }
       }
-    }
 
-    if (e instanceof SubscriptionUpdateFailedError) {
+      if (e instanceof SubscriptionNotFoundError) {
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.SUBSCRIPTION_NOT_FOUND,
+            status: 404,
+            message: "Subscription not found"
+          }
+        }
+      }
+
+      if (e instanceof SubscriptionUpdateFailedError) {
+        this.logger.error("Failed to update subscription plan", {
+          newPriceId: input.newPriceId,
+          error: e instanceof Error ? e.message : String(e)
+        })
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.SUBSCRIPTION_UPDATE_FAILED,
+            status: 500,
+            message: "Failed to update subscription plan"
+          }
+        }
+      }
+
+      this.logger.error("Unexpected error in ChangeSubscriptionPlanHandler", {
+        newPriceId: input.newPriceId,
+        error: e instanceof Error ? e.message : String(e)
+      })
+
       return {
         ok: false,
         error: {
-          code: BILLING_ERROR_CODES.SUBSCRIPTION_UPDATE_FAILED,
+          code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
           status: 500,
-          message: "Failed to update subscription plan"
+          message: "Internal server error"
         }
-      }
-    }
-
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
-        status: 500,
-        message: "Internal server error"
       }
     }
   }

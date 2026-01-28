@@ -1,12 +1,12 @@
-import { resolveContainer } from "@/backend/bootstrap/container"
-import {
-  type FindActivePlansUseCasePort,
-  FindActivePlansUseCasePortToken
-} from "@/backend/modules/billing/application/queries/usecases/find-active-plans/find-active-plans.usecase.port"
+import { inject, injectable } from "tsyringe"
+import type { FindActivePlansUseCasePort } from "@/backend/modules/billing/application/queries/usecases/find-active-plans/find-active-plans.usecase.port"
+import { FindActivePlansUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-active-plans/find-active-plans.usecase.port"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
-type FindActivePlansHandlerResult = Result<{
+export type FindActivePlansHandlerResult = Result<{
   plans: {
     product: {
       id: string
@@ -27,14 +27,24 @@ type FindActivePlansHandlerResult = Result<{
   }[]
 }>
 
-export const handleFindActivePlans =
-  async (): Promise<FindActivePlansHandlerResult> => {
-    const usecase = await resolveContainer<FindActivePlansUseCasePort>(
-      FindActivePlansUseCasePortToken
-    )
+export const FindActivePlansHandlerToken = Symbol("FindActivePlansHandler")
 
+export interface FindActivePlansHandler {
+  handle(): Promise<FindActivePlansHandlerResult>
+}
+
+@injectable()
+export class FindActivePlansHandlerImpl implements FindActivePlansHandler {
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(FindActivePlansUseCasePortToken)
+    private readonly findActivePlansUseCase: FindActivePlansUseCasePort
+  ) {}
+
+  async handle(): Promise<FindActivePlansHandlerResult> {
     try {
-      const output = await usecase.handle()
+      const output = await this.findActivePlansUseCase.handle()
 
       return {
         ok: true,
@@ -43,7 +53,9 @@ export const handleFindActivePlans =
         }
       }
     } catch (e: unknown) {
-      console.error(e)
+      this.logger.error("Unexpected error in FindActivePlansHandler", {
+        error: e instanceof Error ? e.message : String(e)
+      })
 
       return {
         ok: false,
@@ -55,3 +67,4 @@ export const handleFindActivePlans =
       }
     }
   }
+}

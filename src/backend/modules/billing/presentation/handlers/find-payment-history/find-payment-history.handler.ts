@@ -1,8 +1,8 @@
-import { resolveContainer } from "@/backend/bootstrap/container"
-import {
-  type FindPaymentHistoryUseCasePort,
-  FindPaymentHistoryUseCasePortToken
-} from "@/backend/modules/billing/application/queries/usecases/find-payment-history/find-payment-history.usecase.port"
+import { inject, injectable } from "tsyringe"
+import type { FindPaymentHistoryUseCasePort } from "@/backend/modules/billing/application/queries/usecases/find-payment-history/find-payment-history.usecase.port"
+import { FindPaymentHistoryUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-payment-history/find-payment-history.usecase.port"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
@@ -16,18 +16,32 @@ type PaymentHistoryItem = {
   createdAt: string
 }
 
-type FindPaymentHistoryHandlerResult = Result<{
+export type FindPaymentHistoryHandlerResult = Result<{
   payments: PaymentHistoryItem[]
 }>
 
-export const handleFindPaymentHistory =
-  async (): Promise<FindPaymentHistoryHandlerResult> => {
-    const usecase = await resolveContainer<FindPaymentHistoryUseCasePort>(
-      FindPaymentHistoryUseCasePortToken
-    )
+export const FindPaymentHistoryHandlerToken = Symbol(
+  "FindPaymentHistoryHandler"
+)
 
+export interface FindPaymentHistoryHandler {
+  handle(): Promise<FindPaymentHistoryHandlerResult>
+}
+
+@injectable()
+export class FindPaymentHistoryHandlerImpl
+  implements FindPaymentHistoryHandler
+{
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(FindPaymentHistoryUseCasePortToken)
+    private readonly findPaymentHistoryUseCase: FindPaymentHistoryUseCasePort
+  ) {}
+
+  async handle(): Promise<FindPaymentHistoryHandlerResult> {
     try {
-      const output = await usecase.handle()
+      const output = await this.findPaymentHistoryUseCase.handle()
 
       return {
         ok: true,
@@ -42,8 +56,6 @@ export const handleFindPaymentHistory =
         }
       }
     } catch (e: unknown) {
-      console.error(e)
-
       if (e instanceof UnauthorizedError) {
         return {
           ok: false,
@@ -55,6 +67,10 @@ export const handleFindPaymentHistory =
         }
       }
 
+      this.logger.error("Unexpected error in FindPaymentHistoryHandler", {
+        error: e instanceof Error ? e.message : String(e)
+      })
+
       return {
         ok: false,
         error: {
@@ -65,3 +81,4 @@ export const handleFindPaymentHistory =
       }
     }
   }
+}

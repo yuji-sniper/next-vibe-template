@@ -1,5 +1,8 @@
 import { NextResponse } from "next/server"
-import { handleProcessStripeWebhook } from "@/backend/modules/billing/presentation/handlers/process-stripe-webhook/process-stripe-webhook.handler"
+import { resolveContainer } from "@/backend/bootstrap/container"
+import type { ProcessStripeWebhookHandler } from "@/backend/modules/billing/presentation/handlers/process-stripe-webhook/process-stripe-webhook.handler"
+import { ProcessStripeWebhookHandlerToken } from "@/backend/modules/billing/presentation/handlers/process-stripe-webhook/process-stripe-webhook.handler"
+import { withRequestContext } from "@/backend/modules/shared/presentation/middleware/with-request-context"
 
 export async function POST(request: Request) {
   const payload = await request.text()
@@ -12,7 +15,12 @@ export async function POST(request: Request) {
     )
   }
 
-  const result = await handleProcessStripeWebhook({ payload, signature })
+  const result = await withRequestContext(async () => {
+    const handler = await resolveContainer<ProcessStripeWebhookHandler>(
+      ProcessStripeWebhookHandlerToken
+    )
+    return handler.handle({ payload, signature })
+  })
 
   if (result.ok) {
     return NextResponse.json(

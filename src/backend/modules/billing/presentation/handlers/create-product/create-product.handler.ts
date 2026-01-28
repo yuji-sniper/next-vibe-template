@@ -1,10 +1,10 @@
+import { inject, injectable } from "tsyringe"
 import { z } from "zod"
-import { resolveContainer } from "@/backend/bootstrap/container"
-import {
-  type CreateProductUseCasePort,
-  CreateProductUseCasePortToken
-} from "@/backend/modules/billing/application/commands/usecases/create-product/create-product.usecase.port"
+import type { CreateProductUseCasePort } from "@/backend/modules/billing/application/commands/usecases/create-product/create-product.usecase.port"
+import { CreateProductUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/create-product/create-product.usecase.port"
 import { ProductCreateFailedError } from "@/backend/modules/billing/domain/product/product.errors"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import { UnauthorizedError } from "@/backend/modules/shared/domain/errors/unauthorized.error"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { formatZodErrors } from "@/backend/modules/shared/presentation/handlers/utils/format-zod-errors"
@@ -20,9 +20,9 @@ const createProductSchema = z.object({
   metadata: z.record(z.string(), z.string()).optional()
 })
 
-type CreateProductHandlerInput = z.infer<typeof createProductSchema>
+export type CreateProductHandlerInput = z.infer<typeof createProductSchema>
 
-type CreateProductHandlerResult = Result<{
+export type CreateProductHandlerResult = Result<{
   product: {
     id: string
     stripeProductId: string | null
@@ -37,84 +37,103 @@ type CreateProductHandlerResult = Result<{
   }
 }>
 
-export const handleCreateProduct = async (
-  input: CreateProductHandlerInput
-): Promise<CreateProductHandlerResult> => {
-  const parsed = createProductSchema.safeParse(input)
+export const CreateProductHandlerToken = Symbol("CreateProductHandler")
 
-  if (!parsed.success) {
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.VALIDATION_ERROR,
-        status: 422,
-        message: "Validation failed",
-        fieldErrors: formatZodErrors(parsed.error)
-      }
-    }
-  }
+export interface CreateProductHandler {
+  handle(input: CreateProductHandlerInput): Promise<CreateProductHandlerResult>
+}
 
-  const usecase = await resolveContainer<CreateProductUseCasePort>(
-    CreateProductUseCasePortToken
-  )
+@injectable()
+export class CreateProductHandlerImpl implements CreateProductHandler {
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(CreateProductUseCasePortToken)
+    private readonly createProductUseCase: CreateProductUseCasePort
+  ) {}
 
-  try {
-    const output = await usecase.handle({
-      name: parsed.data.name,
-      description: parsed.data.description,
-      features: parsed.data.features,
-      displayOrder: parsed.data.displayOrder,
-      metadata: parsed.data.metadata
-    })
+  async handle(
+    input: CreateProductHandlerInput
+  ): Promise<CreateProductHandlerResult> {
+    const parsed = createProductSchema.safeParse(input)
 
-    return {
-      ok: true,
-      data: {
-        product: {
-          id: output.product.id,
-          stripeProductId: output.product.stripeProductId,
-          name: output.product.name,
-          description: output.product.description,
-          active: output.product.active,
-          features: output.product.features,
-          displayOrder: output.product.displayOrder,
-          metadata: output.product.metadata,
-          createdAt: output.product.createdAt,
-          updatedAt: output.product.updatedAt
-        }
-      }
-    }
-  } catch (e: unknown) {
-    console.error(e)
-
-    if (e instanceof UnauthorizedError) {
+    if (!parsed.success) {
       return {
         ok: false,
         error: {
-          code: AUTH_ADMIN_ERROR_CODES.UNAUTHORIZED,
-          status: 401,
-          message: "Unauthorized"
+          code: COMMON_ERROR_CODES.VALIDATION_ERROR,
+          status: 422,
+          message: "Validation failed",
+          fieldErrors: formatZodErrors(parsed.error)
         }
       }
     }
 
-    if (e instanceof ProductCreateFailedError) {
+    try {
+      const output = await this.createProductUseCase.handle({
+        name: parsed.data.name,
+        description: parsed.data.description,
+        features: parsed.data.features,
+        displayOrder: parsed.data.displayOrder,
+        metadata: parsed.data.metadata
+      })
+
+      return {
+        ok: true,
+        data: {
+          product: {
+            id: output.product.id,
+            stripeProductId: output.product.stripeProductId,
+            name: output.product.name,
+            description: output.product.description,
+            active: output.product.active,
+            features: output.product.features,
+            displayOrder: output.product.displayOrder,
+            metadata: output.product.metadata,
+            createdAt: output.product.createdAt,
+            updatedAt: output.product.updatedAt
+          }
+        }
+      }
+    } catch (e: unknown) {
+      if (e instanceof UnauthorizedError) {
+        return {
+          ok: false,
+          error: {
+            code: AUTH_ADMIN_ERROR_CODES.UNAUTHORIZED,
+            status: 401,
+            message: "Unauthorized"
+          }
+        }
+      }
+
+      if (e instanceof ProductCreateFailedError) {
+        this.logger.error("Failed to create product", {
+          name: parsed.data.name,
+          error: e instanceof Error ? e.message : String(e)
+        })
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.PRODUCT_CREATE_FAILED,
+            status: 500,
+            message: "Failed to create product"
+          }
+        }
+      }
+
+      this.logger.error("Unexpected error in CreateProductHandler", {
+        name: parsed.data.name,
+        error: e instanceof Error ? e.message : String(e)
+      })
+
       return {
         ok: false,
         error: {
-          code: BILLING_ERROR_CODES.PRODUCT_CREATE_FAILED,
+          code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
           status: 500,
-          message: "Failed to create product"
+          message: "Internal server error"
         }
-      }
-    }
-
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
-        status: 500,
-        message: "Internal server error"
       }
     }
   }

@@ -1,34 +1,42 @@
-import { resolveContainer } from "@/backend/bootstrap/container"
-import {
-  type DeleteAuthUserUseCasePort,
-  DeleteAuthUserUseCasePortToken
-} from "@/backend/modules/auth/application/commands/usecases/delete-auth-user/delete-auth-user.usecase.port"
+import { inject, injectable } from "tsyringe"
+import type { DeleteAuthUserUseCasePort } from "@/backend/modules/auth/application/commands/usecases/delete-auth-user/delete-auth-user.usecase.port"
+import { DeleteAuthUserUseCasePortToken } from "@/backend/modules/auth/application/commands/usecases/delete-auth-user/delete-auth-user.usecase.port"
 import {
   AuthUserDeleteFailedError,
   AuthUserUnauthorizedError
 } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
-type DeleteAuthUserHandlerResult = Result<void>
+export type DeleteAuthUserHandlerResult = Result<void>
 
-export const handleDeleteAuthUser =
-  async (): Promise<DeleteAuthUserHandlerResult> => {
-    const usecase = await resolveContainer<DeleteAuthUserUseCasePort>(
-      DeleteAuthUserUseCasePortToken
-    )
+export const DeleteAuthUserHandlerToken = Symbol("DeleteAuthUserHandler")
 
+export interface DeleteAuthUserHandler {
+  handle(): Promise<DeleteAuthUserHandlerResult>
+}
+
+@injectable()
+export class DeleteAuthUserHandlerImpl implements DeleteAuthUserHandler {
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(DeleteAuthUserUseCasePortToken)
+    private readonly deleteAuthUserUseCase: DeleteAuthUserUseCasePort
+  ) {}
+
+  async handle(): Promise<DeleteAuthUserHandlerResult> {
     try {
-      await usecase.handle()
+      await this.deleteAuthUserUseCase.handle()
 
       return {
         ok: true,
         data: undefined
       }
     } catch (e: unknown) {
-      console.error(e)
-
       if (e instanceof AuthUserUnauthorizedError) {
         return {
           ok: false,
@@ -41,6 +49,9 @@ export const handleDeleteAuthUser =
       }
 
       if (e instanceof AuthUserDeleteFailedError) {
+        this.logger.error("Failed to delete user", {
+          error: e instanceof Error ? e.message : String(e)
+        })
         return {
           ok: false,
           error: {
@@ -50,6 +61,10 @@ export const handleDeleteAuthUser =
           }
         }
       }
+
+      this.logger.error("Unexpected error in DeleteAuthUserHandler", {
+        error: e instanceof Error ? e.message : String(e)
+      })
 
       return {
         ok: false,
@@ -61,3 +76,4 @@ export const handleDeleteAuthUser =
       }
     }
   }
+}

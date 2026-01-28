@@ -1,7 +1,10 @@
 "use server"
 
+import { resolveContainer } from "@/backend/bootstrap/container"
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
-import { handleFindActivePlans } from "../../handlers/find-active-plans/find-active-plans.handler"
+import { withRequestContext } from "@/backend/modules/shared/presentation/middleware/with-request-context"
+import type { FindActivePlansHandler } from "../../handlers/find-active-plans/find-active-plans.handler"
+import { FindActivePlansHandlerToken } from "../../handlers/find-active-plans/find-active-plans.handler"
 
 export type Plan = {
   product: {
@@ -28,5 +31,10 @@ export type FindActivePlansActionResponse = ActionResponse<{
 
 export const findActivePlansAction =
   async (): Promise<FindActivePlansActionResponse> => {
-    return await handleFindActivePlans()
+    return withRequestContext(async () => {
+      const handler = await resolveContainer<FindActivePlansHandler>(
+        FindActivePlansHandlerToken
+      )
+      return handler.handle()
+    })
   }

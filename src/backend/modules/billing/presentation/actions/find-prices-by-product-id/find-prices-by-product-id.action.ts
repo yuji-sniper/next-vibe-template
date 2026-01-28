@@ -1,7 +1,10 @@
 "use server"
 
+import { resolveContainer } from "@/backend/bootstrap/container"
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
-import { handleFindPricesByProductId } from "../../handlers/find-prices-by-product-id/find-prices-by-product-id.handler"
+import { withRequestContext } from "@/backend/modules/shared/presentation/middleware/with-request-context"
+import type { FindPricesByProductIdHandler } from "../../handlers/find-prices-by-product-id/find-prices-by-product-id.handler"
+import { FindPricesByProductIdHandlerToken } from "../../handlers/find-prices-by-product-id/find-prices-by-product-id.handler"
 
 export type Price = {
   id: string
@@ -31,5 +34,10 @@ export type FindPricesByProductIdActionResponse = ActionResponse<{
 export const findPricesByProductIdAction = async (
   input: FindPricesByProductIdActionInput
 ): Promise<FindPricesByProductIdActionResponse> => {
-  return await handleFindPricesByProductId(input)
+  return withRequestContext(async () => {
+    const handler = await resolveContainer<FindPricesByProductIdHandler>(
+      FindPricesByProductIdHandlerToken
+    )
+    return handler.handle(input)
+  })
 }

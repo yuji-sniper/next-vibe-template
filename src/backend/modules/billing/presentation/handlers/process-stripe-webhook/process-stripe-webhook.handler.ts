@@ -1,82 +1,105 @@
-import { resolveContainer } from "@/backend/bootstrap/container"
-import {
-  type ProcessStripeWebhookUseCasePort,
-  ProcessStripeWebhookUseCasePortToken
-} from "@/backend/modules/billing/application/commands/usecases/process-stripe-webhook/process-stripe-webhook.usecase.port"
+import { inject, injectable } from "tsyringe"
+import type { ProcessStripeWebhookUseCasePort } from "@/backend/modules/billing/application/commands/usecases/process-stripe-webhook/process-stripe-webhook.usecase.port"
+import { ProcessStripeWebhookUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/process-stripe-webhook/process-stripe-webhook.usecase.port"
 import {
   WebhookEventAlreadyProcessedError,
   WebhookProcessingFailedError,
   WebhookVerificationFailedError
 } from "@/backend/modules/billing/domain/webhook-event/webhook-event.errors"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { BILLING_ERROR_CODES } from "@/shared/errors/billing.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
-type ProcessStripeWebhookHandlerInput = {
+export type ProcessStripeWebhookHandlerInput = {
   payload: string
   signature: string
 }
 
-type ProcessStripeWebhookHandlerResult = Result<{
+export type ProcessStripeWebhookHandlerResult = Result<{
   received: true
 }>
 
-export const handleProcessStripeWebhook = async (
-  input: ProcessStripeWebhookHandlerInput
-): Promise<ProcessStripeWebhookHandlerResult> => {
-  const usecase = await resolveContainer<ProcessStripeWebhookUseCasePort>(
-    ProcessStripeWebhookUseCasePortToken
-  )
+export const ProcessStripeWebhookHandlerToken = Symbol(
+  "ProcessStripeWebhookHandler"
+)
 
-  try {
-    await usecase.handle({
-      payload: input.payload,
-      signature: input.signature
-    })
+export interface ProcessStripeWebhookHandler {
+  handle(
+    input: ProcessStripeWebhookHandlerInput
+  ): Promise<ProcessStripeWebhookHandlerResult>
+}
 
-    return {
-      ok: true,
-      data: { received: true }
-    }
-  } catch (e: unknown) {
-    console.error(e)
+@injectable()
+export class ProcessStripeWebhookHandlerImpl
+  implements ProcessStripeWebhookHandler
+{
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(ProcessStripeWebhookUseCasePortToken)
+    private readonly processStripeWebhookUseCase: ProcessStripeWebhookUseCasePort
+  ) {}
 
-    if (e instanceof WebhookVerificationFailedError) {
-      return {
-        ok: false,
-        error: {
-          code: BILLING_ERROR_CODES.WEBHOOK_VERIFICATION_FAILED,
-          status: 400,
-          message: "Webhook signature verification failed"
-        }
-      }
-    }
+  async handle(
+    input: ProcessStripeWebhookHandlerInput
+  ): Promise<ProcessStripeWebhookHandlerResult> {
+    try {
+      await this.processStripeWebhookUseCase.handle({
+        payload: input.payload,
+        signature: input.signature
+      })
 
-    if (e instanceof WebhookEventAlreadyProcessedError) {
-      // 既に処理済みのイベントは成功として扱う
       return {
         ok: true,
         data: { received: true }
       }
-    }
+    } catch (e: unknown) {
+      if (e instanceof WebhookVerificationFailedError) {
+        this.logger.warn("Webhook signature verification failed")
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.WEBHOOK_VERIFICATION_FAILED,
+            status: 400,
+            message: "Webhook signature verification failed"
+          }
+        }
+      }
 
-    if (e instanceof WebhookProcessingFailedError) {
+      if (e instanceof WebhookEventAlreadyProcessedError) {
+        return {
+          ok: true,
+          data: { received: true }
+        }
+      }
+
+      if (e instanceof WebhookProcessingFailedError) {
+        this.logger.error("Failed to process webhook", {
+          error: e instanceof Error ? e.message : String(e)
+        })
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.WEBHOOK_PROCESSING_FAILED,
+            status: 500,
+            message: "Failed to process webhook"
+          }
+        }
+      }
+
+      this.logger.error("Unexpected error in ProcessStripeWebhookHandler", {
+        error: e instanceof Error ? e.message : String(e)
+      })
+
       return {
         ok: false,
         error: {
-          code: BILLING_ERROR_CODES.WEBHOOK_PROCESSING_FAILED,
+          code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
           status: 500,
-          message: "Failed to process webhook"
+          message: "Internal server error"
         }
-      }
-    }
-
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
-        status: 500,
-        message: "Internal server error"
       }
     }
   }

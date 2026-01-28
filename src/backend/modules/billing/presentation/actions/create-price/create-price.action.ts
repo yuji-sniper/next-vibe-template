@@ -1,11 +1,14 @@
 "use server"
 
+import { resolveContainer } from "@/backend/bootstrap/container"
 import type {
   PriceType,
   RecurringInterval
 } from "@/backend/modules/billing/domain/price/price"
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
-import { handleCreatePrice } from "../../handlers/create-price/create-price.handler"
+import { withRequestContext } from "@/backend/modules/shared/presentation/middleware/with-request-context"
+import type { CreatePriceHandler } from "../../handlers/create-price/create-price.handler"
+import { CreatePriceHandlerToken } from "../../handlers/create-price/create-price.handler"
 
 export type CreatePriceActionRequest = {
   productId: string
@@ -39,5 +42,10 @@ export type CreatePriceActionResponse = ActionResponse<{
 export const createPriceAction = async (
   request: CreatePriceActionRequest
 ): Promise<CreatePriceActionResponse> => {
-  return await handleCreatePrice(request)
+  return withRequestContext(async () => {
+    const handler = await resolveContainer<CreatePriceHandler>(
+      CreatePriceHandlerToken
+    )
+    return handler.handle(request)
+  })
 }
