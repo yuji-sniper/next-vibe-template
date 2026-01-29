@@ -21,7 +21,9 @@ export class ChangeSubscriptionPlanStripeAdapter
 
       const subscriptionItemId = subscription.items.data[0]?.id
       if (!subscriptionItemId) {
-        throw new SubscriptionUpdateFailedError()
+        throw new SubscriptionUpdateFailedError(
+          "Subscription item not found in Stripe"
+        )
       }
 
       const updatedSubscription = await stripe.subscriptions.update(
@@ -30,7 +32,7 @@ export class ChangeSubscriptionPlanStripeAdapter
           items: [
             {
               id: subscriptionItemId,
-              price: input.newPriceId
+              price: input.newStripePriceId
             }
           ],
           // プラン変更時の日割り計算を有効化
@@ -42,7 +44,9 @@ export class ChangeSubscriptionPlanStripeAdapter
 
       const newPriceId = updatedSubscription.items.data[0]?.price.id
       if (!newPriceId) {
-        throw new SubscriptionUpdateFailedError()
+        throw new SubscriptionUpdateFailedError(
+          "New price ID not found in Stripe"
+        )
       }
 
       return {
@@ -53,7 +57,9 @@ export class ChangeSubscriptionPlanStripeAdapter
       if (error instanceof SubscriptionUpdateFailedError) {
         throw error
       }
-      throw new SubscriptionUpdateFailedError()
+      throw new SubscriptionUpdateFailedError(
+        "Unexpected error in ChangeSubscriptionPlanStripeAdapter"
+      )
     }
   }
 }

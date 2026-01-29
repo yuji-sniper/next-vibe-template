@@ -12,10 +12,13 @@ type Props = {
   selectedInterval: BillingInterval
   onIntervalChange: (interval: BillingInterval) => void
   onSubscribe: (priceId: string) => void
+  onChangePlan: (priceId: string) => void
   isLoading: boolean
   loadingPriceId: string | null
   hasMonthlyAndYearly: boolean
   error: Error | null
+  currentStripePriceId: string | null
+  currentPlanDisplayOrder: number | null
 }
 
 export function PricingPresentational({
@@ -23,10 +26,13 @@ export function PricingPresentational({
   selectedInterval,
   onIntervalChange,
   onSubscribe,
+  onChangePlan,
   isLoading,
   loadingPriceId,
   hasMonthlyAndYearly,
-  error
+  error,
+  currentStripePriceId,
+  currentPlanDisplayOrder
 }: Props) {
   const t = useTranslations("pricing")
 
@@ -65,7 +71,10 @@ export function PricingPresentational({
           plans={plans}
           selectedInterval={selectedInterval}
           onSubscribe={onSubscribe}
+          onChangePlan={onChangePlan}
           loadingPriceId={loadingPriceId}
+          currentStripePriceId={currentStripePriceId}
+          currentPlanDisplayOrder={currentPlanDisplayOrder}
         />
       )}
     </div>

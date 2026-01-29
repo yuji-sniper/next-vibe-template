@@ -3,22 +3,44 @@
 import { useLocale, useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "sonner"
+import { useChangeSubscriptionPlanMutation } from "@/features/pricing/hooks/mutations/useChangeSubscriptionPlanMutation"
 import { useCreateCheckoutSessionMutation } from "@/features/pricing/hooks/mutations/useCreateCheckoutSessionMutation"
 import { useGetActivePlansQuery } from "@/features/pricing/hooks/queries/useGetActivePlansQuery"
+import { useGetSubscriptionQuery } from "@/features/pricing/hooks/queries/useGetSubscriptionQuery"
+import {
+  activePlansKey,
+  subscriptionKey
+} from "@/features/pricing/queries/keys"
 import type { BillingInterval } from "@/features/pricing/types/plan"
+import { getQueryClient } from "@/lib/react-query/query-client"
 import { PricingPresentational } from "./presentational"
 
 export function PricingContainer() {
   const locale = useLocale()
   const t = useTranslations("pricing")
+  const queryClient = getQueryClient()
   const [selectedInterval, setSelectedInterval] =
     useState<BillingInterval>("month")
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null)
 
   const { data, isLoading, error } = useGetActivePlansQuery()
+  const { data: subscriptionData } = useGetSubscriptionQuery()
   const checkoutMutation = useCreateCheckoutSessionMutation()
+  const changePlanMutation = useChangeSubscriptionPlanMutation()
 
   const plans = data?.plans ?? []
+  const subscription = subscriptionData?.subscription
+
+  const currentStripePriceId = subscription?.stripePriceId ?? null
+
+  const currentPlanDisplayOrder =
+    currentStripePriceId !== null
+      ? (plans.find((plan) =>
+          plan.prices.some(
+            (price) => price.stripePriceId === currentStripePriceId
+          )
+        )?.product.displayOrder ?? null)
+      : null
 
   const hasMonthlyAndYearly =
     plans.some((plan) =>
@@ -55,16 +77,34 @@ export function PricingContainer() {
     }
   }
 
+  const handleChangePlan = async (priceId: string) => {
+    setLoadingPriceId(priceId)
+
+    try {
+      await changePlanMutation.mutateAsync({ newPriceId: priceId })
+      toast.success(t("currentPlan"))
+      queryClient.invalidateQueries({ queryKey: subscriptionKey })
+      queryClient.invalidateQueries({ queryKey: activePlansKey })
+    } catch {
+      toast.error(t("errors.changeFailed"))
+    } finally {
+      setLoadingPriceId(null)
+    }
+  }
+
   return (
     <PricingPresentational
       plans={plans}
       selectedInterval={selectedInterval}
       onIntervalChange={handleIntervalChange}
       onSubscribe={handleSubscribe}
+      onChangePlan={handleChangePlan}
       isLoading={isLoading}
       loadingPriceId={loadingPriceId}
       hasMonthlyAndYearly={hasMonthlyAndYearly}
       error={error}
+      currentStripePriceId={currentStripePriceId}
+      currentPlanDisplayOrder={currentPlanDisplayOrder}
     />
   )
 }

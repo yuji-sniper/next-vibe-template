@@ -45,13 +45,18 @@
     "oneTime": "One-time",
     "subscribe": "Subscribe",
     "subscribing": "Processing...",
+    "currentPlan": "Current Plan",
+    "upgrade": "Upgrade to {planName}",
+    "downgrade": "Downgrade to {planName}",
+    "changing": "Changing...",
     "features": "Features",
     "empty": {
       "title": "No plans available",
       "description": "There are no plans available at this time."
     },
     "errors": {
-      "checkoutFailed": "Failed to start checkout"
+      "checkoutFailed": "Failed to start checkout",
+      "changeFailed": "Failed to change plan"
     }
   },
   "errors": {

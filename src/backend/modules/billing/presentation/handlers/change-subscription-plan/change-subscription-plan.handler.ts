@@ -2,6 +2,7 @@ import { inject, injectable } from "tsyringe"
 import type { ChangeSubscriptionPlanUseCasePort } from "@/backend/modules/billing/application/commands/usecases/change-subscription-plan/change-subscription-plan.usecase.port"
 import { ChangeSubscriptionPlanUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/change-subscription-plan/change-subscription-plan.usecase.port"
 import { CustomerNotFoundError } from "@/backend/modules/billing/domain/customer/customer.errors"
+import { PriceNotFoundError } from "@/backend/modules/billing/domain/price/price.errors"
 import {
   SubscriptionNotFoundError,
   SubscriptionUpdateFailedError
@@ -89,6 +90,17 @@ export class ChangeSubscriptionPlanHandlerImpl
             code: BILLING_ERROR_CODES.SUBSCRIPTION_NOT_FOUND,
             status: 404,
             message: "Subscription not found"
+          }
+        }
+      }
+
+      if (e instanceof PriceNotFoundError) {
+        return {
+          ok: false,
+          error: {
+            code: BILLING_ERROR_CODES.PRICE_NOT_FOUND,
+            status: 404,
+            message: "Price not found"
           }
         }
       }
