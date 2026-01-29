@@ -91,6 +91,11 @@ type BillingSettingsPresentationalProps = {
   onOpenDialog: () => void
   onCloseDialog: () => void
   onCancelSubscription: () => void
+  isResumeDialogOpen: boolean
+  isResuming: boolean
+  onOpenResumeDialog: () => void
+  onCloseResumeDialog: () => void
+  onResumeSubscription: () => void
 }
 
 export function BillingSettingsPresentational({
@@ -102,7 +107,12 @@ export function BillingSettingsPresentational({
   isCanceling,
   onOpenDialog,
   onCloseDialog,
-  onCancelSubscription
+  onCancelSubscription,
+  isResumeDialogOpen,
+  isResuming,
+  onOpenResumeDialog,
+  onCloseResumeDialog,
+  onResumeSubscription
 }: BillingSettingsPresentationalProps) {
   const t = useTranslations("settings")
   const locale = useLocale()
@@ -117,6 +127,7 @@ export function BillingSettingsPresentational({
 
   return (
     <div className="space-y-6">
+      {/* Current Plan Card */}
       <Card>
         <CardHeader>
           <CardTitle>{t("billing.currentPlan")}</CardTitle>
@@ -140,6 +151,7 @@ export function BillingSettingsPresentational({
         </CardContent>
       </Card>
 
+      {/* Payment History Card */}
       <Card>
         <CardHeader>
           <CardTitle>{t("billing.paymentHistory.title")}</CardTitle>
@@ -187,6 +199,7 @@ export function BillingSettingsPresentational({
         </CardContent>
       </Card>
 
+      {/* Cancel Subscription Card */}
       <Card>
         <CardHeader>
           <CardTitle>{t("billing.cancelPlan.title")}</CardTitle>
@@ -194,17 +207,24 @@ export function BillingSettingsPresentational({
             {t("billing.cancelPlan.description")}
           </CardDescription>
         </CardHeader>
-        <CardContent>
-          <Button
-            variant="destructive"
-            onClick={onOpenDialog}
-            disabled={!isActive || isCancelScheduled}
-          >
-            {t("billing.cancelPlan.button")}
-          </Button>
+        <CardContent className="flex gap-2">
+          {isCancelScheduled ? (
+            <Button onClick={onOpenResumeDialog}>
+              {t("billing.resumePlan.button")}
+            </Button>
+          ) : (
+            <Button
+              variant="destructive"
+              onClick={onOpenDialog}
+              disabled={!isActive}
+            >
+              {t("billing.cancelPlan.button")}
+            </Button>
+          )}
         </CardContent>
       </Card>
 
+      {/* Cancel Subscription Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={onCloseDialog}>
         <DialogContent showCloseButton={false}>
           <DialogHeader>
@@ -227,6 +247,30 @@ export function BillingSettingsPresentational({
               {isCanceling
                 ? t("billing.cancelPlan.dialog.canceling")
                 : t("billing.cancelPlan.dialog.confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Resume Subscription Dialog */}
+      <Dialog open={isResumeDialogOpen} onOpenChange={onCloseResumeDialog}>
+        <DialogContent showCloseButton={false}>
+          <DialogHeader>
+            <DialogTitle>{t("billing.resumePlan.dialog.title")}</DialogTitle>
+            <DialogDescription>
+              {t("billing.resumePlan.dialog.description")}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <DialogClose asChild>
+              <Button variant="outline" disabled={isResuming}>
+                {t("billing.resumePlan.dialog.cancel")}
+              </Button>
+            </DialogClose>
+            <Button onClick={onResumeSubscription} disabled={isResuming}>
+              {isResuming
+                ? t("billing.resumePlan.dialog.resuming")
+                : t("billing.resumePlan.dialog.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

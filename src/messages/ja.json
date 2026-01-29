@@ -45,6 +45,18 @@
         "success": "プランのキャンセルを予約しました",
         "error": "プランのキャンセルに失敗しました"
       },
+      "resumePlan": {
+        "button": "プランを再開",
+        "dialog": {
+          "title": "プランを再開しますか？",
+          "description": "キャンセル予約を解除し、次の更新日に自動更新されます。",
+          "cancel": "戻る",
+          "confirm": "再開する",
+          "resuming": "再開中..."
+        },
+        "success": "プランを再開しました",
+        "error": "プランの再開に失敗しました"
+      },
       "paymentHistory": {
         "title": "請求書一覧",
         "description": "最近の決済履歴",

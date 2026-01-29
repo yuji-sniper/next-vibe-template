@@ -12,6 +12,7 @@ import { BillingSettingsPresentational } from "./presentational"
 
 export function BillingSettingsContainer() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
+  const [isResumeDialogOpen, setIsResumeDialogOpen] = useState(false)
   const locale = useLocale()
   const t = useTranslations("settings")
   const queryClient = getQueryClient()
@@ -20,6 +21,7 @@ export function BillingSettingsContainer() {
   const { data: paymentHistoryData } = useGetPaymentHistoryQuery()
 
   const cancelMutation = useCancelSubscriptionMutation()
+  const resumeMutation = useCancelSubscriptionMutation()
 
   const currentPlanName = subscriptionData?.subscription?.product?.name
 
@@ -34,6 +36,17 @@ export function BillingSettingsContainer() {
     }
   }
 
+  const handleResumeSubscription = async () => {
+    try {
+      await resumeMutation.mutateAsync({ cancelAtPeriodEnd: false })
+      await queryClient.invalidateQueries({ queryKey: subscriptionBaseKey })
+      setIsResumeDialogOpen(false)
+      toast.success(t("billing.resumePlan.success"))
+    } catch {
+      toast.error(t("billing.resumePlan.error"))
+    }
+  }
+
   return (
     <BillingSettingsPresentational
       subscription={subscriptionData?.subscription}
@@ -45,6 +58,11 @@ export function BillingSettingsContainer() {
       onOpenDialog={() => setIsDialogOpen(true)}
       onCloseDialog={() => setIsDialogOpen(false)}
       onCancelSubscription={handleCancelSubscription}
+      isResumeDialogOpen={isResumeDialogOpen}
+      isResuming={resumeMutation.isPending}
+      onOpenResumeDialog={() => setIsResumeDialogOpen(true)}
+      onCloseResumeDialog={() => setIsResumeDialogOpen(false)}
+      onResumeSubscription={handleResumeSubscription}
     />
   )
 }
