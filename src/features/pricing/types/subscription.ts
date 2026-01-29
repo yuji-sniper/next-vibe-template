@@ -12,6 +12,25 @@ export type SubscriptionStatus =
   | "paused"
 
 /**
+ * サブスクリプションに紐づくプロダクト情報
+ */
+export type SubscriptionProduct = {
+  id: string
+  name: string
+  description: string | null
+  features: string[] | null
+  price: {
+    id: string
+    stripePriceId: string | null
+    unitAmount: number
+    currency: string
+    type: "one_time" | "recurring"
+    recurringInterval: string | null
+    displayName: string | null
+  }
+}
+
+/**
  * サブスクリプション情報
  */
 export type Subscription = {
@@ -25,4 +44,5 @@ export type Subscription = {
   cancelAtPeriodEnd: boolean
   createdAt: string
   updatedAt: string
+  product?: SubscriptionProduct
 }

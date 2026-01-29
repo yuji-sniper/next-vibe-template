@@ -1,22 +1,17 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
 import { setRequestLocale } from "next-intl/server"
-import { getActivePlansQuery } from "@/features/pricing/queries/get-active-plans"
+import { getInvoiceHistoryQuery } from "@/features/billing/queries/get-invoice-history"
+import { invoiceHistoryKey } from "@/features/billing/queries/keys"
 import { getSubscriptionQuery } from "@/features/pricing/queries/get-subscription"
-import {
-  activePlansKey,
-  subscriptionKey
-} from "@/features/pricing/queries/keys"
+import { subscriptionKey } from "@/features/pricing/queries/keys"
 import { getQueryClient } from "@/lib/react-query/query-client"
-import {
-  PRICING_PAGE_PRICE_TYPE,
-  PricingContainer
-} from "./_components/container"
+import { BillingSettingsContainer } from "./_components/container"
 
 type Props = {
   params: Promise<{ locale: string }>
 }
 
-export default async function PricingPage({ params }: Props) {
+export default async function BillingSettingsPage({ params }: Props) {
   const { locale } = await params
   setRequestLocale(locale)
 
@@ -24,18 +19,18 @@ export default async function PricingPage({ params }: Props) {
 
   await Promise.all([
     queryClient.prefetchQuery({
-      queryKey: activePlansKey(PRICING_PAGE_PRICE_TYPE),
-      queryFn: () => getActivePlansQuery(PRICING_PAGE_PRICE_TYPE)
+      queryKey: subscriptionKey(true),
+      queryFn: () => getSubscriptionQuery(true)
     }),
     queryClient.prefetchQuery({
-      queryKey: subscriptionKey(),
-      queryFn: () => getSubscriptionQuery()
+      queryKey: invoiceHistoryKey(),
+      queryFn: getInvoiceHistoryQuery
     })
   ])
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      <PricingContainer />
+      <BillingSettingsContainer />
     </HydrationBoundary>
   )
 }

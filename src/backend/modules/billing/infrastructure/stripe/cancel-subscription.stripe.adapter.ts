@@ -1,4 +1,3 @@
-import type Stripe from "stripe"
 import { injectable } from "tsyringe"
 import { SubscriptionCancelFailedError } from "@/backend/modules/billing/domain/subscription/subscription.errors"
 import type {
@@ -16,12 +15,12 @@ export class CancelSubscriptionStripeAdapter implements CancelSubscriptionPort {
     try {
       const cancelAtPeriodEnd = input.cancelAtPeriodEnd ?? true
 
-      const subscription = (await stripe.subscriptions.update(
+      const subscription = await stripe.subscriptions.update(
         input.stripeSubscriptionId,
         {
           cancel_at_period_end: cancelAtPeriodEnd
         }
-      )) as Stripe.Subscription
+      )
 
       const firstItem = subscription.items.data[0]
 

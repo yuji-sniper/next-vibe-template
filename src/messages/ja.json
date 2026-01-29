@@ -21,6 +21,58 @@
   "settings": {
     "title": "設定",
     "heading": "設定",
+    "nav": {
+      "account": "アカウント",
+      "billing": "請求"
+    },
+    "billing": {
+      "currentPlan": "現在のプラン",
+      "noPlan": "プラン未契約",
+      "nextRenewal": "次の更新日",
+      "cancelScheduled": "キャンセル予約済み（期間終了まで利用可能）",
+      "adjustPlan": "プランを調整",
+      "cancelPlan": {
+        "title": "プランのキャンセル",
+        "description": "プランをキャンセルすると、現在の請求期間の終了後にサービスが停止されます。",
+        "button": "プランをキャンセル",
+        "dialog": {
+          "title": "本当にキャンセルしますか？",
+          "description": "現在の請求期間の終了まではサービスをご利用いただけます。期間終了後にプランが解約されます。",
+          "cancel": "戻る",
+          "confirm": "キャンセルする",
+          "canceling": "キャンセル中..."
+        },
+        "success": "プランのキャンセルを予約しました",
+        "error": "プランのキャンセルに失敗しました"
+      },
+      "resumePlan": {
+        "button": "プランを再開",
+        "dialog": {
+          "title": "プランを再開しますか？",
+          "description": "キャンセル予約を解除し、次の更新日に自動更新されます。",
+          "cancel": "戻る",
+          "confirm": "再開する",
+          "resuming": "再開中..."
+        },
+        "success": "プランを再開しました",
+        "error": "プランの再開に失敗しました"
+      },
+      "invoiceHistory": {
+        "title": "請求書一覧",
+        "description": "最近の請求書",
+        "date": "日付",
+        "amount": "金額",
+        "paidAt": "支払日",
+        "status": "ステータス",
+        "empty": "請求書履歴はまだありません。",
+        "statuses": {
+          "paid": "支払済",
+          "open": "未払い",
+          "void": "無効",
+          "uncollectible": "回収不能"
+        }
+      }
+    },
     "deleteAccount": {
       "title": "アカウント削除",
       "description": "アカウントを削除すると、すべてのデータが完全に削除されます。この操作は取り消せません。",
@@ -53,6 +105,14 @@
     "empty": {
       "title": "プランがありません",
       "description": "現在利用可能なプランはありません。"
+    },
+    "changePlanDialog": {
+      "upgradeTitle": "{planName}にアップグレードしますか？",
+      "downgradeTitle": "{planName}にダウングレードしますか？",
+      "upgradeDescription": "プランが即座にアップグレードされます。差額は日割りで計算されます。",
+      "downgradeDescription": "プランがダウングレードされます。変更は現在の請求期間の終了時に適用されます。",
+      "cancel": "キャンセル",
+      "confirm": "変更する"
     },
     "changeSuccess": "プランを変更しました",
     "errors": {

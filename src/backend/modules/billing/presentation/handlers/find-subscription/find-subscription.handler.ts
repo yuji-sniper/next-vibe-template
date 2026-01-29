@@ -9,6 +9,10 @@ import type { Result } from "@/backend/modules/shared/presentation/handlers/type
 import { AUTH_ERROR_CODES } from "@/shared/errors/auth.errors"
 import { COMMON_ERROR_CODES } from "@/shared/errors/common.errors"
 
+export type FindSubscriptionHandlerInput = {
+  includeProduct?: boolean
+}
+
 export type FindSubscriptionHandlerResult = Result<{
   subscription:
     | {
@@ -22,6 +26,21 @@ export type FindSubscriptionHandlerResult = Result<{
         cancelAtPeriodEnd: boolean
         createdAt: string
         updatedAt: string
+        product?: {
+          id: string
+          name: string
+          description: string | null
+          features: string[] | null
+          price: {
+            id: string
+            stripePriceId: string | null
+            unitAmount: number
+            currency: string
+            type: "one_time" | "recurring"
+            recurringInterval: string | null
+            displayName: string | null
+          }
+        }
       }
     | undefined
 }>
@@ -29,7 +48,9 @@ export type FindSubscriptionHandlerResult = Result<{
 export const FindSubscriptionHandlerToken = Symbol("FindSubscriptionHandler")
 
 export interface FindSubscriptionHandler {
-  handle(): Promise<FindSubscriptionHandlerResult>
+  handle(
+    input?: FindSubscriptionHandlerInput
+  ): Promise<FindSubscriptionHandlerResult>
 }
 
 @injectable()
@@ -41,9 +62,11 @@ export class FindSubscriptionHandlerImpl implements FindSubscriptionHandler {
     private readonly findSubscriptionUseCase: FindSubscriptionUseCasePort
   ) {}
 
-  async handle(): Promise<FindSubscriptionHandlerResult> {
+  async handle(
+    input?: FindSubscriptionHandlerInput
+  ): Promise<FindSubscriptionHandlerResult> {
     try {
-      const output = await this.findSubscriptionUseCase.handle()
+      const output = await this.findSubscriptionUseCase.handle(input)
 
       return {
         ok: true,
@@ -61,7 +84,8 @@ export class FindSubscriptionHandlerImpl implements FindSubscriptionHandler {
                   output.subscription.currentPeriodEnd?.toISOString() ?? null,
                 cancelAtPeriodEnd: output.subscription.cancelAtPeriodEnd,
                 createdAt: output.subscription.createdAt.toISOString(),
-                updatedAt: output.subscription.updatedAt.toISOString()
+                updatedAt: output.subscription.updatedAt.toISOString(),
+                product: output.subscription.product
               }
             : undefined
         }

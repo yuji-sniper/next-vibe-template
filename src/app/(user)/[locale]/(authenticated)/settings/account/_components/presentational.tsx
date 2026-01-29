@@ -19,7 +19,7 @@ import {
   DialogTitle
 } from "@/components/ui/dialog"
 
-type SettingsPresentationalProps = {
+type AccountSettingsPresentationalProps = {
   isDialogOpen: boolean
   isDeleting: boolean
   onOpenDialog: () => void
@@ -27,19 +27,17 @@ type SettingsPresentationalProps = {
   onDeleteAccount: () => void
 }
 
-export function SettingsPresentational({
+export function AccountSettingsPresentational({
   isDialogOpen,
   isDeleting,
   onOpenDialog,
   onCloseDialog,
   onDeleteAccount
-}: SettingsPresentationalProps) {
+}: AccountSettingsPresentationalProps) {
   const t = useTranslations("settings")
 
   return (
-    <div className="container max-w-2xl py-8 mx-auto">
-      <h1 className="mb-8 text-2xl font-bold">{t("heading")}</h1>
-
+    <div>
       <Card>
         <CardHeader>
           <CardTitle>{t("deleteAccount.title")}</CardTitle>

@@ -25,7 +25,10 @@ export class CreateCheckoutSessionStripeAdapter
         ],
         mode: input.mode,
         success_url: input.successUrl,
-        cancel_url: input.cancelUrl
+        cancel_url: input.cancelUrl,
+        ...(input.mode === "payment" && {
+          invoice_creation: { enabled: true }
+        })
       })
 
       if (!session.url) {

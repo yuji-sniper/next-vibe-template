@@ -21,6 +21,58 @@
   "settings": {
     "title": "Settings",
     "heading": "Settings",
+    "nav": {
+      "account": "Account",
+      "billing": "Billing"
+    },
+    "billing": {
+      "currentPlan": "Current Plan",
+      "noPlan": "No active plan",
+      "nextRenewal": "Next renewal",
+      "cancelScheduled": "Cancellation scheduled (available until period end)",
+      "adjustPlan": "Adjust Plan",
+      "cancelPlan": {
+        "title": "Cancel Plan",
+        "description": "If you cancel your plan, the service will stop at the end of the current billing period.",
+        "button": "Cancel Plan",
+        "dialog": {
+          "title": "Are you sure you want to cancel?",
+          "description": "You can continue using the service until the end of the current billing period. Your plan will be canceled after that.",
+          "cancel": "Go back",
+          "confirm": "Cancel Plan",
+          "canceling": "Canceling..."
+        },
+        "success": "Plan cancellation has been scheduled",
+        "error": "Failed to cancel the plan"
+      },
+      "resumePlan": {
+        "button": "Resume Plan",
+        "dialog": {
+          "title": "Resume your plan?",
+          "description": "This will cancel the scheduled cancellation. Your subscription will auto-renew on the next renewal date.",
+          "cancel": "Go back",
+          "confirm": "Resume Plan",
+          "resuming": "Resuming..."
+        },
+        "success": "Plan has been resumed",
+        "error": "Failed to resume the plan"
+      },
+      "invoiceHistory": {
+        "title": "Invoice History",
+        "description": "Your recent invoices",
+        "date": "Date",
+        "amount": "Amount",
+        "paidAt": "Paid At",
+        "status": "Status",
+        "empty": "No invoice history yet.",
+        "statuses": {
+          "paid": "Paid",
+          "open": "Open",
+          "void": "Void",
+          "uncollectible": "Uncollectible"
+        }
+      }
+    },
     "deleteAccount": {
       "title": "Delete Account",
       "description": "Deleting your account will permanently remove all your data. This action cannot be undone.",
@@ -53,6 +105,14 @@
     "empty": {
       "title": "No plans available",
       "description": "There are no plans available at this time."
+    },
+    "changePlanDialog": {
+      "upgradeTitle": "Upgrade to {planName}?",
+      "downgradeTitle": "Downgrade to {planName}?",
+      "upgradeDescription": "Your plan will be upgraded immediately. The price difference will be prorated.",
+      "downgradeDescription": "Your plan will be downgraded. The change will take effect at the end of your current billing period.",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
     },
     "changeSuccess": "Plan changed successfully",
     "errors": {

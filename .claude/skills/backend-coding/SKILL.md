@@ -1063,6 +1063,34 @@ import type { ProductRepository } from "@/backend/modules/billing/domain/product
 import { Product } from "../../domain/product/product"
 ```
 
+## 不要なマッピングをしない
+
+レイヤー間でデータを受け渡す際、型が構造的に一致している場合は冗長なマッピングを行わず、そのまま渡す。マッピングは型変換やフィールドの取捨選択が必要な場合にのみ行う。
+
+```typescript
+// ❌ NG: UseCase の出力型と Handler の返却型が一致しているのに冗長なマッピング
+return {
+  ok: true,
+  data: {
+    id: output.id,
+    name: output.name,
+    status: output.status,
+    // ... 全フィールドを手動でコピー
+  }
+}
+
+// ✅ OK: 型が一致している場合はそのまま渡す
+return {
+  ok: true,
+  data: output
+}
+```
+
+**マッピングが必要なケース:**
+- Date → string（`toISOString()`）のような型変換がある場合
+- Domain Entity → DTO のように一部のフィールドだけを抽出する場合
+- フィールド名を変更する場合
+
 ## 型アサーション（as）を避ける
 
 型アサーション（`as`）は型安全性を損なうため、可能な限り使用しない。

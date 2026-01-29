@@ -32,6 +32,10 @@ import {
   FindActivePlansHandlerToken
 } from "@/backend/modules/billing/presentation/handlers/find-active-plans/find-active-plans.handler"
 import {
+  FindInvoiceHistoryHandlerImpl,
+  FindInvoiceHistoryHandlerToken
+} from "@/backend/modules/billing/presentation/handlers/find-invoice-history/find-invoice-history.handler"
+import {
   FindPaymentHistoryHandlerImpl,
   FindPaymentHistoryHandlerToken
 } from "@/backend/modules/billing/presentation/handlers/find-payment-history/find-payment-history.handler"
@@ -126,6 +130,12 @@ export const initPresentationDependency = (container: DependencyContainer) => {
   container.registerSingleton(
     FindPaymentHistoryHandlerToken,
     FindPaymentHistoryHandlerImpl
+  )
+
+  // Invoice Handlers
+  container.registerSingleton(
+    FindInvoiceHistoryHandlerToken,
+    FindInvoiceHistoryHandlerImpl
   )
 
   // Webhook Handlers

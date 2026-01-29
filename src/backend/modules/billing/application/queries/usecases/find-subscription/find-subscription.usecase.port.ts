@@ -1,5 +1,9 @@
 import type { SubscriptionStatus } from "@/backend/modules/billing/domain/subscription/subscription"
 
+export interface FindSubscriptionUseCasePortInput {
+  includeProduct?: boolean
+}
+
 export interface FindSubscriptionUseCasePortOutput {
   subscription:
     | {
@@ -13,12 +17,29 @@ export interface FindSubscriptionUseCasePortOutput {
         cancelAtPeriodEnd: boolean
         createdAt: Date
         updatedAt: Date
+        product?: {
+          id: string
+          name: string
+          description: string | null
+          features: string[] | null
+          price: {
+            id: string
+            stripePriceId: string | null
+            unitAmount: number
+            currency: string
+            type: "one_time" | "recurring"
+            recurringInterval: string | null
+            displayName: string | null
+          }
+        }
       }
     | undefined
 }
 
 export interface FindSubscriptionUseCasePort {
-  handle(): Promise<FindSubscriptionUseCasePortOutput>
+  handle(
+    input?: FindSubscriptionUseCasePortInput
+  ): Promise<FindSubscriptionUseCasePortOutput>
 }
 
 export const FindSubscriptionUseCasePortToken = Symbol(

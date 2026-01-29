@@ -9,7 +9,7 @@ import { useGetActivePlansQuery } from "@/features/pricing/hooks/queries/useGetA
 import { useGetSubscriptionQuery } from "@/features/pricing/hooks/queries/useGetSubscriptionQuery"
 import {
   activePlansBaseKey,
-  subscriptionKey
+  subscriptionBaseKey
 } from "@/features/pricing/queries/keys"
 import type { BillingInterval } from "@/features/pricing/types/plan"
 import { PRICE_TYPE } from "@/features/pricing/types/plan"
@@ -88,7 +88,7 @@ export function PricingContainer() {
     try {
       await changePlanMutation.mutateAsync({ newPriceId: priceId })
       toast.success(t("changeSuccess"))
-      queryClient.invalidateQueries({ queryKey: subscriptionKey })
+      queryClient.invalidateQueries({ queryKey: subscriptionBaseKey })
       queryClient.invalidateQueries({ queryKey: activePlansBaseKey })
     } catch {
       toast.error(t("errors.changeFailed"))

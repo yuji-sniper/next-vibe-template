@@ -30,13 +30,13 @@ export default async function UserAuthenticatedLayout({
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-50 border-b bg-background">
+    <div className="flex h-screen flex-col">
+      <header className="z-50 shrink-0 border-b bg-background">
         <div className="container flex h-14 items-center justify-end">
           <AuthUserMenu />
         </div>
       </header>
-      <main>
+      <main className="flex-1 overflow-y-auto">
         <HydrationBoundary state={dehydrate(queryClient)}>
           {children}
         </HydrationBoundary>
