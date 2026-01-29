@@ -25,6 +25,27 @@
       "account": "Account",
       "billing": "Billing"
     },
+    "billing": {
+      "currentPlan": "Current Plan",
+      "noPlan": "No active plan",
+      "nextRenewal": "Next renewal",
+      "cancelScheduled": "Cancellation scheduled (available until period end)",
+      "adjustPlan": "Adjust Plan",
+      "cancelPlan": {
+        "title": "Cancel Plan",
+        "description": "If you cancel your plan, the service will stop at the end of the current billing period.",
+        "button": "Cancel Plan",
+        "dialog": {
+          "title": "Are you sure you want to cancel?",
+          "description": "You can continue using the service until the end of the current billing period. Your plan will be canceled after that.",
+          "cancel": "Go back",
+          "confirm": "Cancel Plan",
+          "canceling": "Canceling..."
+        },
+        "success": "Plan cancellation has been scheduled",
+        "error": "Failed to cancel the plan"
+      }
+    },
     "deleteAccount": {
       "title": "Delete Account",
       "description": "Deleting your account will permanently remove all your data. This action cannot be undone.",

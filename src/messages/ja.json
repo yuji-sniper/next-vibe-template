@@ -25,6 +25,27 @@
       "account": "アカウント",
       "billing": "請求"
     },
+    "billing": {
+      "currentPlan": "現在のプラン",
+      "noPlan": "プラン未契約",
+      "nextRenewal": "次の更新日",
+      "cancelScheduled": "キャンセル予約済み（期間終了まで利用可能）",
+      "adjustPlan": "プランを調整",
+      "cancelPlan": {
+        "title": "プランのキャンセル",
+        "description": "プランをキャンセルすると、現在の請求期間の終了後にサービスが停止されます。",
+        "button": "プランをキャンセル",
+        "dialog": {
+          "title": "本当にキャンセルしますか？",
+          "description": "現在の請求期間の終了まではサービスをご利用いただけます。期間終了後にプランが解約されます。",
+          "cancel": "戻る",
+          "confirm": "キャンセルする",
+          "canceling": "キャンセル中..."
+        },
+        "success": "プランのキャンセルを予約しました",
+        "error": "プランのキャンセルに失敗しました"
+      }
+    },
     "deleteAccount": {
       "title": "アカウント削除",
       "description": "アカウントを削除すると、すべてのデータが完全に削除されます。この操作は取り消せません。",
