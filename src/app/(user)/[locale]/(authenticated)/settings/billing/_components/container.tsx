@@ -3,6 +3,7 @@
 import { useLocale, useTranslations } from "next-intl"
 import { useState } from "react"
 import { toast } from "sonner"
+import { useGetPaymentHistoryQuery } from "@/features/billing/hooks/queries/useGetPaymentHistoryQuery"
 import { useCancelSubscriptionMutation } from "@/features/pricing/hooks/mutations/useCancelSubscriptionMutation"
 import { useGetSubscriptionQuery } from "@/features/pricing/hooks/queries/useGetSubscriptionQuery"
 import { subscriptionBaseKey } from "@/features/pricing/queries/keys"
@@ -16,6 +17,7 @@ export function BillingSettingsContainer() {
   const queryClient = getQueryClient()
 
   const { data: subscriptionData } = useGetSubscriptionQuery(true)
+  const { data: paymentHistoryData } = useGetPaymentHistoryQuery()
 
   const cancelMutation = useCancelSubscriptionMutation()
 
@@ -37,6 +39,7 @@ export function BillingSettingsContainer() {
       subscription={subscriptionData?.subscription}
       currentPlanName={currentPlanName}
       pricingPath={`/${locale}/pricing`}
+      payments={paymentHistoryData?.payments ?? []}
       isDialogOpen={isDialogOpen}
       isCanceling={cancelMutation.isPending}
       onOpenDialog={() => setIsDialogOpen(true)}

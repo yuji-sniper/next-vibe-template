@@ -44,6 +44,20 @@
         },
         "success": "Plan cancellation has been scheduled",
         "error": "Failed to cancel the plan"
+      },
+      "paymentHistory": {
+        "title": "Payment History",
+        "description": "Your recent payment transactions",
+        "date": "Date",
+        "amount": "Amount",
+        "status": "Status",
+        "empty": "No payment history yet.",
+        "statuses": {
+          "succeeded": "Succeeded",
+          "failed": "Failed",
+          "pending": "Pending",
+          "canceled": "Canceled"
+        }
       }
     },
     "deleteAccount": {
