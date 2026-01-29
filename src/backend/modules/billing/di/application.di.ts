@@ -19,6 +19,8 @@ import { UpdateProductUseCase } from "@/backend/modules/billing/application/comm
 import { UpdateProductUseCasePortToken } from "@/backend/modules/billing/application/commands/usecases/update-product/update-product.usecase.port"
 import { FindActivePlansUseCase } from "@/backend/modules/billing/application/queries/usecases/find-active-plans/find-active-plans.usecase"
 import { FindActivePlansUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-active-plans/find-active-plans.usecase.port"
+import { FindInvoiceHistoryUseCase } from "@/backend/modules/billing/application/queries/usecases/find-invoice-history/find-invoice-history.usecase"
+import { FindInvoiceHistoryUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-invoice-history/find-invoice-history.usecase.port"
 import { FindPaymentHistoryUseCase } from "@/backend/modules/billing/application/queries/usecases/find-payment-history/find-payment-history.usecase"
 import { FindPaymentHistoryUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-payment-history/find-payment-history.usecase.port"
 import { FindPriceByIdUseCase } from "@/backend/modules/billing/application/queries/usecases/find-price-by-id/find-price-by-id.usecase"
@@ -87,5 +89,9 @@ export function initApplicationDependency(container: DependencyContainer) {
   container.registerSingleton(
     FindActivePlansUseCasePortToken,
     FindActivePlansUseCase
+  )
+  container.registerSingleton(
+    FindInvoiceHistoryUseCasePortToken,
+    FindInvoiceHistoryUseCase
   )
 }
