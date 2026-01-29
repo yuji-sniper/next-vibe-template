@@ -55,10 +55,6 @@ const getPriceForInterval = (
   )
 }
 
-const getOneTimePrice = (prices: Price[]): Price | undefined => {
-  return prices.find((price) => price.type === "one_time")
-}
-
 export const PlanCard = ({
   plan,
   selectedInterval,
@@ -73,19 +69,12 @@ export const PlanCard = ({
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const recurringPrice = getPriceForInterval(plan.prices, selectedInterval)
-  const oneTimePrice = getOneTimePrice(plan.prices)
-  const displayPrice = recurringPrice || oneTimePrice
 
-  if (!displayPrice) {
+  if (!recurringPrice) {
     return null
   }
 
-  const isRecurring = displayPrice.type === "recurring"
-  const priceLabel = isRecurring
-    ? selectedInterval === "month"
-      ? t("perMonth")
-      : t("perYear")
-    : t("oneTime")
+  const priceLabel = selectedInterval === "month" ? t("perMonth") : t("perYear")
 
   const isUpgrade =
     currentPlanDisplayOrder !== null &&
@@ -95,13 +84,13 @@ export const PlanCard = ({
     if (currentPlanDisplayOrder !== null) {
       setIsDialogOpen(true)
     } else {
-      onSubscribe(displayPrice.id)
+      onSubscribe(recurringPrice.id)
     }
   }
 
   const handleConfirmChange = () => {
     setIsDialogOpen(false)
-    onChangePlan(displayPrice.id)
+    onChangePlan(recurringPrice.id)
   }
 
   const getButtonLabel = (): string => {
@@ -144,8 +133,8 @@ export const PlanCard = ({
           >
             <span className="text-3xl font-bold">
               {formatPrice(
-                displayPrice.unitAmount,
-                displayPrice.currency,
+                recurringPrice.unitAmount,
+                recurringPrice.currency,
                 locale
               )}
             </span>
