@@ -1,7 +1,7 @@
 "use client"
 
 import Link from "next/link"
-import { useTranslations } from "next-intl"
+import { useLocale, useTranslations } from "next-intl"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -43,13 +43,14 @@ export function BillingSettingsPresentational({
   onCancelSubscription
 }: BillingSettingsPresentationalProps) {
   const t = useTranslations("settings")
+  const locale = useLocale()
 
   const isActive =
     subscription?.status === "active" || subscription?.status === "trialing"
   const isCancelScheduled = subscription?.cancelAtPeriodEnd === true
 
   const formattedPeriodEnd = subscription?.currentPeriodEnd
-    ? new Date(subscription.currentPeriodEnd).toLocaleDateString()
+    ? new Date(subscription.currentPeriodEnd).toLocaleDateString(locale)
     : null
 
   return (
