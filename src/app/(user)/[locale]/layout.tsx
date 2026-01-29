@@ -2,6 +2,7 @@ import { notFound } from "next/navigation"
 import { hasLocale, NextIntlClientProvider } from "next-intl"
 import { getMessages, setRequestLocale } from "next-intl/server"
 import { routing } from "@/i18n/routing"
+import { ProgressBarProvider } from "@/providers/ProgressBarProvider"
 import { QueryProvider } from "@/providers/QueryProvider"
 
 export function generateStaticParams() {
@@ -30,7 +31,7 @@ export default async function LocaleLayout({
       <body>
         <QueryProvider>
           <NextIntlClientProvider messages={messages}>
-            {children}
+            <ProgressBarProvider>{children}</ProgressBarProvider>
           </NextIntlClientProvider>
         </QueryProvider>
       </body>
