@@ -8,7 +8,7 @@ import { useCreateCheckoutSessionMutation } from "@/features/pricing/hooks/mutat
 import { useGetActivePlansQuery } from "@/features/pricing/hooks/queries/useGetActivePlansQuery"
 import { useGetSubscriptionQuery } from "@/features/pricing/hooks/queries/useGetSubscriptionQuery"
 import {
-  activePlansKey,
+  activePlansBaseKey,
   subscriptionKey
 } from "@/features/pricing/queries/keys"
 import type { BillingInterval } from "@/features/pricing/types/plan"
@@ -84,7 +84,7 @@ export function PricingContainer() {
       await changePlanMutation.mutateAsync({ newPriceId: priceId })
       toast.success(t("currentPlan"))
       queryClient.invalidateQueries({ queryKey: subscriptionKey })
-      queryClient.invalidateQueries({ queryKey: activePlansKey })
+      queryClient.invalidateQueries({ queryKey: activePlansBaseKey })
     } catch {
       toast.error(t("errors.changeFailed"))
     } finally {

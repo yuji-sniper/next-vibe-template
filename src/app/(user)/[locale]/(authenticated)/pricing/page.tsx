@@ -21,8 +21,8 @@ export default async function PricingPage({ params }: Props) {
 
   await Promise.all([
     queryClient.prefetchQuery({
-      queryKey: activePlansKey,
-      queryFn: getActivePlansQuery
+      queryKey: activePlansKey(),
+      queryFn: () => getActivePlansQuery()
     }),
     queryClient.prefetchQuery({
       queryKey: subscriptionKey,
