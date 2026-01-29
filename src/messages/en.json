@@ -21,6 +21,10 @@
   "settings": {
     "title": "Settings",
     "heading": "Settings",
+    "nav": {
+      "account": "Account",
+      "billing": "Billing"
+    },
     "deleteAccount": {
       "title": "Delete Account",
       "description": "Deleting your account will permanently remove all your data. This action cannot be undone.",

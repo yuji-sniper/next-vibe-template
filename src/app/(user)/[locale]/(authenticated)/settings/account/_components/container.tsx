@@ -6,9 +6,9 @@ import { useState } from "react"
 import { toast } from "sonner"
 import { useDeleteAuthUserMutation } from "@/features/auth/hooks/mutations/useDeleteAuthUserMutation"
 import { getQueryClient } from "@/lib/react-query/query-client"
-import { SettingsPresentational } from "./presentational"
+import { AccountSettingsPresentational } from "./presentational"
 
-export function SettingsContainer() {
+export function AccountSettingsContainer() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const locale = useLocale()
   const router = useRouter()
@@ -34,7 +34,7 @@ export function SettingsContainer() {
   }
 
   return (
-    <SettingsPresentational
+    <AccountSettingsPresentational
       isDialogOpen={isDialogOpen}
       isDeleting={deleteAccountMutation.isPending}
       onOpenDialog={handleOpenDialog}
