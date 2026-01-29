@@ -8,6 +8,11 @@ export type BillingInterval = "month" | "year"
  */
 export type PriceType = "one_time" | "recurring"
 
+export const PRICE_TYPE = {
+  ONE_TIME: "one_time",
+  RECURRING: "recurring"
+} as const satisfies Record<string, PriceType>
+
 /**
  * 価格情報
  */

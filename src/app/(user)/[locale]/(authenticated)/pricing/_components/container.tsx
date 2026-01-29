@@ -12,8 +12,11 @@ import {
   subscriptionKey
 } from "@/features/pricing/queries/keys"
 import type { BillingInterval } from "@/features/pricing/types/plan"
+import { PRICE_TYPE } from "@/features/pricing/types/plan"
 import { getQueryClient } from "@/lib/react-query/query-client"
 import { PricingPresentational } from "./presentational"
+
+export const PRICING_PAGE_PRICE_TYPE = PRICE_TYPE.RECURRING
 
 export function PricingContainer() {
   const locale = useLocale()
@@ -23,7 +26,9 @@ export function PricingContainer() {
     useState<BillingInterval>("month")
   const [loadingPriceId, setLoadingPriceId] = useState<string | null>(null)
 
-  const { data, isLoading, error } = useGetActivePlansQuery()
+  const { data, isLoading, error } = useGetActivePlansQuery(
+    PRICING_PAGE_PRICE_TYPE
+  )
   const { data: subscriptionData } = useGetSubscriptionQuery()
   const checkoutMutation = useCreateCheckoutSessionMutation()
   const changePlanMutation = useChangeSubscriptionPlanMutation()
@@ -82,7 +87,7 @@ export function PricingContainer() {
 
     try {
       await changePlanMutation.mutateAsync({ newPriceId: priceId })
-      toast.success(t("currentPlan"))
+      toast.success(t("changeSuccess"))
       queryClient.invalidateQueries({ queryKey: subscriptionKey })
       queryClient.invalidateQueries({ queryKey: activePlansBaseKey })
     } catch {

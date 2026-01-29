@@ -54,6 +54,7 @@
       "title": "プランがありません",
       "description": "現在利用可能なプランはありません。"
     },
+    "changeSuccess": "プランを変更しました",
     "errors": {
       "checkoutFailed": "チェックアウトの開始に失敗しました",
       "changeFailed": "プランの変更に失敗しました"

@@ -7,7 +7,10 @@ import {
   subscriptionKey
 } from "@/features/pricing/queries/keys"
 import { getQueryClient } from "@/lib/react-query/query-client"
-import { PricingContainer } from "./_components/container"
+import {
+  PRICING_PAGE_PRICE_TYPE,
+  PricingContainer
+} from "./_components/container"
 
 type Props = {
   params: Promise<{ locale: string }>
@@ -21,8 +24,8 @@ export default async function PricingPage({ params }: Props) {
 
   await Promise.all([
     queryClient.prefetchQuery({
-      queryKey: activePlansKey(),
-      queryFn: () => getActivePlansQuery()
+      queryKey: activePlansKey(PRICING_PAGE_PRICE_TYPE),
+      queryFn: () => getActivePlansQuery(PRICING_PAGE_PRICE_TYPE)
     }),
     queryClient.prefetchQuery({
       queryKey: subscriptionKey,

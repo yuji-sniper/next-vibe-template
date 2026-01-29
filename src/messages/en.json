@@ -54,6 +54,7 @@
       "title": "No plans available",
       "description": "There are no plans available at this time."
     },
+    "changeSuccess": "Plan changed successfully",
     "errors": {
       "checkoutFailed": "Failed to start checkout",
       "changeFailed": "Failed to change plan"
