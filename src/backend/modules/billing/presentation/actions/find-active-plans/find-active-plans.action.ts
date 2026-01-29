@@ -6,6 +6,10 @@ import { withRequestContext } from "@/backend/modules/shared/presentation/middle
 import type { FindActivePlansHandler } from "../../handlers/find-active-plans/find-active-plans.handler"
 import { FindActivePlansHandlerToken } from "../../handlers/find-active-plans/find-active-plans.handler"
 
+export type FindActivePlansActionInput = {
+  priceType?: "one_time" | "recurring"
+}
+
 export type Plan = {
   product: {
     id: string
@@ -29,12 +33,13 @@ export type FindActivePlansActionResponse = ActionResponse<{
   plans: Plan[]
 }>
 
-export const findActivePlansAction =
-  async (): Promise<FindActivePlansActionResponse> => {
-    return withRequestContext(async () => {
-      const handler = await resolveContainer<FindActivePlansHandler>(
-        FindActivePlansHandlerToken
-      )
-      return handler.handle()
-    })
-  }
+export const findActivePlansAction = async (
+  input?: FindActivePlansActionInput
+): Promise<FindActivePlansActionResponse> => {
+  return withRequestContext(async () => {
+    const handler = await resolveContainer<FindActivePlansHandler>(
+      FindActivePlansHandlerToken
+    )
+    return handler.handle(input)
+  })
+}

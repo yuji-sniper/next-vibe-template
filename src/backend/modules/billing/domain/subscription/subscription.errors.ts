@@ -20,8 +20,8 @@ export class SubscriptionCancelFailedError extends Error {
 }
 
 export class SubscriptionUpdateFailedError extends Error {
-  constructor() {
-    super("Failed to update subscription")
+  constructor(message?: string) {
+    super(message ?? "Failed to update subscription")
     this.name = "SubscriptionUpdateFailedError"
   }
 }

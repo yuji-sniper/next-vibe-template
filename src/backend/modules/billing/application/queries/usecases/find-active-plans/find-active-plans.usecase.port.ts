@@ -1,3 +1,7 @@
+export type FindActivePlansUseCaseInput = {
+  priceType?: "one_time" | "recurring"
+}
+
 export type Plan = {
   product: {
     id: string
@@ -22,7 +26,9 @@ export type FindActivePlansUseCaseOutput = {
 }
 
 export interface FindActivePlansUseCasePort {
-  handle(): Promise<FindActivePlansUseCaseOutput>
+  handle(
+    input?: FindActivePlansUseCaseInput
+  ): Promise<FindActivePlansUseCaseOutput>
 }
 
 export const FindActivePlansUseCasePortToken = Symbol(

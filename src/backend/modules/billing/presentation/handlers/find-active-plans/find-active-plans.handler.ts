@@ -1,5 +1,8 @@
 import { inject, injectable } from "tsyringe"
-import type { FindActivePlansUseCasePort } from "@/backend/modules/billing/application/queries/usecases/find-active-plans/find-active-plans.usecase.port"
+import type {
+  FindActivePlansUseCaseInput,
+  FindActivePlansUseCasePort
+} from "@/backend/modules/billing/application/queries/usecases/find-active-plans/find-active-plans.usecase.port"
 import { FindActivePlansUseCasePortToken } from "@/backend/modules/billing/application/queries/usecases/find-active-plans/find-active-plans.usecase.port"
 import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
@@ -30,7 +33,9 @@ export type FindActivePlansHandlerResult = Result<{
 export const FindActivePlansHandlerToken = Symbol("FindActivePlansHandler")
 
 export interface FindActivePlansHandler {
-  handle(): Promise<FindActivePlansHandlerResult>
+  handle(
+    input?: FindActivePlansUseCaseInput
+  ): Promise<FindActivePlansHandlerResult>
 }
 
 @injectable()
@@ -42,9 +47,11 @@ export class FindActivePlansHandlerImpl implements FindActivePlansHandler {
     private readonly findActivePlansUseCase: FindActivePlansUseCasePort
   ) {}
 
-  async handle(): Promise<FindActivePlansHandlerResult> {
+  async handle(
+    input?: FindActivePlansUseCaseInput
+  ): Promise<FindActivePlansHandlerResult> {
     try {
-      const output = await this.findActivePlansUseCase.handle()
+      const output = await this.findActivePlansUseCase.handle(input)
 
       return {
         ok: true,

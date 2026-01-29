@@ -1,6 +1,6 @@
 export interface ChangeSubscriptionPlanPortInput {
   stripeSubscriptionId: string
-  newPriceId: string
+  newStripePriceId: string
 }
 
 export interface ChangeSubscriptionPlanPortOutput {

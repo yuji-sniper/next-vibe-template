@@ -4,6 +4,7 @@ import { PriceRepositoryToken } from "@/backend/modules/billing/domain/price/pri
 import type { ProductRepository } from "@/backend/modules/billing/domain/product/product.repository"
 import { ProductRepositoryToken } from "@/backend/modules/billing/domain/product/product.repository"
 import type {
+  FindActivePlansUseCaseInput,
   FindActivePlansUseCaseOutput,
   FindActivePlansUseCasePort,
   Plan
@@ -18,7 +19,9 @@ export class FindActivePlansUseCase implements FindActivePlansUseCasePort {
     private readonly priceRepository: PriceRepository
   ) {}
 
-  async handle(): Promise<FindActivePlansUseCaseOutput> {
+  async handle(
+    input?: FindActivePlansUseCaseInput
+  ): Promise<FindActivePlansUseCaseOutput> {
     // 1. アクティブ商品一覧取得
     const products = await this.productRepository.findAll({ activeOnly: true })
 
@@ -41,9 +44,14 @@ export class FindActivePlansUseCase implements FindActivePlansUseCasePort {
       })
 
       // Stripe連携済みの価格のみフィルタ
-      const syncedPrices = prices.filter(
-        (price) => price.stripePriceId !== null
-      )
+      let syncedPrices = prices.filter((price) => price.stripePriceId !== null)
+
+      // priceType が指定されている場合、追加フィルタ
+      if (input?.priceType) {
+        syncedPrices = syncedPrices.filter(
+          (price) => price.type === input.priceType
+        )
+      }
 
       // 価格が1つ以上ある商品のみ返却
       if (syncedPrices.length > 0) {

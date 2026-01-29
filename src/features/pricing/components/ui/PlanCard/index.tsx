@@ -17,7 +17,10 @@ type Props = {
   plan: Plan
   selectedInterval: BillingInterval
   onSubscribe: (priceId: string) => void
+  onChangePlan: (priceId: string) => void
   isLoading: boolean
+  isCurrentPlan: boolean
+  currentPlanDisplayOrder: number | null
 }
 
 const formatPrice = (
@@ -49,7 +52,10 @@ export const PlanCard = ({
   plan,
   selectedInterval,
   onSubscribe,
-  isLoading
+  onChangePlan,
+  isLoading,
+  isCurrentPlan,
+  currentPlanDisplayOrder
 }: Props) => {
   const t = useTranslations("pricing")
   const locale = useLocale()
@@ -70,7 +76,33 @@ export const PlanCard = ({
     : t("oneTime")
 
   const handleClick = () => {
-    onSubscribe(displayPrice.id)
+    if (currentPlanDisplayOrder !== null) {
+      onChangePlan(displayPrice.id)
+    } else {
+      onSubscribe(displayPrice.id)
+    }
+  }
+
+  const getButtonLabel = (): string => {
+    if (isLoading) {
+      if (currentPlanDisplayOrder !== null) {
+        return t("changing")
+      }
+      return t("subscribing")
+    }
+
+    if (isCurrentPlan) {
+      return t("currentPlan")
+    }
+
+    if (currentPlanDisplayOrder !== null) {
+      if (plan.product.displayOrder > currentPlanDisplayOrder) {
+        return t("upgrade", { planName: plan.product.name })
+      }
+      return t("downgrade", { planName: plan.product.name })
+    }
+
+    return t("subscribe")
   }
 
   return (
@@ -101,8 +133,12 @@ export const PlanCard = ({
         )}
       </CardContent>
       <CardFooter>
-        <Button className="w-full" onClick={handleClick} disabled={isLoading}>
-          {isLoading ? t("subscribing") : t("subscribe")}
+        <Button
+          className="w-full"
+          onClick={handleClick}
+          disabled={isLoading || isCurrentPlan}
+        >
+          {getButtonLabel()}
         </Button>
       </CardFooter>
     </Card>

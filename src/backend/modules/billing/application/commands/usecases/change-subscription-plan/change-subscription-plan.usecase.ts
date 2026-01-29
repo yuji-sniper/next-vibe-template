@@ -2,6 +2,9 @@ import { inject, injectable } from "tsyringe"
 import { CustomerNotFoundError } from "@/backend/modules/billing/domain/customer/customer.errors"
 import type { CustomerRepository } from "@/backend/modules/billing/domain/customer/customer.repository"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/domain/customer/customer.repository"
+import { PriceNotFoundError } from "@/backend/modules/billing/domain/price/price.errors"
+import type { PriceRepository } from "@/backend/modules/billing/domain/price/price.repository"
+import { PriceRepositoryToken } from "@/backend/modules/billing/domain/price/price.repository"
 import { SubscriptionNotFoundError } from "@/backend/modules/billing/domain/subscription/subscription.errors"
 import type { SubscriptionRepository } from "@/backend/modules/billing/domain/subscription/subscription.repository"
 import { SubscriptionRepositoryToken } from "@/backend/modules/billing/domain/subscription/subscription.repository"
@@ -28,6 +31,8 @@ export class ChangeSubscriptionPlanUseCase
     private readonly getCurrentUser: GetCurrentUserPort,
     @inject(CustomerRepositoryToken)
     private readonly customerRepository: CustomerRepository,
+    @inject(PriceRepositoryToken)
+    private readonly priceRepository: PriceRepository,
     @inject(SubscriptionRepositoryToken)
     private readonly subscriptionRepository: SubscriptionRepository,
     @inject(ChangeSubscriptionPlanPortToken)
@@ -60,18 +65,31 @@ export class ChangeSubscriptionPlanUseCase
       throw new SubscriptionNotFoundError()
     }
 
-    // 4. Stripe API: subscription.update({ items: [{ price: newPriceId }] })
+    // 4. 内部PriceIdからStripePriceIdを取得
+    const price = await this.priceRepository.findById(input.newPriceId)
+    if (!price) {
+      this.logger.warn("Price not found", { priceId: input.newPriceId })
+      throw new PriceNotFoundError(input.newPriceId)
+    }
+    if (!price.stripePriceId) {
+      this.logger.warn("Stripe price ID not set", {
+        priceId: input.newPriceId
+      })
+      throw new PriceNotFoundError(input.newPriceId)
+    }
+
+    // 5. Stripe API: subscription.update({ items: [{ price: stripePriceId }] })
     this.logger.info("Changing Stripe subscription plan", {
       subscriptionId: subscription.id,
       stripeSubscriptionId: subscription.stripeSubscriptionId,
-      newPriceId: input.newPriceId
+      newStripePriceId: price.stripePriceId
     })
     const result = await this.changeSubscriptionPlan.handle({
       stripeSubscriptionId: subscription.stripeSubscriptionId,
-      newPriceId: input.newPriceId
+      newStripePriceId: price.stripePriceId
     })
 
-    // 5. DBのSubscription.stripePriceId更新
+    // 6. DBのSubscription.stripePriceId更新
     subscription.updatePriceId(result.stripePriceId)
     await this.subscriptionRepository.save(subscription)
 

@@ -45,13 +45,19 @@
     "oneTime": "一回払い",
     "subscribe": "申し込む",
     "subscribing": "処理中...",
+    "currentPlan": "契約中",
+    "upgrade": "{planName}にアップグレードする",
+    "downgrade": "{planName}にダウングレードする",
+    "changing": "変更中...",
     "features": "機能",
     "empty": {
       "title": "プランがありません",
       "description": "現在利用可能なプランはありません。"
     },
+    "changeSuccess": "プランを変更しました",
     "errors": {
-      "checkoutFailed": "チェックアウトの開始に失敗しました"
+      "checkoutFailed": "チェックアウトの開始に失敗しました",
+      "changeFailed": "プランの変更に失敗しました"
     }
   },
   "errors": {
