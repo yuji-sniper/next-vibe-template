@@ -106,6 +106,14 @@
       "title": "プランがありません",
       "description": "現在利用可能なプランはありません。"
     },
+    "changePlanDialog": {
+      "upgradeTitle": "{planName}にアップグレードしますか？",
+      "downgradeTitle": "{planName}にダウングレードしますか？",
+      "upgradeDescription": "プランが即座にアップグレードされます。差額は日割りで計算されます。",
+      "downgradeDescription": "プランがダウングレードされます。変更は現在の請求期間の終了時に適用されます。",
+      "cancel": "キャンセル",
+      "confirm": "変更する"
+    },
     "changeSuccess": "プランを変更しました",
     "errors": {
       "checkoutFailed": "チェックアウトの開始に失敗しました",

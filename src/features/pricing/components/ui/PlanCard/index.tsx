@@ -1,6 +1,17 @@
 "use client"
 
 import { useLocale, useTranslations } from "next-intl"
+import { useState } from "react"
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle
+} from "@/components/ui/alert-dialog"
 import { Button } from "@/components/ui/button"
 import {
   Card,
@@ -59,6 +70,7 @@ export const PlanCard = ({
 }: Props) => {
   const t = useTranslations("pricing")
   const locale = useLocale()
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   const recurringPrice = getPriceForInterval(plan.prices, selectedInterval)
   const oneTimePrice = getOneTimePrice(plan.prices)
@@ -75,12 +87,21 @@ export const PlanCard = ({
       : t("perYear")
     : t("oneTime")
 
+  const isUpgrade =
+    currentPlanDisplayOrder !== null &&
+    plan.product.displayOrder > currentPlanDisplayOrder
+
   const handleClick = () => {
     if (currentPlanDisplayOrder !== null) {
-      onChangePlan(displayPrice.id)
+      setIsDialogOpen(true)
     } else {
       onSubscribe(displayPrice.id)
     }
+  }
+
+  const handleConfirmChange = () => {
+    setIsDialogOpen(false)
+    onChangePlan(displayPrice.id)
   }
 
   const getButtonLabel = (): string => {
@@ -96,7 +117,7 @@ export const PlanCard = ({
     }
 
     if (currentPlanDisplayOrder !== null) {
-      if (plan.product.displayOrder > currentPlanDisplayOrder) {
+      if (isUpgrade) {
         return t("upgrade", { planName: plan.product.name })
       }
       return t("downgrade", { planName: plan.product.name })
@@ -106,41 +127,75 @@ export const PlanCard = ({
   }
 
   return (
-    <Card data-slot="plan-card" className="flex w-full max-w-sm flex-col">
-      <CardHeader>
-        <CardTitle data-slot="plan-card-title">{plan.product.name}</CardTitle>
-        {plan.product.description && (
-          <CardDescription data-slot="plan-card-description">
-            {plan.product.description}
-          </CardDescription>
-        )}
-      </CardHeader>
-      <CardContent className="flex-1 space-y-4">
-        <div data-slot="plan-card-price" className="flex items-baseline gap-1">
-          <span className="text-3xl font-bold">
-            {formatPrice(
-              displayPrice.unitAmount,
-              displayPrice.currency,
-              locale
-            )}
-          </span>
-          <span className="text-sm text-muted-foreground">{priceLabel}</span>
-        </div>
-        {plan.product.features && plan.product.features.length > 0 && (
-          <div data-slot="plan-card-features">
-            <FeatureList features={plan.product.features} />
+    <>
+      <Card data-slot="plan-card" className="flex w-full max-w-sm flex-col">
+        <CardHeader>
+          <CardTitle data-slot="plan-card-title">{plan.product.name}</CardTitle>
+          {plan.product.description && (
+            <CardDescription data-slot="plan-card-description">
+              {plan.product.description}
+            </CardDescription>
+          )}
+        </CardHeader>
+        <CardContent className="flex-1 space-y-4">
+          <div
+            data-slot="plan-card-price"
+            className="flex items-baseline gap-1"
+          >
+            <span className="text-3xl font-bold">
+              {formatPrice(
+                displayPrice.unitAmount,
+                displayPrice.currency,
+                locale
+              )}
+            </span>
+            <span className="text-sm text-muted-foreground">{priceLabel}</span>
           </div>
-        )}
-      </CardContent>
-      <CardFooter>
-        <Button
-          className="w-full"
-          onClick={handleClick}
-          disabled={isLoading || isCurrentPlan}
-        >
-          {getButtonLabel()}
-        </Button>
-      </CardFooter>
-    </Card>
+          {plan.product.features && plan.product.features.length > 0 && (
+            <div data-slot="plan-card-features">
+              <FeatureList features={plan.product.features} />
+            </div>
+          )}
+        </CardContent>
+        <CardFooter>
+          <Button
+            className="w-full"
+            onClick={handleClick}
+            disabled={isLoading || isCurrentPlan}
+          >
+            {getButtonLabel()}
+          </Button>
+        </CardFooter>
+      </Card>
+
+      <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isUpgrade
+                ? t("changePlanDialog.upgradeTitle", {
+                    planName: plan.product.name
+                  })
+                : t("changePlanDialog.downgradeTitle", {
+                    planName: plan.product.name
+                  })}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isUpgrade
+                ? t("changePlanDialog.upgradeDescription")
+                : t("changePlanDialog.downgradeDescription")}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>
+              {t("changePlanDialog.cancel")}
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmChange}>
+              {t("changePlanDialog.confirm")}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   )
 }

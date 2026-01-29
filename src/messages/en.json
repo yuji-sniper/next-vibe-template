@@ -106,6 +106,14 @@
       "title": "No plans available",
       "description": "There are no plans available at this time."
     },
+    "changePlanDialog": {
+      "upgradeTitle": "Upgrade to {planName}?",
+      "downgradeTitle": "Downgrade to {planName}?",
+      "upgradeDescription": "Your plan will be upgraded immediately. The price difference will be prorated.",
+      "downgradeDescription": "Your plan will be downgraded. The change will take effect at the end of your current billing period.",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    },
     "changeSuccess": "Plan changed successfully",
     "errors": {
       "checkoutFailed": "Failed to start checkout",
