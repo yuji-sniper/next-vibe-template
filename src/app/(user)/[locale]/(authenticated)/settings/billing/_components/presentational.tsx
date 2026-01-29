@@ -28,7 +28,7 @@ import {
   TableHeader,
   TableRow
 } from "@/components/ui/table"
-import type { PaymentHistoryItem } from "@/features/billing/types/payment-history"
+import type { InvoiceHistoryItem } from "@/features/billing/types/invoice-history"
 import type { Subscription } from "@/features/pricing/types/subscription"
 
 const ZERO_DECIMAL_CURRENCIES = new Set([
@@ -68,14 +68,14 @@ function getStatusBadgeVariant(
   status: string
 ): "default" | "secondary" | "destructive" | "outline" {
   switch (status) {
-    case "succeeded":
+    case "paid":
       return "default"
-    case "failed":
-      return "destructive"
-    case "pending":
+    case "open":
       return "outline"
-    case "canceled":
+    case "void":
       return "secondary"
+    case "uncollectible":
+      return "destructive"
     default:
       return "secondary"
   }
@@ -85,7 +85,7 @@ type BillingSettingsPresentationalProps = {
   subscription: Subscription | undefined
   currentPlanName: string | undefined
   pricingPath: string
-  payments: PaymentHistoryItem[]
+  invoices: InvoiceHistoryItem[]
   isDialogOpen: boolean
   isCanceling: boolean
   onOpenDialog: () => void
@@ -102,7 +102,7 @@ export function BillingSettingsPresentational({
   subscription,
   currentPlanName,
   pricingPath,
-  payments,
+  invoices,
   isDialogOpen,
   isCanceling,
   onOpenDialog,
@@ -151,44 +151,50 @@ export function BillingSettingsPresentational({
         </CardContent>
       </Card>
 
-      {/* Payment History Card */}
+      {/* Invoice History Card */}
       <Card>
         <CardHeader>
-          <CardTitle>{t("billing.paymentHistory.title")}</CardTitle>
+          <CardTitle>{t("billing.invoiceHistory.title")}</CardTitle>
           <CardDescription>
-            {t("billing.paymentHistory.description")}
+            {t("billing.invoiceHistory.description")}
           </CardDescription>
         </CardHeader>
         <CardContent>
-          {payments.length === 0 ? (
+          {invoices.length === 0 ? (
             <p className="text-sm text-muted-foreground">
-              {t("billing.paymentHistory.empty")}
+              {t("billing.invoiceHistory.empty")}
             </p>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>{t("billing.paymentHistory.date")}</TableHead>
-                  <TableHead>{t("billing.paymentHistory.amount")}</TableHead>
-                  <TableHead>{t("billing.paymentHistory.status")}</TableHead>
+                  <TableHead>{t("billing.invoiceHistory.date")}</TableHead>
+                  <TableHead>{t("billing.invoiceHistory.amount")}</TableHead>
+                  <TableHead>{t("billing.invoiceHistory.paidAt")}</TableHead>
+                  <TableHead>{t("billing.invoiceHistory.status")}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {payments.map((payment) => (
-                  <TableRow key={payment.id}>
+                {invoices.map((invoice) => (
+                  <TableRow key={invoice.id}>
                     <TableCell>
-                      {new Date(payment.createdAt).toLocaleDateString(locale)}
+                      {new Date(invoice.createdAt).toLocaleDateString(locale)}
                     </TableCell>
                     <TableCell>
                       {formatPaymentAmount(
-                        payment.amount,
-                        payment.currency,
+                        invoice.amount,
+                        invoice.currency,
                         locale
                       )}
                     </TableCell>
                     <TableCell>
-                      <Badge variant={getStatusBadgeVariant(payment.status)}>
-                        {t(`billing.paymentHistory.statuses.${payment.status}`)}
+                      {invoice.paidAt
+                        ? new Date(invoice.paidAt).toLocaleDateString(locale)
+                        : "-"}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={getStatusBadgeVariant(invoice.status)}>
+                        {t(`billing.invoiceHistory.statuses.${invoice.status}`)}
                       </Badge>
                     </TableCell>
                   </TableRow>

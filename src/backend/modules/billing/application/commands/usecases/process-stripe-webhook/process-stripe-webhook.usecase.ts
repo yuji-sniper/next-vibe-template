@@ -386,9 +386,6 @@ export class ProcessStripeWebhookUseCase
 
     const stripeSubscriptionId =
       invoiceObject.parent?.subscription_details?.subscription
-    if (!stripeSubscriptionId || typeof stripeSubscriptionId !== "string") {
-      return
-    }
 
     // 既存のInvoiceがあるかチェック
     const existingInvoice = await this.invoiceRepository.findByStripeInvoiceId(
@@ -397,7 +394,7 @@ export class ProcessStripeWebhookUseCase
 
     // SubscriptionIDからSubscriptionを取得
     let subscriptionId: string | null = null
-    if (stripeSubscriptionId) {
+    if (stripeSubscriptionId && typeof stripeSubscriptionId === "string") {
       const subscription =
         await this.subscriptionRepository.findByStripeSubscriptionId(
           stripeSubscriptionId

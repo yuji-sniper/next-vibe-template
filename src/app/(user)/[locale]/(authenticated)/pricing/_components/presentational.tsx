@@ -47,7 +47,7 @@ export function PricingPresentational({
   }
 
   return (
-    <div data-slot="pricing-page" className="container py-12">
+    <div data-slot="pricing-page" className="container py-12 mx-auto">
       <div className="mb-8 text-center">
         <h1 className="mb-2 text-3xl font-bold">{t("heading")}</h1>
         <p className="text-muted-foreground">{t("description")}</p>

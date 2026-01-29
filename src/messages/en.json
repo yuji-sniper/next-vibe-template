@@ -57,18 +57,19 @@
         "success": "Plan has been resumed",
         "error": "Failed to resume the plan"
       },
-      "paymentHistory": {
-        "title": "Payment History",
-        "description": "Your recent payment transactions",
+      "invoiceHistory": {
+        "title": "Invoice History",
+        "description": "Your recent invoices",
         "date": "Date",
         "amount": "Amount",
+        "paidAt": "Paid At",
         "status": "Status",
-        "empty": "No payment history yet.",
+        "empty": "No invoice history yet.",
         "statuses": {
-          "succeeded": "Succeeded",
-          "failed": "Failed",
-          "pending": "Pending",
-          "canceled": "Canceled"
+          "paid": "Paid",
+          "open": "Open",
+          "void": "Void",
+          "uncollectible": "Uncollectible"
         }
       }
     },

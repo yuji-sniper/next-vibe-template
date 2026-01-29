@@ -57,18 +57,19 @@
         "success": "プランを再開しました",
         "error": "プランの再開に失敗しました"
       },
-      "paymentHistory": {
+      "invoiceHistory": {
         "title": "請求書一覧",
-        "description": "最近の決済履歴",
+        "description": "最近の請求書",
         "date": "日付",
         "amount": "金額",
+        "paidAt": "支払日",
         "status": "ステータス",
-        "empty": "請求履歴はまだありません。",
+        "empty": "請求書履歴はまだありません。",
         "statuses": {
-          "succeeded": "成功",
-          "failed": "失敗",
-          "pending": "処理中",
-          "canceled": "キャンセル済"
+          "paid": "支払済",
+          "open": "未払い",
+          "void": "無効",
+          "uncollectible": "回収不能"
         }
       }
     },

@@ -1,7 +1,7 @@
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
 import { setRequestLocale } from "next-intl/server"
-import { getPaymentHistoryQuery } from "@/features/billing/queries/get-payment-history"
-import { paymentHistoryKey } from "@/features/billing/queries/keys"
+import { getInvoiceHistoryQuery } from "@/features/billing/queries/get-invoice-history"
+import { invoiceHistoryKey } from "@/features/billing/queries/keys"
 import { getSubscriptionQuery } from "@/features/pricing/queries/get-subscription"
 import { subscriptionKey } from "@/features/pricing/queries/keys"
 import { getQueryClient } from "@/lib/react-query/query-client"
@@ -23,8 +23,8 @@ export default async function BillingSettingsPage({ params }: Props) {
       queryFn: () => getSubscriptionQuery(true)
     }),
     queryClient.prefetchQuery({
-      queryKey: paymentHistoryKey(),
-      queryFn: getPaymentHistoryQuery
+      queryKey: invoiceHistoryKey(),
+      queryFn: getInvoiceHistoryQuery
     })
   ])
 
