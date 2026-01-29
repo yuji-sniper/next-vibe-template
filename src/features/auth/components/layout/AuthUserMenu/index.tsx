@@ -1,7 +1,7 @@
 "use client"
 
 import { useMutation } from "@tanstack/react-query"
-import { LogOut, Settings } from "lucide-react"
+import { ArrowUpCircle, LogOut, Settings } from "lucide-react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useLocale, useTranslations } from "next-intl"
@@ -83,6 +83,14 @@ export function AuthUserMenu() {
           >
             <Settings className="size-4" />
             {t("settings")}
+          </Link>
+          <Link
+            href={`/${locale}/pricing`}
+            onClick={() => setOpen(false)}
+            className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm transition-colors hover:bg-accent"
+          >
+            <ArrowUpCircle className="size-4" />
+            {t("upgradePlan")}
           </Link>
           <button
             type="button"

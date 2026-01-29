@@ -6,6 +6,7 @@
   "userAccount": {
     "openMenu": "Open account menu",
     "settings": "Settings",
+    "upgradePlan": "Upgrade Plan",
     "logout": "Log out",
     "loggingOut": "Logging out..."
   },

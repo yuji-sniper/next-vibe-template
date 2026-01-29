@@ -6,6 +6,7 @@
   "userAccount": {
     "openMenu": "アカウントメニューを開く",
     "settings": "設定",
+    "upgradePlan": "プランをアップグレード",
     "logout": "ログアウト",
     "loggingOut": "ログアウト中..."
   },
