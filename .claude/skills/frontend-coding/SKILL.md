@@ -171,17 +171,18 @@ export const FeatureButton = ({ onClick, disabled, loading }: Props) => {
 "use client"
 
 import { useState } from "react"
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { useTranslations, useLocale } from "next-intl"
 import { toast } from "sonner"
 import { useRouter } from "@/i18n/navigation"
+import { getQueryClient } from "@/lib/react-query/query-client"
 import { FeatureButton } from "../../ui/FeatureButton"
 
 export const FeatureContainer = () => {
   const t = useTranslations("feature")
   const locale = useLocale()
   const router = useRouter()
-  const queryClient = useQueryClient()
+  const queryClient = getQueryClient()
 
   const mutation = useMutation({
     mutationFn: async () => { /* API呼び出し */ },
@@ -254,18 +255,19 @@ app/(admin)/admin/(authenticated)/products/
 // app/(user)/[locale]/(authenticated)/settings/_components/container.tsx
 "use client"
 
-import { useMutation, useQueryClient } from "@tanstack/react-query"
+import { useMutation } from "@tanstack/react-query"
 import { useRouter } from "next/navigation"
 import { useLocale } from "next-intl"
 import { useState } from "react"
 import { toast } from "sonner"
+import { getQueryClient } from "@/lib/react-query/query-client"
 import { SettingsPresentational } from "./presentational"
 
 export function SettingsContainer() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const locale = useLocale()
   const router = useRouter()
-  const queryClient = useQueryClient()
+  const queryClient = getQueryClient()
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
@@ -550,6 +552,24 @@ const products: Product[] = res.data.products.map((p) => ({
   updatedAt: p.updatedAt
 }))
 return { products }
+```
+
+**重要: 不要なマッピングをしない**
+
+Action のレスポンス型とフロントエンドの型が構造的に一致している場合、冗長なマッピングは行わず、レスポンスデータをそのまま返す。マッピングは型変換やフィールドの取捨選択が必要な場合にのみ行う。
+
+```tsx
+// ❌ NG: 型が一致しているのに冗長なマッピング
+const subscription: Subscription = {
+  id: res.data.subscription.id,
+  name: res.data.subscription.name,
+  status: res.data.subscription.status,
+  // ... 全フィールドを手動でコピー
+}
+return { subscription }
+
+// ✅ OK: 型が一致している場合はそのまま返す
+return { subscription: res.data.subscription }
 ```
 
 ### Query Key 定義

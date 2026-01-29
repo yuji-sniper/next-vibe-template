@@ -7,6 +7,10 @@ import { withRequestContext } from "@/backend/modules/shared/presentation/middle
 import type { FindSubscriptionHandler } from "../../handlers/find-subscription/find-subscription.handler"
 import { FindSubscriptionHandlerToken } from "../../handlers/find-subscription/find-subscription.handler"
 
+export type FindSubscriptionActionRequest = {
+  includeProduct?: boolean
+}
+
 export type FindSubscriptionActionResponse = ActionResponse<{
   subscription:
     | {
@@ -20,16 +24,32 @@ export type FindSubscriptionActionResponse = ActionResponse<{
         cancelAtPeriodEnd: boolean
         createdAt: string
         updatedAt: string
+        product?: {
+          id: string
+          name: string
+          description: string | null
+          features: string[] | null
+          price: {
+            id: string
+            stripePriceId: string | null
+            unitAmount: number
+            currency: string
+            type: "one_time" | "recurring"
+            recurringInterval: string | null
+            displayName: string | null
+          }
+        }
       }
     | undefined
 }>
 
-export const findSubscriptionAction =
-  async (): Promise<FindSubscriptionActionResponse> => {
-    return withRequestContext(async () => {
-      const handler = await resolveContainer<FindSubscriptionHandler>(
-        FindSubscriptionHandlerToken
-      )
-      return handler.handle()
-    })
-  }
+export const findSubscriptionAction = async (
+  request?: FindSubscriptionActionRequest
+): Promise<FindSubscriptionActionResponse> => {
+  return withRequestContext(async () => {
+    const handler = await resolveContainer<FindSubscriptionHandler>(
+      FindSubscriptionHandlerToken
+    )
+    return handler.handle(request)
+  })
+}

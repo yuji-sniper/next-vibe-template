@@ -5,4 +5,8 @@ export const activePlansKey = (priceType?: PriceType) =>
   priceType
     ? ([...activePlansBaseKey, priceType] as const)
     : ([...activePlansBaseKey] as const)
-export const subscriptionKey = ["subscription"] as const
+export const subscriptionBaseKey = ["subscription"] as const
+export const subscriptionKey = (includeProduct?: boolean) =>
+  includeProduct
+    ? ([...subscriptionBaseKey, { includeProduct: true }] as const)
+    : ([...subscriptionBaseKey] as const)

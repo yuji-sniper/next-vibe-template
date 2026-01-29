@@ -28,8 +28,8 @@ export default async function PricingPage({ params }: Props) {
       queryFn: () => getActivePlansQuery(PRICING_PAGE_PRICE_TYPE)
     }),
     queryClient.prefetchQuery({
-      queryKey: subscriptionKey,
-      queryFn: getSubscriptionQuery
+      queryKey: subscriptionKey(),
+      queryFn: () => getSubscriptionQuery()
     })
   ])
 
