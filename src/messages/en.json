@@ -132,23 +132,23 @@
   "metadata": {
     "top": {
       "title": "Top",
-      "description": "Top page"
+      "description": "A modern SaaS template built with Next.js, React, and TypeScript. Get started with authentication, payments, and i18n out of the box."
     },
     "signIn": {
       "title": "Sign In",
-      "description": "Sign in page"
+      "description": "Sign in with your Google account to access all features."
     },
     "home": {
       "title": "Home",
-      "description": "Home page"
+      "description": "View your dashboard and manage your account from one place."
     },
     "settings": {
       "title": "Settings",
-      "description": "Account settings page"
+      "description": "Manage your account details, subscription plan, and billing history."
     },
     "pricing": {
       "title": "Pricing",
-      "description": "Pricing plans page"
+      "description": "Choose the plan that fits your needs. Monthly and yearly options available."
     }
   }
 }

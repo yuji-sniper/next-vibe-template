@@ -10,9 +10,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
   const t = await getTranslations({ locale, namespace: "metadata.signIn" })
 
+  const origin = env.NEXT_PUBLIC_ORIGIN
+
   return {
-    title: `${t("title")} | ${env.NEXT_PUBLIC_SERVICE_NAME}`,
-    description: t("description")
+    title: t("title"),
+    description: t("description"),
+    alternates: {
+      canonical: `${origin}/${locale}/sign-in`,
+      languages: {
+        ja: `${origin}/ja/sign-in`,
+        en: `${origin}/en/sign-in`
+      }
+    }
   }
 }
 
