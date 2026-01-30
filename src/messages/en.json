@@ -1,4 +1,7 @@
 {
+  "header": {
+    "signIn": "Sign In"
+  },
   "footer": {
     "terms": "Terms of Service",
     "privacy": "Privacy Policy",
