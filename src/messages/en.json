@@ -1,4 +1,9 @@
 {
+  "footer": {
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "commercialLaw": "Commercial Transactions Act"
+  },
   "top": {
     "title": "Top",
     "heading": "Top"

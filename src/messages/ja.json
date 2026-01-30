@@ -1,4 +1,9 @@
 {
+  "footer": {
+    "terms": "利用規約",
+    "privacy": "プライバシーポリシー",
+    "commercialLaw": "特定商取引法に基づく表記"
+  },
   "top": {
     "title": "トップ",
     "heading": "トップ"
