@@ -132,23 +132,23 @@
   "metadata": {
     "top": {
       "title": "トップ",
-      "description": "トップページ"
+      "description": "Next.js・React・TypeScriptで構築されたモダンなSaaSテンプレート。認証、決済、多言語対応をすぐに使い始められます。"
     },
     "signIn": {
       "title": "サインイン",
-      "description": "サインインページ"
+      "description": "Googleアカウントでサインインして、すべての機能をご利用ください。"
     },
     "home": {
       "title": "ホーム",
-      "description": "ホームページ"
+      "description": "ダッシュボードでアカウントの状況を確認し、サービスを管理できます。"
     },
     "settings": {
       "title": "設定",
-      "description": "アカウント設定ページ"
+      "description": "アカウント情報の確認・変更、プランの管理、請求履歴の確認ができます。"
     },
     "pricing": {
       "title": "料金プラン",
-      "description": "料金プランページ"
+      "description": "あなたに最適なプランをお選びください。月額・年額プランをご用意しています。"
     }
   }
 }
