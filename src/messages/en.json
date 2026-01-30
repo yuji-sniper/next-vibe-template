@@ -129,7 +129,178 @@
       "message": "The page you are looking for could not be found."
     }
   },
+  "commercialLaw": {
+    "heading": "Notation Based on the Specified Commercial Transactions Act",
+    "lastUpdated": "Last updated: January 1, 2025",
+    "items": {
+      "seller": {
+        "label": "Seller",
+        "value": "Sample Inc."
+      },
+      "representative": {
+        "label": "Representative",
+        "value": "Taro Yamada"
+      },
+      "address": {
+        "label": "Address",
+        "value": "Sample Building 5F, 1-1-1 Chiyoda, Chiyoda-ku, Tokyo 100-0001, Japan"
+      },
+      "phone": {
+        "label": "Phone",
+        "value": "+81-3-1234-5678 (Please contact us via email)"
+      },
+      "email": {
+        "label": "Email",
+        "value": "support@example.com"
+      },
+      "url": {
+        "label": "URL",
+        "value": "https://example.com"
+      },
+      "price": {
+        "label": "Price",
+        "value": "As displayed on each service page (tax included)"
+      },
+      "additionalCost": {
+        "label": "Additional Costs",
+        "value": "Internet connection fees are borne by the customer"
+      },
+      "payment": {
+        "label": "Payment Method",
+        "value": "Credit card payment"
+      },
+      "paymentTiming": {
+        "label": "Payment Timing",
+        "value": "Payment is processed at the time of service subscription. Monthly plans are automatically renewed each month."
+      },
+      "delivery": {
+        "label": "Service Delivery",
+        "value": "The service is available immediately after payment is completed"
+      },
+      "cancellation": {
+        "label": "Cancellation and Refund Policy",
+        "value": "Due to the nature of digital services, refunds cannot be provided after the service has been delivered. Monthly plans can be canceled at any time and will remain available until the end of the current billing period."
+      },
+      "environment": {
+        "label": "System Requirements",
+        "value": "Latest versions of Google Chrome, Firefox, Safari, and Microsoft Edge are recommended"
+      }
+    }
+  },
+  "privacy": {
+    "heading": "Privacy Policy",
+    "lastUpdated": "Last updated: January 1, 2025",
+    "sections": {
+      "collection": {
+        "title": "Article 1 (Information We Collect)",
+        "content": "We may collect the following information in connection with the provision of this service:",
+        "items": {
+          "1": "Account information such as name and email address",
+          "2": "Log information such as IP address, browser type, and access date/time",
+          "3": "Information obtained through cookies and similar technologies",
+          "4": "Payment-related information (credit card information is managed by our payment processor)"
+        }
+      },
+      "purpose": {
+        "title": "Article 2 (Purpose of Use)",
+        "content": "We use collected personal information for the following purposes:",
+        "items": {
+          "1": "Provision and operation of this service",
+          "2": "Responding to user inquiries",
+          "3": "Service improvement and development of new features",
+          "4": "Addressing violations of the terms of service",
+          "5": "Sending important notices regarding the service"
+        }
+      },
+      "thirdParty": {
+        "title": "Article 3 (Disclosure to Third Parties)",
+        "content": "We will not provide personal information to third parties except in the following cases: when the user has given consent, when required by law, or when necessary to protect a person's life, body, or property."
+      },
+      "security": {
+        "title": "Article 4 (Security Measures)",
+        "content": "We implement appropriate security measures to prevent leakage, loss, or damage of personal information. Data is transmitted through encrypted communications and managed under appropriate access controls."
+      },
+      "cookies": {
+        "title": "Article 5 (Use of Cookies)",
+        "content": "This service uses cookies to improve user experience and for service analytics. Users can disable cookies through browser settings, but some features may become unavailable."
+      },
+      "retention": {
+        "title": "Article 6 (Data Retention Period)",
+        "content": "We retain personal information to the extent necessary to achieve the purpose of use. When an account is deleted, associated personal information will be deleted within a reasonable period. However, this does not apply to information that is required to be retained by law."
+      },
+      "rights": {
+        "title": "Article 7 (User Rights)",
+        "content": "Users have the right to request disclosure, correction, or deletion of their personal information held by us. Please contact our support team for such requests."
+      },
+      "changes": {
+        "title": "Article 8 (Changes to This Policy)",
+        "content": "We may change this privacy policy as necessary. In the case of significant changes, we will notify users through this service. The revised policy shall take effect upon being posted on this website."
+      },
+      "contact": {
+        "title": "Article 9 (Contact Us)",
+        "content": "For inquiries regarding this policy, please contact us through the inquiry form within the service or via our support email address."
+      }
+    }
+  },
+  "terms": {
+    "heading": "Terms of Service",
+    "lastUpdated": "Last updated: January 1, 2025",
+    "sections": {
+      "acceptance": {
+        "title": "Article 1 (Application)",
+        "content": "These terms and conditions set forth the conditions for the use of this service. By using this service, users are deemed to have agreed to these terms."
+      },
+      "definition": {
+        "title": "Article 2 (Definitions)",
+        "content": "In these terms, \"the Service\" refers to the web application provided by us and all related services."
+      },
+      "registration": {
+        "title": "Article 3 (Account Registration)",
+        "content": "Users shall register an account by providing accurate and up-to-date information. Users are responsible for managing their own account information."
+      },
+      "prohibited": {
+        "title": "Article 4 (Prohibited Activities)",
+        "content": "Users shall not engage in the following activities when using this service:",
+        "items": {
+          "1": "Actions that violate laws or public order and morals",
+          "2": "Actions related to criminal activity",
+          "3": "Actions that interfere with the operation of the service",
+          "4": "Unauthorized collection of other users' personal information",
+          "5": "Attempting unauthorized access",
+          "6": "Other actions deemed inappropriate by us"
+        }
+      },
+      "suspension": {
+        "title": "Article 5 (Service Suspension)",
+        "content": "We may suspend all or part of the service without prior notice to users in cases such as system maintenance, natural disasters, or other unavoidable circumstances."
+      },
+      "liability": {
+        "title": "Article 6 (Disclaimer)",
+        "content": "We shall not be liable for any damages arising from the use of this service, except in cases of intentional misconduct or gross negligence on our part."
+      },
+      "changes": {
+        "title": "Article 7 (Changes to Terms)",
+        "content": "We may change these terms without notice when deemed necessary. The revised terms shall take effect upon being posted on this website."
+      },
+      "law": {
+        "title": "Article 8 (Governing Law and Jurisdiction)",
+        "content": "These terms shall be governed by the laws of Japan. In the event of any dispute arising from this service, the Tokyo District Court shall have exclusive jurisdiction as the court of first instance."
+      }
+    }
+  },
   "metadata": {
+    "commercialLaw": {
+      "title": "Commercial Transactions Act",
+      "description": "Seller information and transaction conditions based on the Specified Commercial Transactions Act."
+    },
+    "privacy": {
+      "title": "Privacy Policy",
+      "description": "Learn how we collect, use, and protect your personal information."
+    },
+    "terms": {
+      "title": "Terms of Service",
+      "description": "Please review our terms of service. These terms set forth the conditions for using our service."
+    },
     "top": {
       "title": "Top",
       "description": "A modern SaaS template built with Next.js, React, and TypeScript. Get started with authentication, payments, and i18n out of the box."
