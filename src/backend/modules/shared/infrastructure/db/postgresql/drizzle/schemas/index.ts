@@ -1,5 +1,6 @@
 export * from "./admins"
 export * from "./customers"
+export * from "./emails"
 export * from "./invoices"
 export * from "./payments"
 export * from "./prices"

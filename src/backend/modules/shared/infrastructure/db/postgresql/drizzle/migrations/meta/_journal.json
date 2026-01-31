@@ -29,6 +29,13 @@
       "when": 1769539420410,
       "tag": "0003_create_billing_related_tables",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1769857995978,
+      "tag": "0004_create_emails_table",
+      "breakpoints": true
     }
   ]
 }
