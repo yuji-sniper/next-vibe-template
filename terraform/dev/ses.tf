@@ -51,7 +51,35 @@ resource "aws_route53_record" "main_dmarc" {
   records = ["v=DMARC1; p=none;"]
 }
 
-# inbound
+################################################################################
+# 受信
+################################################################################
+# ルールセット
+resource "aws_ses_receipt_rule_set" "primary" {
+  rule_set_name = "primary"
+}
+
+# ルール
+resource "aws_ses_receipt_rule" "primary" {
+  rule_set_name = aws_ses_receipt_rule_set.primary.rule_set_name
+  name          = "store"
+  enabled       = true
+  tls_policy    = "Require"
+  scan_enabled  = true
+  recipients    = ["support@${aws_ses_domain_identity.main.domain}"]
+  s3_action {
+    bucket_name       = aws_s3_bucket.mail.id
+    object_key_prefix = "emails/"
+    position          = 1
+  }
+}
+
+# 有効なルールセット
+resource "aws_ses_active_receipt_rule_set" "primary" {
+  rule_set_name = aws_ses_receipt_rule_set.primary.rule_set_name
+}
+
+# inbound　　MXレコード
 resource "aws_route53_record" "main_inbound_mx" {
   zone_id = data.aws_route53_zone.main.id
   name    = aws_ses_domain_identity.main.domain
