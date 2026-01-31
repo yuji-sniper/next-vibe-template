@@ -1,3 +1,6 @@
+################################################################################
+# 送信
+################################################################################
 # ID
 resource "aws_ses_domain_identity" "main" {
   domain = local.domain
@@ -46,4 +49,13 @@ resource "aws_route53_record" "main_dmarc" {
   type    = "TXT"
   ttl     = 300
   records = ["v=DMARC1; p=none;"]
+}
+
+# inbound
+resource "aws_route53_record" "main_inbound_mx" {
+  zone_id = data.aws_route53_zone.main.id
+  name    = aws_ses_domain_identity.main.domain
+  type    = "MX"
+  ttl     = 300
+  records = ["10 inbound-smtp.${local.region}.amazonaws.com"]
 }
