@@ -1,5 +1,10 @@
 data "aws_caller_identity" "current" {}
 
+locals {
+  receipt_rule_set = "primary"
+  receipt_rule     = "store"
+}
+
 ################################################################################
 # Mail
 ################################################################################
@@ -38,4 +43,32 @@ resource "aws_s3_bucket_versioning" "mail" {
   versioning_configuration {
     status = "Enabled"
   }
+}
+
+data "aws_iam_policy_document" "mail" {
+  statement {
+    sid    = "AllowSESPuts"
+    effect = "Allow"
+    principals {
+      type        = "Service"
+      identifiers = ["ses.amazonaws.com"]
+    }
+    actions   = ["s3:PutObject"]
+    resources = ["arn:aws:s3:::${aws_s3_bucket.mail.id}/*"]
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceAccount"
+      values   = [data.aws_caller_identity.current.account_id]
+    }
+    condition {
+      test     = "StringEquals"
+      variable = "aws:SourceArn"
+      values   = ["arn:aws:ses:${local.region}:${data.aws_caller_identity.current.account_id}:receipt-rule-set/${local.receipt_rule_set}:receipt-rule/${local.receipt_rule}"]
+    }
+  }
+}
+
+resource "aws_s3_bucket_policy" "mail" {
+  bucket = aws_s3_bucket.mail.id
+  policy = data.aws_iam_policy_document.mail.json
 }
