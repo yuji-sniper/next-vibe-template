@@ -72,6 +72,7 @@ resource "aws_ses_receipt_rule" "primary" {
     object_key_prefix = "emails/"
     position          = 1
   }
+  depends_on = [aws_s3_bucket_policy.mail]
 }
 
 # 有効なルールセット
