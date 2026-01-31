@@ -68,9 +68,8 @@ resource "aws_ses_receipt_rule" "primary" {
   scan_enabled  = true
   recipients    = ["support@${aws_ses_domain_identity.main.domain}"]
   s3_action {
-    bucket_name       = aws_s3_bucket.mail.id
-    object_key_prefix = "emails/"
-    position          = 1
+    bucket_name = aws_s3_bucket.mail.id
+    position    = 1
   }
   depends_on = [aws_s3_bucket_policy.mail]
 }
