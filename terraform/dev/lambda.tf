@@ -12,7 +12,7 @@ resource "aws_s3_object" "email_processor" {
   bucket = aws_s3_bucket.lambda_function.id
   key    = "email-processor.zip"
   source = data.archive_file.email_processor.output_path
-  etag   = data.archive_file.email_processor.output_base64sha256
+  etag   = data.archive_file.email_processor.output_md5
 }
 
 # IAMロール
