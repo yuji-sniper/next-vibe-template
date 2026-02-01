@@ -8,6 +8,7 @@
   },
   "scripts": {
     "dev": "next dev",
+    "prebuild": "pnpm drizzle:migrate",
     "build": "next build",
     "start": "next start",
     "type:check": "tsc --noEmit",
