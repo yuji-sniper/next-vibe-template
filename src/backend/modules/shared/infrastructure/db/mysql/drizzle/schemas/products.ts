@@ -15,7 +15,7 @@ export const products = mysqlTable(
   "products",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
-    stripeProductId: text("stripe_product_id").unique(),
+    stripeProductId: varchar("stripe_product_id", { length: 255 }).unique(),
     name: text("name").notNull(),
     description: text("description"),
     active: boolean("active").notNull().default(true),

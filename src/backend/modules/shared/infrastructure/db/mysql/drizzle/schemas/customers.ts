@@ -20,7 +20,9 @@ export const customers = mysqlTable(
   {
     id: varchar("id", { length: 36 }).primaryKey(),
     userId: varchar("user_id", { length: 36 }).notNull(),
-    stripeCustomerId: text("stripe_customer_id").notNull().unique(),
+    stripeCustomerId: varchar("stripe_customer_id", { length: 255 })
+      .notNull()
+      .unique(),
     email: text("email").notNull(),
     createdAt: timestamp("created_at", { fsp: 3 }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { fsp: 3 })

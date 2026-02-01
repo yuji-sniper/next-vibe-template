@@ -22,7 +22,9 @@ export const invoices = mysqlTable(
     id: varchar("id", { length: 36 }).primaryKey(),
     customerId: varchar("customer_id", { length: 36 }).notNull(),
     subscriptionId: varchar("subscription_id", { length: 36 }),
-    stripeInvoiceId: text("stripe_invoice_id").notNull().unique(),
+    stripeInvoiceId: varchar("stripe_invoice_id", { length: 255 })
+      .notNull()
+      .unique(),
     amount: int("amount").notNull(),
     currency: varchar("currency", { length: 3 }).notNull().default("jpy"),
     status: text("status").notNull(),

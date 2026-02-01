@@ -19,7 +19,9 @@ export const subscriptions = mysqlTable(
   {
     id: varchar("id", { length: 36 }).primaryKey(),
     customerId: varchar("customer_id", { length: 36 }).notNull(),
-    stripeSubscriptionId: text("stripe_subscription_id").notNull().unique(),
+    stripeSubscriptionId: varchar("stripe_subscription_id", { length: 255 })
+      .notNull()
+      .unique(),
     stripePriceId: text("stripe_price_id").notNull(),
     status: text("status").notNull(),
     currentPeriodStart: timestamp("current_period_start", { fsp: 3 }),

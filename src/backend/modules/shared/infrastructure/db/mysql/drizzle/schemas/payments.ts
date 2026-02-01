@@ -19,7 +19,9 @@ export const payments = mysqlTable(
   {
     id: varchar("id", { length: 36 }).primaryKey(),
     customerId: varchar("customer_id", { length: 36 }).notNull(),
-    stripePaymentIntentId: text("stripe_payment_intent_id").notNull().unique(),
+    stripePaymentIntentId: varchar("stripe_payment_intent_id", { length: 255 })
+      .notNull()
+      .unique(),
     amount: int("amount").notNull(),
     currency: text("currency").notNull().default("jpy"),
     status: text("status").notNull(),

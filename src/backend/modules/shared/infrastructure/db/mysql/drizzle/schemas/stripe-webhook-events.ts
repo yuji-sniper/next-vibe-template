@@ -8,7 +8,7 @@ import {
 
 export const stripeWebhookEvents = mysqlTable("stripe_webhook_events", {
   id: varchar("id", { length: 36 }).primaryKey(),
-  stripeEventId: text("stripe_event_id").notNull().unique(),
+  stripeEventId: varchar("stripe_event_id", { length: 255 }).notNull().unique(),
   eventType: text("event_type").notNull(),
   processed: boolean("processed").default(false).notNull(),
   createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull()

@@ -11,8 +11,8 @@ export const emails = mysqlTable(
   "emails",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
-    messageId: text("message_id"),
-    fromAddress: text("from_address").notNull(),
+    messageId: varchar("message_id", { length: 255 }),
+    fromAddress: varchar("from_address", { length: 255 }).notNull(),
     fromName: text("from_name"),
     toAddresses: json("to_addresses")
       .notNull()

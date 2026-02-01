@@ -21,7 +21,7 @@ export const prices = mysqlTable(
   {
     id: varchar("id", { length: 36 }).primaryKey(),
     productId: varchar("product_id", { length: 36 }).notNull(),
-    stripePriceId: text("stripe_price_id").unique(),
+    stripePriceId: varchar("stripe_price_id", { length: 255 }).unique(),
     currency: text("currency").notNull().default("jpy"),
     unitAmount: int("unit_amount").notNull(),
     recurringInterval: text("recurring_interval"),
