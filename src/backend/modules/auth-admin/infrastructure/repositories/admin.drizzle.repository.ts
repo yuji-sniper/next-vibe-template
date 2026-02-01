@@ -14,12 +14,9 @@ export class AdminDrizzleRepository implements AdminRepository {
 
   async delete(adminId: string): Promise<void> {
     const db = this.getDb.handle()
-    const result = await db
-      .delete(admins)
-      .where(eq(admins.id, adminId))
-      .returning({ id: admins.id })
+    const [result] = await db.delete(admins).where(eq(admins.id, adminId))
 
-    if (result.length === 0) {
+    if (result.affectedRows === 0) {
       throw new AuthAdminDeleteFailedError()
     }
   }

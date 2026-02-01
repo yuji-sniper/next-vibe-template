@@ -14,12 +14,9 @@ export class UserDrizzleRepository implements UserRepository {
 
   async delete(userId: string): Promise<void> {
     const db = this.getDb.handle()
-    const result = await db
-      .delete(users)
-      .where(eq(users.id, userId))
-      .returning({ id: users.id })
+    const [result] = await db.delete(users).where(eq(users.id, userId))
 
-    if (result.length === 0) {
+    if (result.affectedRows === 0) {
       throw new AuthUserDeleteFailedError()
     }
   }
