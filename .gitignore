@@ -43,3 +43,5 @@ next-env.d.ts
 .docs
 
 **/settings.local.json
+
+.docker/mysql/data
