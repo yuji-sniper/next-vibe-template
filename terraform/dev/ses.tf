@@ -66,7 +66,7 @@ resource "aws_ses_receipt_rule" "primary" {
   enabled       = true
   tls_policy    = "Require"
   scan_enabled  = true
-  recipients    = ["support@${aws_ses_domain_identity.main.domain}"]
+  recipients    = ["support-dev@${aws_ses_domain_identity.main.domain}"]
   s3_action {
     bucket_name = aws_s3_bucket.mail.id
     position    = 1
