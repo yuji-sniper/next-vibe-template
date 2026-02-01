@@ -2,8 +2,8 @@ import { eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
 import type { AdminRepository } from "@/backend/modules/auth-admin/domain/auth-admin/admin.repository"
 import { AuthAdminDeleteFailedError } from "@/backend/modules/auth-admin/domain/auth-admin/auth-admin.errors"
-import { GetDb } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/get-db"
-import { admins } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/schemas"
+import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
+import { admins } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
 
 @injectable()
 export class AdminDrizzleRepository implements AdminRepository {

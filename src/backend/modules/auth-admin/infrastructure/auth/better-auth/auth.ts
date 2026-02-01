@@ -1,16 +1,14 @@
-import "server-only"
-
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { oneTap } from "better-auth/plugins"
-import { db } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/client"
+import { db } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/client"
 import { env } from "@/env"
 
-export type Session = Awaited<ReturnType<typeof authAdmin.api.getSession>>
+export type Session = Awaited<ReturnType<typeof auth.api.getSession>>
 
-export const authAdmin = betterAuth({
+export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "pg"
+    provider: "mysql"
   }),
   baseURL: env.NEXT_PUBLIC_ORIGIN_ADMIN,
   advanced: {
@@ -28,16 +26,7 @@ export const authAdmin = betterAuth({
   },
   plugins: [oneTap()],
   user: {
-    modelName: "admins",
-    additionalFields: {
-      storageKey: {
-        type: "string"
-      },
-      tokenBalance: {
-        type: "number",
-        default: 0
-      }
-    }
+    modelName: "admins"
   },
   session: {
     modelName: "admin_sessions"
