@@ -7,7 +7,7 @@ export default defineConfig({
     "./src/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas",
   dialect: "mysql",
   dbCredentials: {
-    url: env.DATABASE_HOST,
+    host: env.DATABASE_HOST,
     port: env.DATABASE_PORT,
     user: env.DATABASE_USER,
     password: env.DATABASE_PASSWORD,
