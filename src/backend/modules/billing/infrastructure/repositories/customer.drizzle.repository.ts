@@ -2,8 +2,8 @@ import { eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
 import { Customer } from "@/backend/modules/billing/domain/customer/customer"
 import type { CustomerRepository } from "@/backend/modules/billing/domain/customer/customer.repository"
-import { GetDb } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/get-db"
-import { customers } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/schemas"
+import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
+import { customers } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
 
 @injectable()
 export class CustomerDrizzleRepository implements CustomerRepository {

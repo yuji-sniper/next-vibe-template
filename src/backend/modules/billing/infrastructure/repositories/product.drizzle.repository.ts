@@ -2,8 +2,8 @@ import { eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
 import { Product } from "@/backend/modules/billing/domain/product/product"
 import type { ProductRepository } from "@/backend/modules/billing/domain/product/product.repository"
-import { GetDb } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/get-db"
-import { products } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/schemas"
+import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
+import { products } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
 
 @injectable()
 export class ProductDrizzleRepository implements ProductRepository {
