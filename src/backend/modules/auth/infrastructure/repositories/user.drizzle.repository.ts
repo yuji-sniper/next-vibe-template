@@ -1,6 +1,5 @@
 import { eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
-import { AuthUserDeleteFailedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
 import type { UserRepository } from "@/backend/modules/auth/domain/auth-user/user.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
 import { users } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
@@ -12,12 +11,10 @@ export class UserDrizzleRepository implements UserRepository {
     private readonly getDb: GetDb
   ) {}
 
-  async delete(userId: string): Promise<void> {
+  async delete(userId: string): Promise<boolean> {
     const db = this.getDb.handle()
     const [result] = await db.delete(users).where(eq(users.id, userId))
 
-    if (result.affectedRows === 0) {
-      throw new AuthUserDeleteFailedError()
-    }
+    return result.affectedRows > 0
   }
 }

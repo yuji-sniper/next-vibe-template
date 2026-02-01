@@ -1,6 +1,7 @@
 import { inject, injectable } from "tsyringe"
 import type { GetAuthUserPort } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
 import { GetAuthUserPortToken } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
+import { AuthUserDeleteFailedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
 import type { UserRepository } from "@/backend/modules/auth/domain/auth-user/user.repository"
 import { UserRepositoryToken } from "@/backend/modules/auth/domain/auth-user/user.repository"
 import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
@@ -24,7 +25,11 @@ export class DeleteAuthUserUseCase implements DeleteAuthUserUseCasePort {
     const { authUser } = await this.getAuthUser.handle()
 
     this.logger.info("Deleting user from repository", { userId: authUser.id })
-    await this.userRepository.delete(authUser.id)
+    const deleted = await this.userRepository.delete(authUser.id)
+
+    if (!deleted) {
+      throw new AuthUserDeleteFailedError()
+    }
 
     this.logger.info("Auth user deleted successfully", { userId: authUser.id })
   }
