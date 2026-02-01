@@ -6,8 +6,8 @@ import type {
 } from "@/backend/modules/billing/domain/price/price"
 import { Price } from "@/backend/modules/billing/domain/price/price"
 import type { PriceRepository } from "@/backend/modules/billing/domain/price/price.repository"
-import { GetDb } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/get-db"
-import { prices } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/schemas"
+import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
+import { prices } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
 
 @injectable()
 export class PriceDrizzleRepository implements PriceRepository {
@@ -84,8 +84,7 @@ export class PriceDrizzleRepository implements PriceRepository {
         createdAt: price.createdAt,
         updatedAt: price.updatedAt
       })
-      .onConflictDoUpdate({
-        target: prices.id,
+      .onDuplicateKeyUpdate({
         set: {
           stripePriceId: price.stripePriceId,
           active: price.active,

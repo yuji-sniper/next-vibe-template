@@ -4,7 +4,12 @@ import { z } from "zod"
 export const env = createEnv({
   server: {
     BETTER_AUTH_SECRET: z.string(),
-    DATABASE_URL: z.string(),
+    DATABASE_HOST: z.string(),
+    DATABASE_PORT: z.coerce.number().default(3306),
+    DATABASE_USER: z.string(),
+    DATABASE_PASSWORD: z.string(),
+    DATABASE_NAME: z.string(),
+    DATABASE_NAME_TEST: z.string(),
     GOOGLE_CLIENT_SECRET: z.string(),
     GOOGLE_CLIENT_SECRET_ADMIN: z.string(),
     STRIPE_SECRET_KEY: z.string(),

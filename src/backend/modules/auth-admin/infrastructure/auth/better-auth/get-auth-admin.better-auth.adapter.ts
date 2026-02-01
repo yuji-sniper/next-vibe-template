@@ -5,11 +5,11 @@ import type {
 } from "../../../application/queries/ports/get-auth-admin.port"
 import { AuthAdmin } from "../../../domain/auth-admin/auth-admin"
 import { AuthAdminUnauthorizedError } from "../../../domain/auth-admin/auth-admin.errors"
-import { authAdmin } from "./auth-admin"
+import { auth } from "./auth"
 
 export class GetAuthAdminBetterAuthAdapter implements GetAuthAdminPort {
   async handle(): Promise<GetAuthAdminPortOutput> {
-    const session = await authAdmin.api.getSession({
+    const session = await auth.api.getSession({
       headers: await headers()
     })
 

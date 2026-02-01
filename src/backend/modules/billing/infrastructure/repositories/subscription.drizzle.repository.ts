@@ -3,8 +3,8 @@ import { inject, injectable } from "tsyringe"
 import type { SubscriptionStatus } from "@/backend/modules/billing/domain/subscription/subscription"
 import { Subscription } from "@/backend/modules/billing/domain/subscription/subscription"
 import type { SubscriptionRepository } from "@/backend/modules/billing/domain/subscription/subscription.repository"
-import { GetDb } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/get-db"
-import { subscriptions } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/schemas"
+import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
+import { subscriptions } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
 
 @injectable()
 export class SubscriptionDrizzleRepository implements SubscriptionRepository {
@@ -78,8 +78,7 @@ export class SubscriptionDrizzleRepository implements SubscriptionRepository {
         createdAt: subscription.createdAt,
         updatedAt: subscription.updatedAt
       })
-      .onConflictDoUpdate({
-        target: subscriptions.id,
+      .onDuplicateKeyUpdate({
         set: {
           stripePriceId: subscription.stripePriceId,
           status: subscription.status,

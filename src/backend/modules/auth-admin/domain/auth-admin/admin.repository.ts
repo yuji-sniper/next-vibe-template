@@ -1,5 +1,5 @@
 export interface AdminRepository {
-  delete(adminId: string): Promise<void>
+  delete(adminId: string): Promise<boolean>
 }
 
 export const AdminRepositoryToken = Symbol("AdminRepository")

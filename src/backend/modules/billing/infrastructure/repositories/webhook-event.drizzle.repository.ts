@@ -2,8 +2,8 @@ import { eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
 import { WebhookEvent } from "@/backend/modules/billing/domain/webhook-event/webhook-event"
 import type { WebhookEventRepository } from "@/backend/modules/billing/domain/webhook-event/webhook-event.repository"
-import { GetDb } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/get-db"
-import { stripeWebhookEvents } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/schemas"
+import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
+import { stripeWebhookEvents } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
 
 @injectable()
 export class WebhookEventDrizzleRepository implements WebhookEventRepository {
@@ -47,8 +47,7 @@ export class WebhookEventDrizzleRepository implements WebhookEventRepository {
         processed: event.processed,
         createdAt: event.createdAt
       })
-      .onConflictDoUpdate({
-        target: stripeWebhookEvents.id,
+      .onDuplicateKeyUpdate({
         set: { processed: event.processed }
       })
   }

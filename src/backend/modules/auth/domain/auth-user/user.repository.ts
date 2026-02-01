@@ -1,5 +1,5 @@
 export interface UserRepository {
-  delete(userId: string): Promise<void>
+  delete(userId: string): Promise<boolean>
 }
 
 export const UserRepositoryToken = Symbol("UserRepository")

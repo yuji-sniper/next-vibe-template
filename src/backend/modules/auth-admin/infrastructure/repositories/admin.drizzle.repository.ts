@@ -1,9 +1,8 @@
 import { eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
 import type { AdminRepository } from "@/backend/modules/auth-admin/domain/auth-admin/admin.repository"
-import { AuthAdminDeleteFailedError } from "@/backend/modules/auth-admin/domain/auth-admin/auth-admin.errors"
-import { GetDb } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/get-db"
-import { admins } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/schemas"
+import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
+import { admins } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
 
 @injectable()
 export class AdminDrizzleRepository implements AdminRepository {
@@ -12,15 +11,10 @@ export class AdminDrizzleRepository implements AdminRepository {
     private readonly getDb: GetDb
   ) {}
 
-  async delete(adminId: string): Promise<void> {
+  async delete(adminId: string): Promise<boolean> {
     const db = this.getDb.handle()
-    const result = await db
-      .delete(admins)
-      .where(eq(admins.id, adminId))
-      .returning({ id: admins.id })
+    const [result] = await db.delete(admins).where(eq(admins.id, adminId))
 
-    if (result.length === 0) {
-      throw new AuthAdminDeleteFailedError()
-    }
+    return result.affectedRows > 0
   }
 }
