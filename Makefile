@@ -18,3 +18,6 @@ prune:
 
 tunnel:
 	cloudflared tunnel --url http://localhost:3000
+
+stripe-listen:
+	stripe listen --forward-to localhost:3000/api/stripe/webhook
