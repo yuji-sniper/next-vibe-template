@@ -72,8 +72,7 @@ export class PaymentDrizzleRepository implements PaymentRepository {
         status: payment.status,
         createdAt: payment.createdAt
       })
-      .onConflictDoUpdate({
-        target: payments.id,
+      .onDuplicateKeyUpdate({
         set: { status: payment.status }
       })
   }

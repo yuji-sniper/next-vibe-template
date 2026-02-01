@@ -70,8 +70,7 @@ export class ProductDrizzleRepository implements ProductRepository {
         createdAt: product.createdAt,
         updatedAt: product.updatedAt
       })
-      .onConflictDoUpdate({
-        target: products.id,
+      .onDuplicateKeyUpdate({
         set: {
           stripeProductId: product.stripeProductId,
           name: product.name,

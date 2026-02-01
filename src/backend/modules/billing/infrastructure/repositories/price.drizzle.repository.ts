@@ -84,8 +84,7 @@ export class PriceDrizzleRepository implements PriceRepository {
         createdAt: price.createdAt,
         updatedAt: price.updatedAt
       })
-      .onConflictDoUpdate({
-        target: prices.id,
+      .onDuplicateKeyUpdate({
         set: {
           stripePriceId: price.stripePriceId,
           active: price.active,

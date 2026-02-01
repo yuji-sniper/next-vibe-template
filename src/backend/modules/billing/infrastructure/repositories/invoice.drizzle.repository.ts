@@ -80,8 +80,7 @@ export class InvoiceDrizzleRepository implements InvoiceRepository {
         paidAt: invoice.paidAt,
         createdAt: invoice.createdAt
       })
-      .onConflictDoUpdate({
-        target: invoices.id,
+      .onDuplicateKeyUpdate({
         set: {
           status: invoice.status,
           paidAt: invoice.paidAt

@@ -78,8 +78,7 @@ export class SubscriptionDrizzleRepository implements SubscriptionRepository {
         createdAt: subscription.createdAt,
         updatedAt: subscription.updatedAt
       })
-      .onConflictDoUpdate({
-        target: subscriptions.id,
+      .onDuplicateKeyUpdate({
         set: {
           stripePriceId: subscription.stripePriceId,
           status: subscription.status,

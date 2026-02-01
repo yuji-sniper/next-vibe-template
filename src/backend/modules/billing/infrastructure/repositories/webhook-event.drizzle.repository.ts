@@ -47,8 +47,7 @@ export class WebhookEventDrizzleRepository implements WebhookEventRepository {
         processed: event.processed,
         createdAt: event.createdAt
       })
-      .onConflictDoUpdate({
-        target: stripeWebhookEvents.id,
+      .onDuplicateKeyUpdate({
         set: { processed: event.processed }
       })
   }
