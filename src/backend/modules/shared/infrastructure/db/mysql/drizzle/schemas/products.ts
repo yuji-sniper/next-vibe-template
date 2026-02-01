@@ -2,16 +2,16 @@ import { relations } from "drizzle-orm"
 import {
   boolean,
   index,
-  integer,
-  jsonb,
-  pgTable,
+  int,
+  json,
+  mysqlTable,
   text,
   timestamp,
   varchar
-} from "drizzle-orm/pg-core"
+} from "drizzle-orm/mysql-core"
 import { prices } from "./prices"
 
-export const products = pgTable(
+export const products = mysqlTable(
   "products",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
@@ -19,15 +19,14 @@ export const products = pgTable(
     name: text("name").notNull(),
     description: text("description"),
     active: boolean("active").notNull().default(true),
-    metadata: jsonb("metadata").$type<Record<string, string> | null>(),
-    displayOrder: integer("display_order").default(0),
-    features: jsonb("features").$type<string[] | null>(),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
+    metadata: json("metadata").$type<Record<string, string> | null>(),
+    displayOrder: int("display_order").default(0),
+    features: json("features").$type<string[] | null>(),
+    createdAt: timestamp("created_at", { fsp: 3 }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { fsp: 3 })
       .notNull()
       .defaultNow()
+      .$onUpdate(() => new Date())
   },
   (table) => [
     index("idx_products_stripe_product_id").on(table.stripeProductId),

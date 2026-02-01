@@ -2,12 +2,12 @@ import { relations } from "drizzle-orm"
 import {
   foreignKey,
   index,
-  integer,
-  pgTable,
+  int,
+  mysqlTable,
   text,
   timestamp,
   varchar
-} from "drizzle-orm/pg-core"
+} from "drizzle-orm/mysql-core"
 import { customers } from "./customers"
 import { subscriptions } from "./subscriptions"
 
@@ -16,20 +16,18 @@ export const INVOICES_CONSTRAINTS = {
   SUBSCRIPTION_ID_FOREIGN_KEY: "invoices_subscription_id_subscriptions_id_fk"
 } as const
 
-export const invoices = pgTable(
+export const invoices = mysqlTable(
   "invoices",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
     customerId: varchar("customer_id", { length: 36 }).notNull(),
     subscriptionId: varchar("subscription_id", { length: 36 }),
     stripeInvoiceId: text("stripe_invoice_id").notNull().unique(),
-    amount: integer("amount").notNull(),
+    amount: int("amount").notNull(),
     currency: varchar("currency", { length: 3 }).notNull().default("jpy"),
     status: text("status").notNull(),
-    paidAt: timestamp("paid_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow()
+    paidAt: timestamp("paid_at", { fsp: 3 }),
+    createdAt: timestamp("created_at", { fsp: 3 }).notNull().defaultNow()
   },
   (table) => [
     foreignKey({

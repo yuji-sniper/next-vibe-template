@@ -3,39 +3,38 @@ import {
   boolean,
   foreignKey,
   index,
-  integer,
-  jsonb,
-  pgTable,
+  int,
+  json,
+  mysqlTable,
   text,
   timestamp,
   varchar
-} from "drizzle-orm/pg-core"
+} from "drizzle-orm/mysql-core"
 import { products } from "./products"
 
 export const PRICES_CONSTRAINTS = {
   PRODUCT_ID_FOREIGN_KEY: "prices_product_id_products_id_fk"
 } as const
 
-export const prices = pgTable(
+export const prices = mysqlTable(
   "prices",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
     productId: varchar("product_id", { length: 36 }).notNull(),
     stripePriceId: text("stripe_price_id").unique(),
     currency: text("currency").notNull().default("jpy"),
-    unitAmount: integer("unit_amount").notNull(),
+    unitAmount: int("unit_amount").notNull(),
     recurringInterval: text("recurring_interval"),
-    recurringIntervalCount: integer("recurring_interval_count").default(1),
+    recurringIntervalCount: int("recurring_interval_count").default(1),
     type: text("type").notNull(),
     active: boolean("active").notNull().default(true),
-    metadata: jsonb("metadata").$type<Record<string, string> | null>(),
+    metadata: json("metadata").$type<Record<string, string> | null>(),
     displayName: text("display_name"),
-    createdAt: timestamp("created_at", { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
+    createdAt: timestamp("created_at", { fsp: 3 }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { fsp: 3 })
       .notNull()
       .defaultNow()
+      .$onUpdate(() => new Date())
   },
   (table) => [
     foreignKey({
