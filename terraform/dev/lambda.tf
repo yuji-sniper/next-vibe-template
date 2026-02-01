@@ -67,8 +67,10 @@ resource "aws_lambda_function" "email_processor" {
   role             = aws_iam_role.email_processor.arn
   handler          = "index.handler"
   runtime          = "nodejs20.x"
-  filename         = data.archive_file.email_processor.output_path
+  s3_bucket        = aws_s3_bucket.lambda_function.id
+  s3_key           = aws_s3_object.email_processor.key
   source_code_hash = data.archive_file.email_processor.output_base64sha256
+  publish          = true
   memory_size      = 256
   timeout          = 30
 
@@ -88,7 +90,6 @@ resource "aws_lambda_function" "email_processor" {
   }
 
   depends_on = [
-    aws_s3_object.email_processor,
     aws_iam_role_policy_attachment.email_processor_lambda_basic,
     aws_iam_role_policy_attachment.email_processor_s3,
   ]
