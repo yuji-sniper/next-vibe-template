@@ -86,9 +86,6 @@ importers:
       pino:
         specifier: ^10.3.0
         version: 10.3.0
-      postgres:
-        specifier: ^3.4.8
-        version: 3.4.8
       react:
         specifier: 19.2.3
         version: 19.2.3
@@ -4635,7 +4632,8 @@ snapshots:
     dependencies:
       xtend: 4.0.2
 
-  postgres@3.4.8: {}
+  postgres@3.4.8:
+    optional: true
 
   process-warning@5.0.0: {}
 
