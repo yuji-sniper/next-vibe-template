@@ -6,11 +6,12 @@ services:
       - 3306:3306
     environment:
       MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: next-vibe-template
-      MYSQL_USER: next-vibe-template
+      MYSQL_DATABASE: next_vibe_template
+      MYSQL_USER: next_vibe_template
       MYSQL_PASSWORD: password
     volumes:
-      - .docker/mysql/data:/var/lib/mysql
+      - mysql-data:/var/lib/mysql
+      - .docker/mysql/initdb.d:/docker-entrypoint-initdb.d
   phpmyadmin:
     container_name: phpmyadmin
     image: phpmyadmin
@@ -23,3 +24,5 @@ services:
       PMA_PASSWORD: password
     depends_on:
       - db
+volumes:
+  mysql-data:
