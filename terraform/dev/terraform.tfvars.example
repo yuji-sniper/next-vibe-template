@@ -2,3 +2,5 @@ database_host =
 database_port = 
 database_user = 
 database_name = 
+
+vercel_cname_target = 
