@@ -1,0 +1,45 @@
+import { relations } from "drizzle-orm"
+import {
+  foreignKey,
+  index,
+  integer,
+  pgTable,
+  text,
+  timestamp,
+  varchar
+} from "drizzle-orm/pg-core"
+import { customers } from "./customers"
+
+export const PAYMENTS_CONSTRAINTS = {
+  CUSTOMER_ID_FOREIGN_KEY: "payments_customer_id_customers_id_fk"
+} as const
+
+export const payments = pgTable(
+  "payments",
+  {
+    id: varchar("id", { length: 36 }).primaryKey(),
+    customerId: varchar("customer_id", { length: 36 }).notNull(),
+    stripePaymentIntentId: text("stripe_payment_intent_id").notNull().unique(),
+    amount: integer("amount").notNull(),
+    currency: text("currency").notNull().default("jpy"),
+    status: text("status").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.customerId],
+      foreignColumns: [customers.id],
+      name: PAYMENTS_CONSTRAINTS.CUSTOMER_ID_FOREIGN_KEY
+    }).onDelete("cascade"),
+    index("idx_payments_customer_id").on(table.customerId)
+  ]
+)
+
+export const paymentsRelations = relations(payments, ({ one }) => ({
+  customer: one(customers, {
+    fields: [payments.customerId],
+    references: [customers.id]
+  })
+}))
