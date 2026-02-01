@@ -7,5 +7,14 @@ dev-admin:
 up:
 	docker compose up -d
 
+build:
+	docker compose up -d --build
+
+down:
+	docker compose down
+
+prune:
+	docker system prune -a --volumes --force
+
 tunnel:
 	cloudflared tunnel --url http://localhost:3000
