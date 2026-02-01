@@ -1,11 +1,15 @@
 import type { ExtractTablesWithRelations } from "drizzle-orm"
-import type { PgTransaction } from "drizzle-orm/pg-core"
-import type { PostgresJsQueryResultHKT } from "drizzle-orm/postgres-js"
-import type { Db } from "../../../infrastructure/db/postgresql/drizzle/client"
-import type * as schema from "../../../infrastructure/db/postgresql/drizzle/schemas"
+import type { MySqlTransaction } from "drizzle-orm/mysql-core"
+import type {
+  MySql2PreparedQueryHKT,
+  MySql2QueryResultHKT
+} from "drizzle-orm/mysql2"
+import type { Db } from "../../../infrastructure/db/mysql/drizzle/client"
+import type * as schema from "../../../infrastructure/db/mysql/drizzle/schemas"
 
-export type DbTransaction = PgTransaction<
-  PostgresJsQueryResultHKT,
+export type DbTransaction = MySqlTransaction<
+  MySql2QueryResultHKT,
+  MySql2PreparedQueryHKT,
   typeof schema,
   ExtractTablesWithRelations<typeof schema>
 >
