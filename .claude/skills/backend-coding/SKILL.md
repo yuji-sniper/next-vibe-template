@@ -1,7 +1,7 @@
 ---
 name: backend-coding
 trigger: /backend-coding
-description: Next.jsプロジェクトのバックエンド実装スキル。クリーンアーキテクチャ + DDD + tsyringe DIパターンに基づく実装。src/backend/modules/配下のドメイン、ユースケース、リポジトリ、ハンドラー、Server Actionの実装時に使用。Drizzle ORM + PostgreSQL + Better-Auth + Zodバリデーションのパターンに従う。
+description: Next.jsプロジェクトのバックエンド実装スキル。クリーンアーキテクチャ + DDD + tsyringe DIパターンに基づく実装。src/backend/modules/配下のドメイン、ユースケース、リポジトリ、ハンドラー、Server Actionの実装時に使用。Drizzle ORM + MySQL + Better-Auth + Zodバリデーションのパターンに従う。
 ---
 
 # Backend Coding
@@ -29,7 +29,7 @@ src/backend/
     │   │       └── *.vo.ts
     │   ├── infrastructure/
     │   │   ├── db/
-    │   │   │   └── postgresql/
+    │   │   │   └── mysql/
     │   │   │       └── drizzle/
     │   │   │           ├── client.ts
     │   │   │           ├── get-db.ts
@@ -505,8 +505,8 @@ import { inject, injectable } from "tsyringe"
 import type { ExampleStatus } from "@/backend/modules/{module}/domain/example/example"
 import { Example } from "@/backend/modules/{module}/domain/example/example"
 import type { ExampleRepository } from "@/backend/modules/{module}/domain/example/example.repository"
-import { GetDb } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/get-db"
-import { examples } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/schemas"
+import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
+import { examples } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
 
 @injectable()
 export class ExampleDrizzleRepository implements ExampleRepository {
@@ -558,8 +558,7 @@ export class ExampleDrizzleRepository implements ExampleRepository {
         createdAt: example.createdAt,
         updatedAt: example.updatedAt
       })
-      .onConflictDoUpdate({
-        target: examples.id,
+      .onDuplicateKeyUpdate({
         set: {
           name: example.name,
           status: example.status,
@@ -736,17 +735,17 @@ export const initExampleDependency = (container: DependencyContainer) => {
 ## Drizzle Schema
 
 ```typescript
-// modules/shared/infrastructure/db/postgresql/drizzle/schemas/{table}.ts
+// modules/shared/infrastructure/db/mysql/drizzle/schemas/{table}.ts
 import { relations } from "drizzle-orm"
 import {
   boolean,
   foreignKey,
   index,
-  pgTable,
+  mysqlTable,
   text,
   timestamp,
   varchar
-} from "drizzle-orm/pg-core"
+} from "drizzle-orm/mysql-core"
 import { users } from "./users"
 
 // 外部キー制約名の定数化
@@ -754,7 +753,7 @@ export const EXAMPLES_CONSTRAINTS = {
   USER_ID_FOREIGN_KEY: "examples_user_id_users_id_fk"
 } as const
 
-export const examples = pgTable(
+export const examples = mysqlTable(
   "examples",
   {
     id: varchar("id", { length: 36 }).primaryKey(),
@@ -762,12 +761,13 @@ export const examples = pgTable(
     externalId: text("external_id").notNull().unique(),
     name: text("name").notNull(),
     status: text("status").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true })
+    createdAt: timestamp("created_at", { fsp: 3 })
       .notNull()
       .defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true })
+    updatedAt: timestamp("updated_at", { fsp: 3 })
       .notNull()
       .defaultNow()
+      .$onUpdate(() => new Date())
   },
   (table) => [
     foreignKey({
@@ -941,12 +941,12 @@ import "server-only"
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { oneTap } from "better-auth/plugins"
-import { db } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/client"
+import { db } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/client"
 import { env } from "@/env"
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "pg"
+    provider: "mysql"
   }),
   baseURL: env.NEXT_PUBLIC_ORIGIN,
   socialProviders: {
@@ -1035,7 +1035,7 @@ export class UuidV7Generator implements UuidV7GeneratorPort {
 
 ## スキーマ追加時
 
-1. `modules/shared/infrastructure/db/postgresql/drizzle/schemas/` にスキーマファイル作成
+1. `modules/shared/infrastructure/db/mysql/drizzle/schemas/` にスキーマファイル作成
 2. `schemas/index.ts` にエクスポートを追加
 3. マイグレーション生成: `pnpm drizzle-kit:generate`
 4. マイグレーション適用: `pnpm drizzle-kit:migrate`
@@ -1148,17 +1148,17 @@ export type PriceType = "one_time" | "recurring"
 export type RecurringInterval = "month" | "year"
 ```
 
-## Drizzle Schema の JSONB 型指定
+## Drizzle Schema の JSON 型指定
 
-JSONB カラムには `$type<>()` で型を指定する：
+JSON カラムには `$type<>()` で型を指定する：
 
 ```typescript
-import { jsonb, pgTable } from "drizzle-orm/pg-core"
+import { json, mysqlTable } from "drizzle-orm/mysql-core"
 
-export const products = pgTable("products", {
-  // JSONB カラムの型指定
-  metadata: jsonb("metadata").$type<Record<string, string> | null>(),
-  features: jsonb("features").$type<string[] | null>(),
+export const products = mysqlTable("products", {
+  // JSON カラムの型指定
+  metadata: json("metadata").$type<Record<string, string> | null>(),
+  features: json("features").$type<string[] | null>(),
 })
 ```
 
@@ -1192,12 +1192,12 @@ private toDomain(row: {
 - [ ] Domain Entity の変更メソッドで `updatedAt` を更新
 - [ ] Domain Error は `this.name` を設定
 - [ ] Repository は `GetDb` 経由で DB アクセス（`this.getDb.handle()`）
-- [ ] Repository の `save()` は `onConflictDoUpdate` で upsert 実装
+- [ ] Repository の `save()` は `onDuplicateKeyUpdate` で upsert 実装
 - [ ] Repository に `toDomain()` プライベートメソッドを実装
 - [ ] Repository の import はエイリアスパス（`@/backend/...`）を使用
 - [ ] Drizzle Schema で外部キー制約名を定数化
 - [ ] Drizzle Schema で適切なインデックスを定義
-- [ ] Drizzle Schema の JSONB カラムに `$type<>()` で型指定
+- [ ] Drizzle Schema の JSON カラムに `$type<>()` で型指定
 - [ ] DI 登録を `registerSingleton` で追加
 - [ ] Handler で Zod バリデーションを実装（Action ではなく Handler で行う）
 - [ ] Handler で Domain Error を Result 型に変換
