@@ -1,14 +1,12 @@
-import "server-only"
-
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { oneTap } from "better-auth/plugins"
-import { db } from "@/backend/modules/shared/infrastructure/db/postgresql/drizzle/client"
+import { db } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/client"
 import { env } from "@/env"
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: "pg"
+    provider: "mysql"
   }),
   baseURL: env.NEXT_PUBLIC_ORIGIN,
   socialProviders: {
@@ -20,15 +18,7 @@ export const auth = betterAuth({
   plugins: [oneTap()],
   user: {
     modelName: "users",
-    additionalFields: {
-      storageKey: {
-        type: "string"
-      },
-      tokenBalance: {
-        type: "number",
-        default: 0
-      }
-    }
+    additionalFields: {}
   },
   session: {
     modelName: "sessions"
