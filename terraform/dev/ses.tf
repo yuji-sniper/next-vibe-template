@@ -14,7 +14,7 @@ resource "aws_ses_domain_dkim" "main" {
 resource "aws_route53_record" "main_dkim" {
   count   = 3
   zone_id = aws_route53_zone.main.zone_id
-  name    = "${aws_ses_domain_dkim.main.dkim_tokens[count.index]}._domainkey.${aws_ses_domain_identity.main.domain}"
+  name    = "${aws_ses_domain_dkim.main.dkim_tokens[count.index]}._domainkey.${local.domain}"
   type    = "CNAME"
   ttl     = 1800
   records = ["${aws_ses_domain_dkim.main.dkim_tokens[count.index]}.dkim.amazonses.com"]
@@ -23,7 +23,7 @@ resource "aws_route53_record" "main_dkim" {
 # MAIL FROM
 resource "aws_ses_domain_mail_from" "main" {
   domain           = aws_ses_domain_identity.main.domain
-  mail_from_domain = "bounce.dev.${aws_ses_domain_identity.main.domain}"
+  mail_from_domain = "bounce.${local.domain}"
 }
 
 resource "aws_route53_record" "main_mail_from_mx" {
@@ -45,7 +45,7 @@ resource "aws_route53_record" "main_mail_from_txt" {
 # DMARC
 resource "aws_route53_record" "main_dmarc" {
   zone_id = aws_route53_zone.main.zone_id
-  name    = "_dmarc.${aws_ses_domain_identity.main.domain}"
+  name    = "_dmarc.${local.domain}"
   type    = "TXT"
   ttl     = 300
   records = ["v=DMARC1; p=none;"]
@@ -66,7 +66,7 @@ resource "aws_ses_receipt_rule" "primary" {
   enabled       = true
   tls_policy    = "Require"
   scan_enabled  = true
-  recipients    = ["support-dev@${aws_ses_domain_identity.main.domain}"]
+  recipients    = ["support@${local.domain}"]
   s3_action {
     bucket_name = aws_s3_bucket.mail.id
     position    = 1
