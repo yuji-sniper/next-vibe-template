@@ -11,7 +11,7 @@ export const authAdminClient = createAuthClient({
       clientId: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID_ADMIN,
       cancelOnTapOutside: false,
       promptOptions: {
-        fedCM: process.env.NODE_ENV === "production"
+        fedCM: true
       }
     })
   ]
