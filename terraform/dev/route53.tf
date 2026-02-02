@@ -15,5 +15,5 @@ resource "aws_route53_record" "main_admin_cname" {
   name    = "admin"
   type    = "CNAME"
   ttl     = 300
-  records = [var.vercel_cname_target]
+  records = ["www.${local.domain}"]
 }
