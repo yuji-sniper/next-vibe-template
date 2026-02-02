@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "0c141c6b-b610-472d-a2a4-ddba76765f77",
+  "id": "a2429cdc-76da-4825-841e-d594a12bd8a8",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "admin_accounts": {
@@ -647,8 +647,7 @@
           "type": "varchar(3)",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "'jpy'"
+          "autoincrement": false
         },
         "status": {
           "name": "status",
@@ -860,8 +859,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "('jpy')"
+          "autoincrement": false
         },
         "unit_amount": {
           "name": "unit_amount",

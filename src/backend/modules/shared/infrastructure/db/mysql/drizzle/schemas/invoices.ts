@@ -26,7 +26,7 @@ export const invoices = mysqlTable(
       .notNull()
       .unique(),
     amount: int("amount").notNull(),
-    currency: varchar("currency", { length: 3 }).notNull().default("jpy"),
+    currency: varchar("currency", { length: 3 }).notNull(),
     status: text("status").notNull(),
     paidAt: timestamp("paid_at", { fsp: 3 }),
     createdAt: timestamp("created_at", { fsp: 3 })
