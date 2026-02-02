@@ -97,7 +97,7 @@ CREATE TABLE `payments` (
 	`customer_id` varchar(36) NOT NULL,
 	`stripe_payment_intent_id` varchar(255) NOT NULL,
 	`amount` int NOT NULL,
-	`currency` text NOT NULL DEFAULT ('jpy'),
+	`currency` text NOT NULL,
 	`status` text NOT NULL,
 	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `payments_id` PRIMARY KEY(`id`),

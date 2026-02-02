@@ -23,7 +23,7 @@ export const payments = mysqlTable(
       .notNull()
       .unique(),
     amount: int("amount").notNull(),
-    currency: text("currency").notNull().default("jpy"),
+    currency: text("currency").notNull(),
     status: text("status").notNull(),
     createdAt: timestamp("created_at", { fsp: 3 })
       .notNull()

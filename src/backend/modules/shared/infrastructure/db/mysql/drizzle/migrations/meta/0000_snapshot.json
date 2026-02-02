@@ -1,7 +1,7 @@
 {
   "version": "5",
   "dialect": "mysql",
-  "id": "79ec5938-367b-413b-97d8-a250fce1e97a",
+  "id": "0c141c6b-b610-472d-a2a4-ddba76765f77",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "admin_accounts": {
@@ -771,8 +771,7 @@
           "type": "text",
           "primaryKey": false,
           "notNull": true,
-          "autoincrement": false,
-          "default": "('jpy')"
+          "autoincrement": false
         },
         "status": {
           "name": "status",
