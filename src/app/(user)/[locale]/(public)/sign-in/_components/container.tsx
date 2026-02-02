@@ -24,7 +24,8 @@ export function SignInContainer() {
 
   useEffectOnce(() => {
     authClient.oneTap({
-      callbackURL: `/${locale}/home`
+      callbackURL: `/${locale}/home`,
+      cancelOnTapOutside: false
     })
   })
 
