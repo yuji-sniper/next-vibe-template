@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 import {
   foreignKey,
   index,
@@ -24,10 +24,12 @@ export const customers = mysqlTable(
       .notNull()
       .unique(),
     email: text("email").notNull(),
-    createdAt: timestamp("created_at", { fsp: 3 }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
     updatedAt: timestamp("updated_at", { fsp: 3 })
       .notNull()
-      .defaultNow()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
       .$onUpdate(() => new Date())
   },
   (table) => [

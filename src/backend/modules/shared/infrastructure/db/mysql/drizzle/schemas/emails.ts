@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm"
 import {
   index,
   json,
@@ -26,7 +27,9 @@ export const emails = mysqlTable(
     s3Bucket: text("s3_bucket").notNull(),
     s3Key: text("s3_key").notNull(),
     receivedAt: timestamp("received_at", { fsp: 3 }),
-    createdAt: timestamp("created_at", { fsp: 3 }).notNull().defaultNow()
+    createdAt: timestamp("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
   },
   (table) => [
     index("idx_emails_from_address").on(table.fromAddress),

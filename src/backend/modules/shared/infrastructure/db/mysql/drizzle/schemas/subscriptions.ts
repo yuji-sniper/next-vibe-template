@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 import {
   boolean,
   foreignKey,
@@ -27,10 +27,12 @@ export const subscriptions = mysqlTable(
     currentPeriodStart: timestamp("current_period_start", { fsp: 3 }),
     currentPeriodEnd: timestamp("current_period_end", { fsp: 3 }),
     cancelAtPeriodEnd: boolean("cancel_at_period_end").notNull().default(false),
-    createdAt: timestamp("created_at", { fsp: 3 }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
     updatedAt: timestamp("updated_at", { fsp: 3 })
       .notNull()
-      .defaultNow()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
       .$onUpdate(() => new Date())
   },
   (table) => [

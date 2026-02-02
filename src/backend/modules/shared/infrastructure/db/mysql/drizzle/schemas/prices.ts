@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 import {
   boolean,
   foreignKey,
@@ -30,10 +30,12 @@ export const prices = mysqlTable(
     active: boolean("active").notNull().default(true),
     metadata: json("metadata").$type<Record<string, string> | null>(),
     displayName: text("display_name"),
-    createdAt: timestamp("created_at", { fsp: 3 }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
     updatedAt: timestamp("updated_at", { fsp: 3 })
       .notNull()
-      .defaultNow()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
       .$onUpdate(() => new Date())
   },
   (table) => [

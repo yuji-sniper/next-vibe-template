@@ -1,3 +1,4 @@
+import { sql } from "drizzle-orm"
 import {
   boolean,
   mysqlTable,
@@ -11,5 +12,7 @@ export const stripeWebhookEvents = mysqlTable("stripe_webhook_events", {
   stripeEventId: varchar("stripe_event_id", { length: 255 }).notNull().unique(),
   eventType: text("event_type").notNull(),
   processed: boolean("processed").default(false).notNull(),
-  createdAt: timestamp("created_at", { fsp: 3 }).defaultNow().notNull()
+  createdAt: timestamp("created_at", { fsp: 3 })
+    .default(sql`CURRENT_TIMESTAMP(3)`)
+    .notNull()
 })

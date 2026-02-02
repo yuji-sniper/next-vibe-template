@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 import {
   foreignKey,
   index,
@@ -25,7 +25,9 @@ export const payments = mysqlTable(
     amount: int("amount").notNull(),
     currency: text("currency").notNull().default("jpy"),
     status: text("status").notNull(),
-    createdAt: timestamp("created_at", { fsp: 3 }).notNull().defaultNow()
+    createdAt: timestamp("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
   },
   (table) => [
     foreignKey({

@@ -1,4 +1,4 @@
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 import {
   boolean,
   index,
@@ -22,10 +22,12 @@ export const products = mysqlTable(
     metadata: json("metadata").$type<Record<string, string> | null>(),
     displayOrder: int("display_order").default(0),
     features: json("features").$type<string[] | null>(),
-    createdAt: timestamp("created_at", { fsp: 3 }).notNull().defaultNow(),
+    createdAt: timestamp("created_at", { fsp: 3 })
+      .notNull()
+      .default(sql`CURRENT_TIMESTAMP(3)`),
     updatedAt: timestamp("updated_at", { fsp: 3 })
       .notNull()
-      .defaultNow()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
       .$onUpdate(() => new Date())
   },
   (table) => [

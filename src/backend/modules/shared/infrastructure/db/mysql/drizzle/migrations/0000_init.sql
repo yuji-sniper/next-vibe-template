@@ -10,7 +10,7 @@ CREATE TABLE `admin_accounts` (
 	`refresh_token_expires_at` timestamp(3),
 	`scope` text,
 	`password` text,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	`updated_at` timestamp(3) NOT NULL,
 	CONSTRAINT `admin_accounts_id` PRIMARY KEY(`id`)
 );
@@ -19,7 +19,7 @@ CREATE TABLE `admin_sessions` (
 	`id` varchar(36) NOT NULL,
 	`expires_at` timestamp(3) NOT NULL,
 	`token` varchar(255) NOT NULL,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	`updated_at` timestamp(3) NOT NULL,
 	`ip_address` text,
 	`user_agent` text,
@@ -33,8 +33,8 @@ CREATE TABLE `admin_verifications` (
 	`identifier` varchar(255) NOT NULL,
 	`value` text NOT NULL,
 	`expires_at` timestamp(3) NOT NULL,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
-	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+	`updated_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `admin_verifications_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
@@ -44,8 +44,8 @@ CREATE TABLE `admins` (
 	`email` varchar(255) NOT NULL,
 	`email_verified` boolean NOT NULL DEFAULT false,
 	`image` text,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
-	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+	`updated_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `admins_id` PRIMARY KEY(`id`),
 	CONSTRAINT `admins_email_unique` UNIQUE(`email`)
 );
@@ -55,8 +55,8 @@ CREATE TABLE `customers` (
 	`user_id` varchar(36) NOT NULL,
 	`stripe_customer_id` varchar(255) NOT NULL,
 	`email` text NOT NULL,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
-	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+	`updated_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `customers_id` PRIMARY KEY(`id`),
 	CONSTRAINT `customers_stripe_customer_id_unique` UNIQUE(`stripe_customer_id`)
 );
@@ -74,7 +74,7 @@ CREATE TABLE `emails` (
 	`s3_bucket` text NOT NULL,
 	`s3_key` text NOT NULL,
 	`received_at` timestamp(3),
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `emails_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
@@ -87,7 +87,7 @@ CREATE TABLE `invoices` (
 	`currency` varchar(3) NOT NULL DEFAULT 'jpy',
 	`status` text NOT NULL,
 	`paid_at` timestamp(3),
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `invoices_id` PRIMARY KEY(`id`),
 	CONSTRAINT `invoices_stripe_invoice_id_unique` UNIQUE(`stripe_invoice_id`)
 );
@@ -99,7 +99,7 @@ CREATE TABLE `payments` (
 	`amount` int NOT NULL,
 	`currency` text NOT NULL DEFAULT ('jpy'),
 	`status` text NOT NULL,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `payments_id` PRIMARY KEY(`id`),
 	CONSTRAINT `payments_stripe_payment_intent_id_unique` UNIQUE(`stripe_payment_intent_id`)
 );
@@ -116,8 +116,8 @@ CREATE TABLE `prices` (
 	`active` boolean NOT NULL DEFAULT true,
 	`metadata` json,
 	`display_name` text,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
-	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+	`updated_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `prices_id` PRIMARY KEY(`id`),
 	CONSTRAINT `prices_stripe_price_id_unique` UNIQUE(`stripe_price_id`)
 );
@@ -131,8 +131,8 @@ CREATE TABLE `products` (
 	`metadata` json,
 	`display_order` int DEFAULT 0,
 	`features` json,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
-	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+	`updated_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `products_id` PRIMARY KEY(`id`),
 	CONSTRAINT `products_stripe_product_id_unique` UNIQUE(`stripe_product_id`)
 );
@@ -142,7 +142,7 @@ CREATE TABLE `stripe_webhook_events` (
 	`stripe_event_id` varchar(255) NOT NULL,
 	`event_type` text NOT NULL,
 	`processed` boolean NOT NULL DEFAULT false,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `stripe_webhook_events_id` PRIMARY KEY(`id`),
 	CONSTRAINT `stripe_webhook_events_stripe_event_id_unique` UNIQUE(`stripe_event_id`)
 );
@@ -156,8 +156,8 @@ CREATE TABLE `subscriptions` (
 	`current_period_start` timestamp(3),
 	`current_period_end` timestamp(3),
 	`cancel_at_period_end` boolean NOT NULL DEFAULT false,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
-	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+	`updated_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `subscriptions_id` PRIMARY KEY(`id`),
 	CONSTRAINT `subscriptions_stripe_subscription_id_unique` UNIQUE(`stripe_subscription_id`)
 );
@@ -174,7 +174,7 @@ CREATE TABLE `accounts` (
 	`refresh_token_expires_at` timestamp(3),
 	`scope` text,
 	`password` text,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	`updated_at` timestamp(3) NOT NULL,
 	CONSTRAINT `accounts_id` PRIMARY KEY(`id`)
 );
@@ -183,7 +183,7 @@ CREATE TABLE `sessions` (
 	`id` varchar(36) NOT NULL,
 	`expires_at` timestamp(3) NOT NULL,
 	`token` varchar(255) NOT NULL,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	`updated_at` timestamp(3) NOT NULL,
 	`ip_address` text,
 	`user_agent` text,
@@ -198,8 +198,8 @@ CREATE TABLE `users` (
 	`email` varchar(255) NOT NULL,
 	`email_verified` boolean NOT NULL DEFAULT false,
 	`image` text,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
-	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+	`updated_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `users_id` PRIMARY KEY(`id`),
 	CONSTRAINT `users_email_unique` UNIQUE(`email`)
 );
@@ -209,8 +209,8 @@ CREATE TABLE `verifications` (
 	`identifier` varchar(255) NOT NULL,
 	`value` text NOT NULL,
 	`expires_at` timestamp(3) NOT NULL,
-	`created_at` timestamp(3) NOT NULL DEFAULT (now()),
-	`updated_at` timestamp(3) NOT NULL DEFAULT (now()),
+	`created_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+	`updated_at` timestamp(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 	CONSTRAINT `verifications_id` PRIMARY KEY(`id`)
 );
 --> statement-breakpoint
