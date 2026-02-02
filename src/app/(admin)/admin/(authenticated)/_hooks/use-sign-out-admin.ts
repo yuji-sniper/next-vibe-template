@@ -14,7 +14,7 @@ export function useSignOutAdmin() {
     },
     onSuccess: () => {
       getQueryClient().clear()
-      router.push("/admin/sign-in")
+      router.push("/sign-in")
     }
   })
 

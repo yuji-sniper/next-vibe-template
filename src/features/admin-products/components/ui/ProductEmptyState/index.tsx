@@ -15,7 +15,7 @@ export const ProductEmptyState = () => {
         新しい商品を作成してください。
       </p>
       <Button asChild>
-        <Link href="/admin/products/new">新規作成</Link>
+        <Link href="/products/new">新規作成</Link>
       </Button>
     </div>
   )

@@ -41,7 +41,7 @@ export const ProductsPresentational = ({
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold">商品管理</h1>
         <Button asChild>
-          <Link href="/admin/products/new">
+          <Link href="/products/new">
             <PlusIcon className="size-4" />
             新規作成
           </Link>
