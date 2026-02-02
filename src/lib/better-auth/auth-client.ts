@@ -14,7 +14,7 @@ export const authClient = createAuthClient({
       promptOptions: {
         // FedCMはローカル開発環境では動作しないため、本番環境のみ有効化
         // NEXT_PUBLIC_ORIGINがhttpsで始まる場合のみFedCMを有効化
-        fedCM: env.NEXT_PUBLIC_ORIGIN.startsWith("https://")
+        fedCM: true
       }
     })
   ]
