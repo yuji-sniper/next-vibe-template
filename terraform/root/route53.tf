@@ -28,19 +28,11 @@ resource "aws_route53_record" "prod_admin_cname" {
 }
 
 # Development
-resource "aws_route53_record" "dev_cname" {
+resource "aws_route53_record" "dev_ns" {
   zone_id = data.aws_route53_zone.main.zone_id
-  name    = "dev"
-  type    = "CNAME"
-  ttl     = 300
-  records = [var.vercel_cname_target]
-}
-
-resource "aws_route53_record" "dev_admin_cname" {
-  zone_id = data.aws_route53_zone.main.zone_id
-  name    = "dev.admin"
-  type    = "CNAME"
-  ttl     = 300
-  records = [var.vercel_cname_target]
+  name    = "dev.${local.domain}"
+  type    = "NS"
+  ttl     = 172800
+  records = var.dev_name_servers
 }
 
