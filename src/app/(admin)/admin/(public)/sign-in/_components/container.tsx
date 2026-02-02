@@ -36,7 +36,8 @@ export function AdminSignInContainer() {
 
   useEffectOnce(() => {
     authAdminClient.oneTap({
-      callbackURL: "/dashboard"
+      callbackURL: "/dashboard",
+      cancelOnTapOutside: false
     })
   })
 
