@@ -23,12 +23,12 @@ import { useSignOutAdmin } from "../_hooks/use-sign-out-admin"
 const navItems = [
   {
     title: "ダッシュボード",
-    href: "/admin/dashboard",
+    href: "/dashboard",
     icon: LayoutDashboard
   },
   {
     title: "商品管理",
-    href: "/admin/products",
+    href: "/products",
     icon: Package
   }
 ]
