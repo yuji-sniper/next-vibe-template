@@ -12,9 +12,7 @@ export const authClient = createAuthClient({
       cancelOnTapOutside: false,
       context: "signin",
       promptOptions: {
-        // FedCMはローカル開発環境では動作しないため、本番環境のみ有効化
-        // NEXT_PUBLIC_ORIGINがhttpsで始まる場合のみFedCMを有効化
-        fedCM: true
+        fedCM: false
       }
     })
   ]
