@@ -2,7 +2,6 @@ data "aws_route53_zone" "main" {
   name = local.domain
 }
 
-# Production
 resource "aws_route53_record" "prod_a" {
   zone_id = data.aws_route53_zone.main.zone_id
   name    = local.domain
@@ -11,6 +10,7 @@ resource "aws_route53_record" "prod_a" {
   records = ["216.150.1.1"]
 }
 
+# Prod
 resource "aws_route53_record" "prod_www_cname" {
   zone_id = data.aws_route53_zone.main.zone_id
   name    = "www"
@@ -27,7 +27,7 @@ resource "aws_route53_record" "prod_admin_cname" {
   records = [var.vercel_cname_target]
 }
 
-# Development委任
+# Dev委任
 resource "aws_route53_record" "dev_ns" {
   zone_id = data.aws_route53_zone.main.zone_id
   name    = "dev.${local.domain}"
