@@ -27,7 +27,7 @@ resource "aws_route53_record" "prod_admin_cname" {
   records = [var.vercel_cname_target]
 }
 
-# Development
+# Development委任
 resource "aws_route53_record" "dev_ns" {
   zone_id = data.aws_route53_zone.main.zone_id
   name    = "dev.${local.domain}"
