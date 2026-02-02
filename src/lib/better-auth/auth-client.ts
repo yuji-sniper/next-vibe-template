@@ -11,6 +11,9 @@ export const authClient = createAuthClient({
       clientId: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
       cancelOnTapOutside: false,
       context: "signin",
+      additionalOptions: {
+        use_fedcm_for_prompt: false
+      },
       promptOptions: {
         fedCM: false
       }
