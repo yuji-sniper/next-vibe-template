@@ -20,5 +20,5 @@ variable "database_name" {
 
 variable "vercel_cname_target" {
   type        = string
-  description = "The target of the Vercel CNAME"
+  description = "The CNAME target of the Vercel deployment"
 }

@@ -13,7 +13,7 @@ resource "aws_ses_domain_dkim" "main" {
 
 resource "aws_route53_record" "main_dkim" {
   count   = 3
-  zone_id = data.aws_route53_zone.main.id
+  zone_id = aws_route53_zone.main.zone_id
   name    = "${aws_ses_domain_dkim.main.dkim_tokens[count.index]}._domainkey.${aws_ses_domain_identity.main.domain}"
   type    = "CNAME"
   ttl     = 1800
@@ -27,7 +27,7 @@ resource "aws_ses_domain_mail_from" "main" {
 }
 
 resource "aws_route53_record" "main_mail_from_mx" {
-  zone_id = data.aws_route53_zone.main.id
+  zone_id = aws_route53_zone.main.zone_id
   name    = aws_ses_domain_mail_from.main.mail_from_domain
   type    = "MX"
   ttl     = 300
@@ -35,7 +35,7 @@ resource "aws_route53_record" "main_mail_from_mx" {
 }
 
 resource "aws_route53_record" "main_mail_from_txt" {
-  zone_id = data.aws_route53_zone.main.id
+  zone_id = aws_route53_zone.main.zone_id
   name    = aws_ses_domain_mail_from.main.mail_from_domain
   type    = "TXT"
   ttl     = 300
@@ -44,7 +44,7 @@ resource "aws_route53_record" "main_mail_from_txt" {
 
 # DMARC
 resource "aws_route53_record" "main_dmarc" {
-  zone_id = data.aws_route53_zone.main.id
+  zone_id = aws_route53_zone.main.zone_id
   name    = "_dmarc.${aws_ses_domain_identity.main.domain}"
   type    = "TXT"
   ttl     = 300
@@ -81,7 +81,7 @@ resource "aws_ses_active_receipt_rule_set" "primary" {
 
 # inbound　　MXレコード
 resource "aws_route53_record" "main_inbound_mx" {
-  zone_id = data.aws_route53_zone.main.id
+  zone_id = aws_route53_zone.main.zone_id
   name    = aws_ses_domain_identity.main.domain
   type    = "MX"
   ttl     = 300
