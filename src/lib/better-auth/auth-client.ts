@@ -9,7 +9,13 @@ export const authClient = createAuthClient({
   plugins: [
     oneTapClient({
       clientId: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,
-      cancelOnTapOutside: false
+      cancelOnTapOutside: false,
+      additionalOptions: {
+        use_fedcm_for_prompt: false
+      },
+      promptOptions: {
+        fedCM: false
+      }
     })
   ]
 })
