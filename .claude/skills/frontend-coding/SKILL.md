@@ -25,27 +25,24 @@ Next.js 16 + React 19 + TypeScript のフロントエンド実装ガイド。
 ```
 src/
 ├── app/                    # Next.js App Router
-│   ├── layout.tsx          # ルートレイアウト
+│   ├── layout.tsx          # ルートレイアウト（globals.cssのインポートのみ）
 │   ├── globals.css         # グローバルスタイル（Tailwind v4）
 │   ├── (user)/[locale]/    # ユーザー向けページ
-│   │   ├── layout.tsx      # ロケールレイアウト（NextIntlClientProvider）
+│   │   ├── layout.tsx      # ロケールレイアウト（html/body、プロバイダー、メタデータテンプレート）
 │   │   ├── error.tsx       # エラーバウンダリ
 │   │   ├── not-found.tsx   # 404ページ
 │   │   ├── (authenticated)/ # 認証後ページ
 │   │   │   ├── layout.tsx  # 認証チェック + HydrationBoundary
 │   │   │   └── {page}/
-│   │   │       ├── page.tsx
-│   │   │       └── _components/  # ページ固有コンポーネント
+│   │   │       ├── page.tsx           # generateMetadataでi18n対応メタデータ
+│   │   │       └── _components/       # ページ固有コンポーネント
 │   │   │           ├── container.tsx      # ロジック層
 │   │   │           └── presentational.tsx # 表示層
 │   │   └── (public)/        # 公開ページ
 │   │       └── layout.tsx
 │   └── (admin)/admin/      # 管理者向けページ
 ├── components/             # 共通UIコンポーネント
-│   ├── ui/                 # Radix UI + shadcn/ui ベース
-│   └── layout/
-│       └── wrapper/        # ラッパーコンポーネント
-│           └── RootLayoutWrapper/  # グローバルプロバイダー
+│   └── ui/                 # Radix UI + shadcn/ui ベース
 ├── features/               # 機能別フォルダ（複数ページで共有）
 │   └── {feature}/
 │       ├── types/          # 型定義
@@ -369,14 +366,63 @@ export default async function SettingsPage({ params }: Props) {
 
 ## ページ実装パターン
 
+### メタデータ定義（generateMetadata）
+
+ページ固有のメタデータは`generateMetadata`関数で定義する。i18n対応のメタデータを生成できる。
+
+```tsx
+// app/(user)/[locale]/(authenticated)/home/page.tsx
+import type { Metadata } from "next"
+import { getTranslations, setRequestLocale } from "next-intl/server"
+
+type Props = {
+  params: Promise<{ locale: string }>
+}
+
+// i18n対応のメタデータを生成
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "metadata.home" })
+
+  return {
+    title: t("title"),
+    description: t("description")
+  }
+}
+
+export default async function HomePage({ params }: Props) {
+  const { locale } = await params
+  setRequestLocale(locale)
+
+  const t = await getTranslations("home")
+
+  return (
+    <div>
+      <h1>{t("heading")}</h1>
+    </div>
+  )
+}
+```
+
 ### サーバーコンポーネント（認証なし）
 
 ```tsx
 // app/(user)/[locale]/(public)/example/page.tsx
-import { setRequestLocale } from "next-intl/server"
+import type { Metadata } from "next"
+import { getTranslations, setRequestLocale } from "next-intl/server"
 
 type Props = {
   params: Promise<{ locale: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "metadata.example" })
+
+  return {
+    title: t("title"),
+    description: t("description")
+  }
 }
 
 export default async function ExamplePage({ params }: Props) {
@@ -391,6 +437,7 @@ export default async function ExamplePage({ params }: Props) {
 
 ```tsx
 // app/(user)/[locale]/(authenticated)/dashboard/page.tsx
+import type { Metadata } from "next"
 import { setRequestLocale, getTranslations } from "next-intl/server"
 import { HydrationBoundary, dehydrate } from "@tanstack/react-query"
 import { getQueryClient } from "@/lib/react-query/query-client"
@@ -399,6 +446,16 @@ import { DashboardContainer } from "@/features/example/components/layout/Dashboa
 
 type Props = {
   params: Promise<{ locale: string }>
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "metadata.dashboard" })
+
+  return {
+    title: t("title"),
+    description: t("description")
+  }
 }
 
 export default async function DashboardPage({ params }: Props) {
@@ -686,28 +743,48 @@ export const useDeleteFeatureMutation = () => {
 
 ### HydrationBoundary（SSR統合）
 
-サーバーでプリフェッチしたデータをクライアントに引き継ぐ:
+サーバーでプリフェッチしたデータをクライアントに引き継ぐ。ページ単位でデータをプリフェッチする場合に使用する。
+
+**注意**: 認証レイアウトでは`fetchQuery`を使用してユーザー情報を取得・検証する。`prefetchQuery`はページ固有のデータプリフェッチに使用する。
 
 ```tsx
-// app/(user)/[locale]/(authenticated)/layout.tsx
+// app/(user)/[locale]/(authenticated)/products/page.tsx
+import type { Metadata } from "next"
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
+import { getTranslations, setRequestLocale } from "next-intl/server"
 import { getQueryClient } from "@/lib/react-query/query-client"
+import { productsKey, getProductsQuery } from "@/features/products/queries/get-products"
+import { ProductsContainer } from "./_components/container"
 
-export const dynamic = "force-dynamic"
+type Props = {
+  params: Promise<{ locale: string }>
+}
 
-export default async function AuthenticatedLayout({ children, params }) {
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params
+  const t = await getTranslations({ locale, namespace: "metadata.products" })
+
+  return {
+    title: t("title"),
+    description: t("description")
+  }
+}
+
+export default async function ProductsPage({ params }: Props) {
+  const { locale } = await params
+  setRequestLocale(locale)
+
   const queryClient = getQueryClient()
 
-  // サーバーサイドでデータプリフェッチ
+  // ページ固有のデータをプリフェッチ
   await queryClient.prefetchQuery({
-    queryKey: featureKey,
-    queryFn: getFeatureQuery
+    queryKey: productsKey,
+    queryFn: getProductsQuery
   })
 
   return (
     <HydrationBoundary state={dehydrate(queryClient)}>
-      {children}
+      <ProductsContainer />
     </HydrationBoundary>
   )
 }
@@ -1008,18 +1085,22 @@ export function useSignOut() {
 
 ### 認証ガード（レイアウト）
 
+認証レイアウトでは`fetchQuery`を使用してユーザー情報を取得し、未認証の場合はリダイレクトする。
+
 ```tsx
 // app/(user)/[locale]/(authenticated)/layout.tsx
-import { redirect } from "next/navigation"
 import { dehydrate, HydrationBoundary } from "@tanstack/react-query"
-import { getQueryClient } from "@/lib/react-query/query-client"
-import { authUserKey, getAuthUserQuery } from "@/features/auth/queries/get-auth-user"
+import { redirect } from "next/navigation"
+import { setRequestLocale } from "next-intl/server"
 import { Toaster } from "@/components/ui/sonner"
 import { AuthUserMenu } from "@/features/auth/components/layout/AuthUserMenu"
+import { getAuthUserQuery } from "@/features/auth/queries/get-auth-user"
+import { authUserKey } from "@/features/auth/queries/keys"
+import { getQueryClient } from "@/lib/react-query/query-client"
 
 export const dynamic = "force-dynamic"
 
-export default async function AuthenticatedLayout({
+export default async function UserAuthenticatedLayout({
   children,
   params
 }: {
@@ -1027,11 +1108,12 @@ export default async function AuthenticatedLayout({
   params: Promise<{ locale: string }>
 }) {
   const { locale } = await params
-  const queryClient = getQueryClient()
+  setRequestLocale(locale)
 
+  const queryClient = getQueryClient()
   const { authUser } = await queryClient.fetchQuery({
     queryKey: authUserKey,
-    queryFn: getAuthUserQuery
+    queryFn: () => getAuthUserQuery({ orError: false })
   })
 
   if (!authUser) {
@@ -1039,13 +1121,13 @@ export default async function AuthenticatedLayout({
   }
 
   return (
-    <div className="min-h-screen">
-      <header className="sticky top-0 z-50 border-b bg-background">
+    <div className="flex h-screen flex-col">
+      <header className="z-50 shrink-0 border-b bg-background">
         <div className="container flex h-14 items-center justify-end">
           <AuthUserMenu />
         </div>
       </header>
-      <main>
+      <main className="flex-1 overflow-y-auto">
         <HydrationBoundary state={dehydrate(queryClient)}>
           {children}
         </HydrationBoundary>
@@ -1058,57 +1140,63 @@ export default async function AuthenticatedLayout({
 
 ## グローバルプロバイダー構成
 
-### RootLayoutWrapper
-
-```tsx
-// components/layout/wrapper/RootLayoutWrapper/index.tsx
-"use client"
-
-import type { PropsWithChildren } from "react"
-import { QueryProvider } from "@/providers/QueryProvider"
-
-export const RootLayoutWrapper = ({ children }: PropsWithChildren) => {
-  return <QueryProvider>{children}</QueryProvider>
-}
-```
-
 ### ルートレイアウト
+
+ルートレイアウトはグローバルCSSのインポートのみを行い、`html`/`body`タグはロケールレイアウトに配置する。
 
 ```tsx
 // app/layout.tsx
-import type { Metadata } from "next"
-import { RootLayoutWrapper } from "@/components/layout/wrapper/RootLayoutWrapper"
 import "./globals.css"
-
-export const metadata: Metadata = {
-  title: "App Title",
-  description: "App Description"
-}
 
 export default function RootLayout({
   children
-}: {
+}: Readonly<{
   children: React.ReactNode
-}) {
-  return (
-    <html lang="en" suppressHydrationWarning>
-      <body>
-        <RootLayoutWrapper>{children}</RootLayoutWrapper>
-      </body>
-    </html>
-  )
+}>) {
+  return children
 }
 ```
 
 ### ロケールレイアウト
 
+ロケールレイアウトに`html`/`body`タグ、プロバイダー、メタデータテンプレートを配置する。
+
 ```tsx
 // app/(user)/[locale]/layout.tsx
-import { hasLocale, setRequestLocale } from "next-intl/server"
+import type { Metadata } from "next"
 import { notFound } from "next/navigation"
-import { NextIntlClientProvider } from "next-intl"
-import { getMessages } from "next-intl/server"
+import { hasLocale, NextIntlClientProvider } from "next-intl"
+import { getMessages, setRequestLocale } from "next-intl/server"
+import { env } from "@/env"
 import { routing } from "@/i18n/routing"
+import { ProgressBarProvider } from "@/providers/ProgressBarProvider"
+import { QueryProvider } from "@/providers/QueryProvider"
+
+const serviceName = env.NEXT_PUBLIC_SERVICE_NAME
+const serviceDescription = "サービスの説明"
+
+// メタデータテンプレート（ページ別タイトルは generateMetadata で設定）
+export const metadata: Metadata = {
+  metadataBase: new URL(env.NEXT_PUBLIC_ORIGIN),
+  title: {
+    template: `%s | ${serviceName}`,
+    default: serviceName
+  },
+  description: serviceDescription,
+  openGraph: {
+    title: serviceName,
+    description: serviceDescription,
+    url: env.NEXT_PUBLIC_ORIGIN,
+    siteName: serviceName,
+    images: [{ url: "/og-image.png", width: 1200, height: 630 }]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: serviceName,
+    description: serviceDescription,
+    images: ["/og-image.png"]
+  }
+}
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }))
@@ -1131,9 +1219,15 @@ export default async function LocaleLayout({
   const messages = await getMessages()
 
   return (
-    <NextIntlClientProvider messages={messages}>
-      {children}
-    </NextIntlClientProvider>
+    <html lang={locale}>
+      <body>
+        <QueryProvider>
+          <NextIntlClientProvider messages={messages}>
+            <ProgressBarProvider>{children}</ProgressBarProvider>
+          </NextIntlClientProvider>
+        </QueryProvider>
+      </body>
+    </html>
   )
 }
 ```
