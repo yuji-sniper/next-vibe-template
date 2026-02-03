@@ -13,6 +13,7 @@ const serviceDescription =
 const authorName = "John Smith"
 
 export const metadata: Metadata = {
+  metadataBase: new URL(env.NEXT_PUBLIC_ORIGIN),
   title: {
     template: `%s | ${serviceName}`,
     default: serviceName
