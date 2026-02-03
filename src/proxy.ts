@@ -60,6 +60,12 @@ export function proxy(request: NextRequest) {
     return setCorsHeaders(response, host)
   }
 
+  // robots.txt, sitemap.xml はi18nルーティングをスキップ
+  if (pathname === "/robots.txt" || pathname === "/sitemap.xml") {
+    const response = NextResponse.next()
+    return setCorsHeaders(response, host)
+  }
+
   // ユーザー向けホストの場合、i18nルーティングを適用
   if (host === env.NEXT_PUBLIC_HOST) {
     // APIルートは除外
