@@ -26,7 +26,7 @@ export default async function AdminAuthenticatedLayout({
   })
 
   if (!authAdmin) {
-    redirect("/sign-in")
+    redirect("/")
   }
 
   return (

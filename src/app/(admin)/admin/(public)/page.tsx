@@ -3,8 +3,8 @@ import { Suspense } from "react"
 import { AdminSignInContainer } from "./_components/container"
 
 export const metadata: Metadata = {
-  title: "Sign In",
-  description: "Admin sign in page."
+  title: "サインイン",
+  description: "管理者用のサインインページです。"
 }
 
 export default function AdminSignInPage() {

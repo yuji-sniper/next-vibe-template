@@ -25,7 +25,11 @@ export function SignInContainer() {
   useEffectOnce(() => {
     authClient.oneTap({
       callbackURL: `/${locale}/home`,
-      cancelOnTapOutside: false
+      cancelOnTapOutside: false,
+      fetchOptions: {
+        // localhostではFedCMが動作しないため無効化
+        useFedCM: false
+      }
     })
   })
 
