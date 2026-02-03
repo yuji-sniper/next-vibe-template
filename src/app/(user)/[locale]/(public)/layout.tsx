@@ -1,4 +1,3 @@
-import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { getTranslations, setRequestLocale } from "next-intl/server"
 import { Button } from "@/components/ui/button"
@@ -11,24 +10,6 @@ import { getQueryClient } from "@/lib/react-query/query-client"
 type Props = {
   children: React.ReactNode
   params: Promise<{ locale: string }>
-}
-
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { locale } = await params
-  const t = await getTranslations({ locale, namespace: "metadata.top" })
-  const origin = env.NEXT_PUBLIC_ORIGIN
-
-  return {
-    title: t("title"),
-    description: t("description"),
-    alternates: {
-      canonical: `${origin}/${locale}`,
-      languages: {
-        ja: `${origin}/ja`,
-        en: `${origin}/en`
-      }
-    }
-  }
 }
 
 export default async function UserPublicLayout({ children, params }: Props) {
