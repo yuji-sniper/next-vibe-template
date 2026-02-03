@@ -77,7 +77,7 @@ export function AuthUserMenu() {
         </div>
         <div className="p-1">
           <Link
-            href={`/${locale}/settings`}
+            href={`/${locale}/settings/account`}
             onClick={() => setOpen(false)}
             className="flex w-full items-center gap-2 rounded-sm px-3 py-2 text-sm transition-colors hover:bg-accent"
           >

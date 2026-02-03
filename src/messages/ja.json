@@ -325,6 +325,14 @@
       "title": "設定",
       "description": "アカウント情報の確認・変更、プランの管理、請求履歴の確認ができます。"
     },
+    "accountSettings": {
+      "title": "アカウント設定",
+      "description": "アカウントに関する設定を行うことができます。"
+    },
+    "billingSettings": {
+      "title": "請求設定",
+      "description": "請求に関する設定を行うことができます。"
+    },
     "pricing": {
       "title": "料金プラン",
       "description": "あなたに最適なプランをお選びください。月額・年額プランをご用意しています。"

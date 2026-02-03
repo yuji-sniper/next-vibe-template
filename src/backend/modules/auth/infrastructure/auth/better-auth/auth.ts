@@ -9,6 +9,7 @@ export const auth = betterAuth({
     provider: "mysql"
   }),
   baseURL: env.NEXT_PUBLIC_ORIGIN,
+  trustedOrigins: [env.NEXT_PUBLIC_ORIGIN],
   socialProviders: {
     google: {
       clientId: env.NEXT_PUBLIC_GOOGLE_CLIENT_ID,

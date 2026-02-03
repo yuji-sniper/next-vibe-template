@@ -11,6 +11,7 @@ export const auth = betterAuth({
     provider: "mysql"
   }),
   baseURL: env.NEXT_PUBLIC_ORIGIN_ADMIN,
+  trustedOrigins: [env.NEXT_PUBLIC_ORIGIN_ADMIN],
   advanced: {
     cookies: {
       session_token: {

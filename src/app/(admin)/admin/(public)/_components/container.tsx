@@ -27,7 +27,7 @@ export function AdminSignInContainer() {
       await authAdminClient.signIn.social({
         provider: "google",
         callbackURL: "/dashboard",
-        errorCallbackURL: "/sign-in"
+        errorCallbackURL: "/"
       })
     } finally {
       setIsLoading(false)

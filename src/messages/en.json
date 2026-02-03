@@ -325,6 +325,14 @@
       "title": "Settings",
       "description": "Manage your account details, subscription plan, and billing history."
     },
+    "accountSettings": {
+      "title": "Account Settings",
+      "description": "Manage your account settings."
+    },
+    "billingSettings": {
+      "title": "Billing Settings",
+      "description": "Manage your billing settings."
+    },
     "pricing": {
       "title": "Pricing",
       "description": "Choose the plan that fits your needs. Monthly and yearly options available."
