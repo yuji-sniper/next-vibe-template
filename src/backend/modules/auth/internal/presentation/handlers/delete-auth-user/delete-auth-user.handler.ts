@@ -1,10 +1,10 @@
 import { inject, injectable } from "tsyringe"
-import type { DeleteAuthUserUseCasePort } from "@/backend/modules/auth/application/commands/usecases/delete-auth-user/delete-auth-user.usecase.port"
-import { DeleteAuthUserUseCasePortToken } from "@/backend/modules/auth/application/commands/usecases/delete-auth-user/delete-auth-user.usecase.port"
 import {
   AuthUserDeleteFailedError,
   AuthUserUnauthorizedError
-} from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
+} from "@/backend/modules/auth/public/errors/auth.errors"
+import type { DeleteAuthUserUseCasePort } from "@/backend/modules/auth/public/ports/delete-auth-user.usecase.port"
+import { DeleteAuthUserUseCasePortToken } from "@/backend/modules/auth/public/ports/delete-auth-user.usecase.port"
 import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"

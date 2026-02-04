@@ -1,7 +1,7 @@
-import type { AuthUser } from "../../../domain/auth-user/auth-user"
+import type { AuthUser } from "../../domain/auth-user/auth-user"
 
 export interface GetAuthUserPortOutput {
-  authUser: AuthUser
+  authUser: AuthUser | null
 }
 
 export interface GetAuthUserPort {

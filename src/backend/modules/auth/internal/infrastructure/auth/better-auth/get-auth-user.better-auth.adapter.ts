@@ -1,10 +1,9 @@
 import { headers } from "next/headers"
-import { AuthUserUnauthorizedError } from "@/backend/modules/auth/domain/auth-user/auth-user.errors"
 import type {
   GetAuthUserPort,
   GetAuthUserPortOutput
-} from "../../../application/queries/ports/get-auth-user.port"
-import { AuthUser } from "../../../domain/auth-user/auth-user"
+} from "@/backend/modules/auth/internal/application/ports/get-auth-user.port"
+import { AuthUser } from "@/backend/modules/auth/internal/domain/auth-user/auth-user"
 import { auth } from "./auth"
 
 export class GetAuthUserBetterAuthAdapter implements GetAuthUserPort {
@@ -14,7 +13,9 @@ export class GetAuthUserBetterAuthAdapter implements GetAuthUserPort {
     })
 
     if (!session) {
-      throw new AuthUserUnauthorizedError()
+      return {
+        authUser: null
+      }
     }
 
     return {
