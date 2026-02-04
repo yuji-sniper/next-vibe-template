@@ -2,7 +2,6 @@ import { relations, sql } from "drizzle-orm"
 import {
   boolean,
   foreignKey,
-  index,
   mysqlTable,
   text,
   timestamp,
@@ -40,8 +39,7 @@ export const subscriptions = mysqlTable(
       columns: [table.customerId],
       foreignColumns: [customers.id],
       name: SUBSCRIPTIONS_CONSTRAINTS.CUSTOMER_ID_FOREIGN_KEY
-    }).onDelete("cascade"),
-    index("idx_subscriptions_customer_id").on(table.customerId)
+    }).onDelete("cascade")
   ]
 )
 

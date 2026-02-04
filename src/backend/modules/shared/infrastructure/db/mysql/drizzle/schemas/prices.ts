@@ -2,7 +2,6 @@ import { relations, sql } from "drizzle-orm"
 import {
   boolean,
   foreignKey,
-  index,
   int,
   json,
   mysqlTable,
@@ -43,10 +42,7 @@ export const prices = mysqlTable(
       columns: [table.productId],
       foreignColumns: [products.id],
       name: PRICES_CONSTRAINTS.PRODUCT_ID_FOREIGN_KEY
-    }).onDelete("cascade"),
-    index("idx_prices_product_id").on(table.productId),
-    index("idx_prices_stripe_price_id").on(table.stripePriceId),
-    index("idx_prices_active").on(table.active)
+    }).onDelete("cascade")
   ]
 )
 

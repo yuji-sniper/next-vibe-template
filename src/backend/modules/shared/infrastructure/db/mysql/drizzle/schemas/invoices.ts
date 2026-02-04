@@ -1,7 +1,6 @@
 import { relations, sql } from "drizzle-orm"
 import {
   foreignKey,
-  index,
   int,
   mysqlTable,
   text,
@@ -43,9 +42,7 @@ export const invoices = mysqlTable(
       columns: [table.subscriptionId],
       foreignColumns: [subscriptions.id],
       name: INVOICES_CONSTRAINTS.SUBSCRIPTION_ID_FOREIGN_KEY
-    }).onDelete("set null"),
-    index("idx_invoices_customer_id").on(table.customerId),
-    index("idx_invoices_subscription_id").on(table.subscriptionId)
+    }).onDelete("set null")
   ]
 )
 
