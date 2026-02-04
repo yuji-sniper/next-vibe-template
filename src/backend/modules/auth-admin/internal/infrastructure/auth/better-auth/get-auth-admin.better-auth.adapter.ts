@@ -2,9 +2,8 @@ import { headers } from "next/headers"
 import type {
   GetAuthAdminPort,
   GetAuthAdminPortOutput
-} from "../../../application/queries/ports/get-auth-admin.port"
-import { AuthAdmin } from "../../../domain/auth-admin/auth-admin"
-import { AuthAdminUnauthorizedError } from "../../../domain/auth-admin/auth-admin.errors"
+} from "@/backend/modules/auth-admin/internal/application/queries/ports/get-auth-admin.port"
+import { AuthAdmin } from "@/backend/modules/auth-admin/internal/domain/auth-admin/auth-admin"
 import { auth } from "./auth"
 
 export class GetAuthAdminBetterAuthAdapter implements GetAuthAdminPort {
@@ -14,7 +13,9 @@ export class GetAuthAdminBetterAuthAdapter implements GetAuthAdminPort {
     })
 
     if (!session) {
-      throw new AuthAdminUnauthorizedError()
+      return {
+        authAdmin: null
+      }
     }
 
     return {

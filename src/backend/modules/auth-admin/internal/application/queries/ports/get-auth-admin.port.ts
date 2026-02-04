@@ -1,7 +1,7 @@
-import type { AuthAdmin } from "../../../domain/auth-admin/auth-admin"
-
 export interface GetAuthAdminPortOutput {
-  authAdmin: AuthAdmin
+  authAdmin: {
+    id: string
+  } | null
 }
 
 export interface GetAuthAdminPort {
