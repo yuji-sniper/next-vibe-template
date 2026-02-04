@@ -21,6 +21,7 @@
     "drizzle:drop": "drizzle-kit drop --config src/backend/libs/drizzle/drizzle.config.ts"
   },
   "dependencies": {
+    "@aws-sdk/client-scheduler": "^3.982.0",
     "@bprogress/next": "^3.2.12",
     "@hookform/resolvers": "^5.2.2",
     "@radix-ui/react-alert-dialog": "^1.1.15",
