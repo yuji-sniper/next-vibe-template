@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import { resolveContainer } from "@/backend/bootstrap/di/container"
-import type { ProcessStripeWebhookHandler } from "@/backend/modules/billing/presentation/handlers/process-stripe-webhook/process-stripe-webhook.handler"
-import { ProcessStripeWebhookHandlerToken } from "@/backend/modules/billing/presentation/handlers/process-stripe-webhook/process-stripe-webhook.handler"
+import type { ProcessStripeWebhookHandler } from "@/backend/modules/billing/internal/presentation/handlers/process-stripe-webhook/process-stripe-webhook.handler"
+import { ProcessStripeWebhookHandlerToken } from "@/backend/modules/billing/internal/presentation/handlers/process-stripe-webhook/process-stripe-webhook.handler"
 import { withRequestContext } from "@/backend/modules/shared/presentation/middleware/with-request-context"
 
 export async function POST(request: Request) {
