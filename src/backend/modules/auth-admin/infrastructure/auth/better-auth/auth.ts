@@ -1,7 +1,7 @@
 import { betterAuth } from "better-auth"
 import { drizzleAdapter } from "better-auth/adapters/drizzle"
 import { oneTap } from "better-auth/plugins"
-import { db } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/client"
+import { db } from "@/backend/bootstrap/db/client"
 import { env } from "@/env"
 
 export type Session = Awaited<ReturnType<typeof auth.api.getSession>>

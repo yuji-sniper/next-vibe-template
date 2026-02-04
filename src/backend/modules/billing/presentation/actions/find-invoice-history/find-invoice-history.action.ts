@@ -1,6 +1,6 @@
 "use server"
 
-import { resolveContainer } from "@/backend/bootstrap/container"
+import { resolveContainer } from "@/backend/bootstrap/di/container"
 import type { FindInvoiceHistoryHandler } from "@/backend/modules/billing/presentation/handlers/find-invoice-history/find-invoice-history.handler"
 import { FindInvoiceHistoryHandlerToken } from "@/backend/modules/billing/presentation/handlers/find-invoice-history/find-invoice-history.handler"
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"

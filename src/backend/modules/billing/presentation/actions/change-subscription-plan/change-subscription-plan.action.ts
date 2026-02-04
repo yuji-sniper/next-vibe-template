@@ -1,6 +1,6 @@
 "use server"
 
-import { resolveContainer } from "@/backend/bootstrap/container"
+import { resolveContainer } from "@/backend/bootstrap/di/container"
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
 import { withRequestContext } from "@/backend/modules/shared/presentation/middleware/with-request-context"
 import type { ChangeSubscriptionPlanHandler } from "../../handlers/change-subscription-plan/change-subscription-plan.handler"

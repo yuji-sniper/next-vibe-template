@@ -1,6 +1,6 @@
 "use server"
 
-import { resolveContainer } from "@/backend/bootstrap/container"
+import { resolveContainer } from "@/backend/bootstrap/di/container"
 import type {
   PriceType,
   RecurringInterval
