@@ -1,4 +1,4 @@
-import { findInvoiceHistoryAction } from "@/backend/modules/billing/presentation/actions/find-invoice-history/find-invoice-history.action"
+import { findInvoiceHistoryAction } from "@/backend/modules/billing/internal/presentation/actions/find-invoice-history/find-invoice-history.action"
 import { ServerError } from "@/utils/error/server-error"
 import type {
   InvoiceHistoryItem,

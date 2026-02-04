@@ -1,4 +1,4 @@
-import { findProductByIdAction } from "@/backend/modules/billing/presentation/actions/find-product-by-id/find-product-by-id.action"
+import { findProductByIdAction } from "@/backend/modules/billing/internal/presentation/actions/find-product-by-id/find-product-by-id.action"
 import { ServerError } from "@/utils/error/server-error"
 import type { ProductDetail } from "../types/product-detail"
 

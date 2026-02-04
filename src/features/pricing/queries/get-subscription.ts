@@ -1,4 +1,4 @@
-import { findSubscriptionAction } from "@/backend/modules/billing/presentation/actions/find-subscription/find-subscription.action"
+import { findSubscriptionAction } from "@/backend/modules/billing/internal/presentation/actions/find-subscription/find-subscription.action"
 import { ServerError } from "@/utils/error/server-error"
 import type { Subscription } from "../types/subscription"
 

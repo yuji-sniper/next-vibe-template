@@ -1,4 +1,4 @@
-import { archiveProductAction } from "@/backend/modules/billing/presentation/actions/archive-product/archive-product.action"
+import { archiveProductAction } from "@/backend/modules/billing/internal/presentation/actions/archive-product/archive-product.action"
 import { ServerError } from "@/utils/error/server-error"
 
 export type ArchiveProductMutationParams = {

@@ -1,4 +1,4 @@
-import { updateProductAction } from "@/backend/modules/billing/presentation/actions/update-product/update-product.action"
+import { updateProductAction } from "@/backend/modules/billing/internal/presentation/actions/update-product/update-product.action"
 import { ServerError } from "@/utils/error/server-error"
 
 export type UpdateProductInput = {

@@ -1,4 +1,4 @@
-import { deleteAuthUserAction } from "@/backend/modules/auth/presentation/actions/delete-auth-user/delete-auth-user.action"
+import { deleteAuthUserAction } from "@/backend/modules/auth/internal/presentation/actions/delete-auth-user/delete-auth-user.action"
 import { ServerError } from "@/utils/error/server-error"
 
 export type DeleteAuthUserMutation = () => Promise<void>

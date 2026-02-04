@@ -1,4 +1,4 @@
-import { createProductAction } from "@/backend/modules/billing/presentation/actions/create-product/create-product.action"
+import { createProductAction } from "@/backend/modules/billing/internal/presentation/actions/create-product/create-product.action"
 import { ServerError } from "@/utils/error/server-error"
 import type { ProductFormValues } from "../types/product-form"
 

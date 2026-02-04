@@ -1,4 +1,4 @@
-import { findPaymentHistoryAction } from "@/backend/modules/billing/presentation/actions/find-payment-history/find-payment-history.action"
+import { findPaymentHistoryAction } from "@/backend/modules/billing/internal/presentation/actions/find-payment-history/find-payment-history.action"
 import { ServerError } from "@/utils/error/server-error"
 import type {
   PaymentHistoryItem,

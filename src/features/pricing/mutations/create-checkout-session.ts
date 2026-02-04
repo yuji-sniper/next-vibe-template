@@ -1,4 +1,4 @@
-import { createCheckoutSessionAction } from "@/backend/modules/billing/presentation/actions/create-checkout-session/create-checkout-session.action"
+import { createCheckoutSessionAction } from "@/backend/modules/billing/internal/presentation/actions/create-checkout-session/create-checkout-session.action"
 import { ServerError } from "@/utils/error/server-error"
 
 export type CreateCheckoutSessionInput = {

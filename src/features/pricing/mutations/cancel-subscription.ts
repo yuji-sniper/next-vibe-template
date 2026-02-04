@@ -1,4 +1,4 @@
-import { cancelSubscriptionAction } from "@/backend/modules/billing/presentation/actions/cancel-subscription/cancel-subscription.action"
+import { cancelSubscriptionAction } from "@/backend/modules/billing/internal/presentation/actions/cancel-subscription/cancel-subscription.action"
 import { ServerError } from "@/utils/error/server-error"
 
 export type CancelSubscriptionInput = {

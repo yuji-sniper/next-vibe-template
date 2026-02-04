@@ -1,4 +1,4 @@
-import { getAuthAdminAction } from "@/backend/modules/auth-admin/presentation/actions/get-auth-admin/get-auth-admin.action"
+import { getAuthAdminAction } from "@/backend/modules/auth-admin/internal/presentation/actions/get-auth-admin/get-auth-admin.action"
 import { ServerError } from "@/utils/error/server-error"
 import type { AuthAdmin } from "../types/auth-admin"
 

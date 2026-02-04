@@ -1,4 +1,4 @@
-import { getAuthUserAction } from "@/backend/modules/auth/presentation/actions/get-auth-user/get-auth-user.action"
+import { getAuthUserAction } from "@/backend/modules/auth/internal/presentation/actions/get-auth-user/get-auth-user.action"
 import { ServerError } from "@/utils/error/server-error"
 import type { AuthUser } from "../types/auth-user"
 

@@ -1,4 +1,4 @@
-import { createPriceAction } from "@/backend/modules/billing/presentation/actions/create-price/create-price.action"
+import { createPriceAction } from "@/backend/modules/billing/internal/presentation/actions/create-price/create-price.action"
 import { ServerError } from "@/utils/error/server-error"
 import type { PriceFormValues } from "../types/price-form"
 

@@ -1,4 +1,4 @@
-import { changeSubscriptionPlanAction } from "@/backend/modules/billing/presentation/actions/change-subscription-plan/change-subscription-plan.action"
+import { changeSubscriptionPlanAction } from "@/backend/modules/billing/internal/presentation/actions/change-subscription-plan/change-subscription-plan.action"
 import { ServerError } from "@/utils/error/server-error"
 
 export type ChangeSubscriptionPlanInput = {

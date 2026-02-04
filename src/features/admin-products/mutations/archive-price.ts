@@ -1,4 +1,4 @@
-import { archivePriceAction } from "@/backend/modules/billing/presentation/actions/archive-price/archive-price.action"
+import { archivePriceAction } from "@/backend/modules/billing/internal/presentation/actions/archive-price/archive-price.action"
 import { ServerError } from "@/utils/error/server-error"
 
 export type ArchivePriceInput = {

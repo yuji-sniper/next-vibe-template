@@ -1,4 +1,4 @@
-import { findActivePlansAction } from "@/backend/modules/billing/presentation/actions/find-active-plans/find-active-plans.action"
+import { findActivePlansAction } from "@/backend/modules/billing/internal/presentation/actions/find-active-plans/find-active-plans.action"
 import { ServerError } from "@/utils/error/server-error"
 import type { Plan, PriceType } from "../types/plan"
 
