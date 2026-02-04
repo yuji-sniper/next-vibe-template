@@ -24,8 +24,12 @@ src/backend/
     │   │   └── infrastructure.di.ts
     │   ├── application/
     │   │   └── ports/
+    │   │       ├── context/
+    │   │       │   └── request-context.port.ts
     │   │       ├── db/
     │   │       │   └── transactor.port.ts
+    │   │       ├── logger/
+    │   │       │   └── logger.port.ts        # ロガーポート
     │   │       └── uuid/
     │   │           └── uuid-v7-generator.port.ts
     │   ├── domain/
@@ -38,6 +42,8 @@ src/backend/
     │   │   │           ├── client.ts
     │   │   │           ├── get-db.ts
     │   │   │           └── transactor.ts
+    │   │   ├── logger/
+    │   │   │   └── pino-logger.ts            # Pinoロガー実装
     │   │   ├── node/
     │   │   │   └── als/
     │   │   │       └── als-context.ts
@@ -46,8 +52,10 @@ src/backend/
     │   └── presentation/
     │       ├── actions/types/
     │       │   └── action-response.ts
-    │       └── handlers/types/
-    │           └── result.ts
+    │       ├── handlers/types/
+    │       │   └── result.ts
+    │       └── middleware/
+    │           └── with-request-context.ts   # リクエストコンテキストミドルウェア
     │
     └── {module}/                     # ドメインモジュール
         ├── internal/                 # モジュール内部実装
@@ -133,43 +141,52 @@ Infrastructure Layer (adapters/repositories)
 
 ### 1. Server Action
 
-**Action は「薄いラッパー」として機能し、Handler を呼び出すだけ。バリデーションは Handler で行う。**
+**Action は「薄いラッパー」として機能し、`withRequestContext` でラップして Handler を呼び出す。バリデーションは Handler で行う。**
 
 ```typescript
 // modules/{module}/internal/presentation/actions/{action}/{action}.action.ts
 "use server"
 
+import { resolveContainer } from "@/backend/bootstrap/di/container"
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
-import { handleExample } from "../../handlers/example/example.handler"
+import { withRequestContext } from "@/backend/modules/shared/presentation/middleware/with-request-context"
+import type {
+  ExampleHandler,
+  ExampleHandlerInput
+} from "../../handlers/example/example.handler"
+import { ExampleHandlerToken } from "../../handlers/example/example.handler"
 
-export type ExampleActionRequest = {
-  name: string
-  email?: string
-}
+// Handler の入力型を再利用
+export type ExampleActionRequest = ExampleHandlerInput
 
 export type ExampleActionResponse = ActionResponse<{
   example: { id: string; name: string }
 }>
 
-// Action はシンプルに Handler を呼び出すだけ（バリデーションは Handler で行う）
+// Action は withRequestContext でラップして Handler を呼び出す
 export const exampleAction = async (
   request: ExampleActionRequest
 ): Promise<ExampleActionResponse> => {
-  return await handleExample(request)
+  return withRequestContext(async () => {
+    const handler = await resolveContainer<ExampleHandler>(ExampleHandlerToken)
+    return handler.handle(request)
+  })
 }
 ```
 
 ### 2. Handler
 
-**Handler は Zod でバリデーションを行い、UseCase を呼び出し、エラーを Result 型に変換する。**
+**Handler はクラスベースで実装し、LoggerPort を DI 注入する。Zod でバリデーションを行い、UseCase を呼び出し、エラーを Result 型に変換してログ出力する。**
 
 ```typescript
 // modules/{module}/internal/presentation/handlers/{handler}/{handler}.handler.ts
+import { inject, injectable } from "tsyringe"
 import { z } from "zod"
-import { resolveContainer } from "@/backend/bootstrap/di/container"
 import type { ExampleUseCasePort } from "@/backend/modules/{module}/public/ports/example.usecase.port"
 import { ExampleUseCasePortToken } from "@/backend/modules/{module}/public/ports/example.usecase.port"
 import { ExampleNotFoundError } from "@/backend/modules/{module}/public/errors/example.errors"
+import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { formatZodErrors } from "@/backend/modules/shared/presentation/handlers/utils/format-zod-errors"
 import { EXAMPLE_ERROR_CODES } from "@/shared/errors/example.errors"
@@ -181,64 +198,81 @@ const exampleSchema = z.object({
   email: z.string().email().optional()
 })
 
-// z.infer でスキーマから型を推論（二重定義を避ける）
-type ExampleHandlerInput = z.infer<typeof exampleSchema>
+// z.input でスキーマの入力型を取得（Action から参照可能にするため export）
+export type ExampleHandlerInput = z.input<typeof exampleSchema>
 
-type ExampleHandlerResult = Result<{
+export type ExampleHandlerResult = Result<{
   example: { id: string; name: string }
 }>
 
-export const handleExample = async (
-  input: ExampleHandlerInput
-): Promise<ExampleHandlerResult> => {
-  // 1. バリデーション
-  const parsed = exampleSchema.safeParse(input)
+// Handler の Token と Interface を定義（DI 登録用）
+export const ExampleHandlerToken = Symbol("ExampleHandler")
 
-  if (!parsed.success) {
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.VALIDATION_ERROR,
-        status: 422,
-        message: "Validation failed",
-        fieldErrors: formatZodErrors(parsed.error)  // { "path.to.field": "error message" }
-      }
-    }
-  }
+export interface ExampleHandler {
+  handle(input: ExampleHandlerInput): Promise<ExampleHandlerResult>
+}
 
-  // 2. UseCase 実行
-  const usecase = await resolveContainer<ExampleUseCasePort>(
-    ExampleUseCasePortToken
-  )
+@injectable()
+export class ExampleHandlerImpl implements ExampleHandler {
+  constructor(
+    @inject(LoggerPortToken)
+    private readonly logger: LoggerPort,
+    @inject(ExampleUseCasePortToken)
+    private readonly exampleUseCase: ExampleUseCasePort
+  ) {}
 
-  try {
-    const output = await usecase.handle({
-      name: parsed.data.name,
-      email: parsed.data.email
-    })
-    return {
-      ok: true,
-      data: { example: output.example }
-    }
-  } catch (e: unknown) {
-    // 3. Domain Error を Result 型に変換
-    if (e instanceof ExampleNotFoundError) {
+  async handle(input: ExampleHandlerInput): Promise<ExampleHandlerResult> {
+    // 1. バリデーション
+    const parsed = exampleSchema.safeParse(input)
+
+    if (!parsed.success) {
       return {
         ok: false,
         error: {
-          code: EXAMPLE_ERROR_CODES.NOT_FOUND,
-          status: 404,
-          message: "Example not found"
+          code: COMMON_ERROR_CODES.VALIDATION_ERROR,
+          status: 422,
+          message: "Validation failed",
+          fieldErrors: formatZodErrors(parsed.error)  // { "path.to.field": "error message" }
         }
       }
     }
 
-    return {
-      ok: false,
-      error: {
-        code: COMMON_ERROR_CODES.INTERNAL_SERVER_ERROR,
-        status: 500,
-        message: "Internal server error"
+    try {
+      // 2. UseCase 実行
+      const output = await this.exampleUseCase.handle({
+        name: parsed.data.name,
+        email: parsed.data.email
+      })
+      return {
+        ok: true,
+        data: { example: output.example }
+      }
+    } catch (e: unknown) {
+      // 3. Domain Error を Result 型に変換
+      if (e instanceof ExampleNotFoundError) {
+        return {
+          ok: false,
+          error: {
+            code: EXAMPLE_ERROR_CODES.NOT_FOUND,
+            status: 404,
+            message: "Example not found"
+          }
+        }
+      }
+
+      // 4. 予期しないエラーはログ出力してモジュール固有のエラーコードで返す
+      this.logger.error("Failed to handle example", {
+        name: parsed.data.name,
+        error: e instanceof Error ? e.message : String(e)
+      })
+
+      return {
+        ok: false,
+        error: {
+          code: EXAMPLE_ERROR_CODES.CREATE_FAILED,
+          status: 500,
+          message: "Failed to create example"
+        }
       }
     }
   }
@@ -743,6 +777,19 @@ export function initApplicationDependency(container: DependencyContainer) {
 ```
 
 ```typescript
+// modules/{module}/internal/di/presentation.di.ts
+import type { DependencyContainer } from "tsyringe"
+import {
+  ExampleHandlerImpl,
+  ExampleHandlerToken
+} from "@/backend/modules/{module}/internal/presentation/handlers/example/example.handler"
+
+export const initPresentationDependency = (container: DependencyContainer) => {
+  container.registerSingleton(ExampleHandlerToken, ExampleHandlerImpl)
+}
+```
+
+```typescript
 // modules/{module}/internal/di/index.ts
 import type { DependencyContainer } from "tsyringe"
 import { initApplicationDependency } from "./application.di"
@@ -961,6 +1008,60 @@ export class ProcessWebhookUseCase {
       throw new WebhookProcessingFailedError()
     }
   }
+}
+```
+
+## ロギング
+
+Handler でエラーをログ出力する際は、`LoggerPort` を DI 注入して使用する。
+
+```typescript
+// modules/shared/application/ports/logger/logger.port.ts
+export interface LoggerPort {
+  debug(message: string, context?: Record<string, unknown>): void
+  info(message: string, context?: Record<string, unknown>): void
+  warn(message: string, context?: Record<string, unknown>): void
+  error(message: string, context?: Record<string, unknown>): void
+  child(bindings: Record<string, unknown>): LoggerPort
+}
+
+export const LoggerPortToken = Symbol("LoggerPort")
+```
+
+### ログ出力のベストプラクティス
+
+```typescript
+// ✅ 正しい: エラー内容とコンテキストを含める
+this.logger.error("Failed to create product", {
+  name: input.name,
+  error: e instanceof Error ? e.message : String(e)
+})
+
+// ❌ 間違い: コンテキストなしでログ出力
+this.logger.error("Failed to create product")
+```
+
+### リクエストコンテキスト
+
+`withRequestContext` を使用すると、ログに `requestId` と `userId` が自動的に付与される。
+
+```typescript
+// modules/shared/presentation/middleware/with-request-context.ts
+export const withRequestContext = async <T>(
+  callback: () => Promise<T>
+): Promise<T> => {
+  const alsContext = await resolveContainer<AlsContext>(AlsContext)
+  const uuidGenerator = await resolveContainer<UuidV7GeneratorPort>(
+    UuidV7GeneratorPortToken
+  )
+
+  return alsContext.run(async () => {
+    const requestContext = await resolveContainer<RequestContextPort>(
+      RequestContextPortToken
+    )
+    requestContext.setRequestId(uuidGenerator.generate())
+    return callback()
+  })
 }
 ```
 
@@ -1227,6 +1328,7 @@ private toDomain(row: {
 新規実装時の確認事項:
 
 - [ ] Server Action に `"use server"` 指定
+- [ ] **Server Action は `withRequestContext` でラップ**
 - [ ] UseCase に `@injectable()` デコレータ
 - [ ] UseCase は UseCase Port インターフェースを実装
 - [ ] **UseCase の Output は DTO形式（プリミティブ型）で返す（Domain Entity を直接返さない）**
@@ -1246,9 +1348,14 @@ private toDomain(row: {
 - [ ] Drizzle Schema の JSON カラムに `$type<>()` で型指定
 - [ ] **Schema を `bootstrap/db/schemas/index.ts` にエクスポート追加**
 - [ ] DI 登録を `registerSingleton` で追加
+- [ ] **Handler はクラスベースで `@injectable()` デコレータ**
+- [ ] **Handler は Token と Interface を export**
+- [ ] **Handler は `LoggerPort` を DI 注入**
 - [ ] Handler で Zod バリデーションを実装（Action ではなく Handler で行う）
 - [ ] Handler で Domain Error を Result 型に変換
 - [ ] Handler でエラーコードを共通定数から参照
+- [ ] **Handler で予期しないエラーをログ出力（`this.logger.error()`）**
+- [ ] **Handler を `presentation.di.ts` で DI 登録**
 - [ ] Action は「薄いラッパー」として Handler を呼び出すだけ
 - [ ] 型アサーション（as）を避ける（Repository の toDomain() での列挙型マッピングは例外）
 - [ ] `pnpm type:check` が通ること（必須）
