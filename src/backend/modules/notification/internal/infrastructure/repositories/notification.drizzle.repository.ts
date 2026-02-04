@@ -3,12 +3,12 @@ import { inject, injectable } from "tsyringe"
 import type {
   AudienceType,
   NotificationStatus
-} from "@/backend/modules/notification/domain/notification/notification"
+} from "@/backend/modules/notification/internal/domain/notification/notification"
 import {
   Notification,
   NotificationStatus as NotificationStatusEnum
-} from "@/backend/modules/notification/domain/notification/notification"
-import type { NotificationRepository } from "@/backend/modules/notification/domain/notification/notification.repository"
+} from "@/backend/modules/notification/internal/domain/notification/notification"
+import type { NotificationRepository } from "@/backend/modules/notification/internal/domain/notification/notification.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
 import { notifications } from "../db/mysql/drizzle/schemas"
 

@@ -1,12 +1,12 @@
 import { and, count, eq, inArray, sql } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
 import { v7 } from "uuid"
-import type { DeliveryStatus } from "@/backend/modules/notification/domain/delivery/delivery"
+import type { DeliveryStatus } from "@/backend/modules/notification/internal/domain/delivery/delivery"
 import {
   Delivery,
   DeliveryStatus as DeliveryStatusEnum
-} from "@/backend/modules/notification/domain/delivery/delivery"
-import type { DeliveryRepository } from "@/backend/modules/notification/domain/delivery/delivery.repository"
+} from "@/backend/modules/notification/internal/domain/delivery/delivery"
+import type { DeliveryRepository } from "@/backend/modules/notification/internal/domain/delivery/delivery.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
 import { notificationDeliveries } from "../db/mysql/drizzle/schemas"
 
