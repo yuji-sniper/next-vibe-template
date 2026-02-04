@@ -4,7 +4,7 @@ import type { SubscriptionStatus } from "@/backend/modules/billing/domain/subscr
 import { Subscription } from "@/backend/modules/billing/domain/subscription/subscription"
 import type { SubscriptionRepository } from "@/backend/modules/billing/domain/subscription/subscription.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { subscriptions } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
+import { subscriptions } from "../db/mysql/drizzle/schemas"
 
 @injectable()
 export class SubscriptionDrizzleRepository implements SubscriptionRepository {

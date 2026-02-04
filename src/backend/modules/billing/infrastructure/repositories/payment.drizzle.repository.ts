@@ -4,7 +4,7 @@ import type { PaymentStatus } from "@/backend/modules/billing/domain/payment/pay
 import { Payment } from "@/backend/modules/billing/domain/payment/payment"
 import type { PaymentRepository } from "@/backend/modules/billing/domain/payment/payment.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { payments } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
+import { payments } from "../db/mysql/drizzle/schemas"
 
 @injectable()
 export class PaymentDrizzleRepository implements PaymentRepository {

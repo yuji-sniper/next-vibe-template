@@ -3,6 +3,7 @@ import { container, type InjectionToken } from "tsyringe"
 import { initAuthDependency } from "../modules/auth/di"
 import { initAuthAdminDependency } from "../modules/auth-admin/di"
 import { initBillingDependency } from "../modules/billing/di"
+import { initNotificationDependency } from "../modules/notification/di"
 import { initSharedDependency } from "../modules/shared/di"
 
 let initialized = false
@@ -17,6 +18,8 @@ const getContainer = () => {
     initAuthAdminDependency(container)
     // billing
     initBillingDependency(container)
+    // notification
+    initNotificationDependency(container)
 
     initialized = true
   }

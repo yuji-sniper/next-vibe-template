@@ -4,7 +4,7 @@ import type { InvoiceStatus } from "@/backend/modules/billing/domain/invoice/inv
 import { Invoice } from "@/backend/modules/billing/domain/invoice/invoice"
 import type { InvoiceRepository } from "@/backend/modules/billing/domain/invoice/invoice.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { invoices } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
+import { invoices } from "../db/mysql/drizzle/schemas"
 
 @injectable()
 export class InvoiceDrizzleRepository implements InvoiceRepository {

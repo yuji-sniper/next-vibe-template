@@ -3,7 +3,7 @@ import { inject, injectable } from "tsyringe"
 import { Product } from "@/backend/modules/billing/domain/product/product"
 import type { ProductRepository } from "@/backend/modules/billing/domain/product/product.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { products } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
+import { products } from "../db/mysql/drizzle/schemas"
 
 @injectable()
 export class ProductDrizzleRepository implements ProductRepository {
