@@ -1,6 +1,10 @@
 import type { DependencyContainer } from "tsyringe"
+import { CreateSchedulePortToken } from "@/backend/modules/notification/internal/application/commands/ports/create-schedule.port"
+import { GetAdminUserPortToken } from "@/backend/modules/notification/internal/application/ports/get-admin-user.port"
 import { DeliveryRepositoryToken } from "@/backend/modules/notification/internal/domain/delivery/delivery.repository"
 import { NotificationRepositoryToken } from "@/backend/modules/notification/internal/domain/notification/notification.repository"
+import { CreateScheduleEventBridgeSchedulerAdapter } from "@/backend/modules/notification/internal/infrastructure/eventbridge-scheduler/create-schedule.eventbridge-scheduler.adapter"
+import { GetAdminUserAuthModuleAdapter } from "@/backend/modules/notification/internal/infrastructure/modules/auth/get-admin-user.auth-module.adapter"
 import { DeliveryDrizzleRepository } from "@/backend/modules/notification/internal/infrastructure/repositories/delivery.drizzle.repository"
 import { NotificationDrizzleRepository } from "@/backend/modules/notification/internal/infrastructure/repositories/notification.drizzle.repository"
 
@@ -13,5 +17,17 @@ export function initInfrastructureDependency(container: DependencyContainer) {
   container.registerSingleton(
     DeliveryRepositoryToken,
     DeliveryDrizzleRepository
+  )
+
+  // External Module Adapters
+  container.registerSingleton(
+    GetAdminUserPortToken,
+    GetAdminUserAuthModuleAdapter
+  )
+
+  // External Service Adapters
+  container.registerSingleton(
+    CreateSchedulePortToken,
+    CreateScheduleEventBridgeSchedulerAdapter
   )
 }

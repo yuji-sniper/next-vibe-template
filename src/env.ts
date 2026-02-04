@@ -13,7 +13,9 @@ export const env = createEnv({
     GOOGLE_CLIENT_SECRET: z.string(),
     GOOGLE_CLIENT_SECRET_ADMIN: z.string(),
     STRIPE_SECRET_KEY: z.string(),
-    STRIPE_WEBHOOK_SECRET: z.string()
+    STRIPE_WEBHOOK_SECRET: z.string(),
+    AWS_REGION: z.string(),
+    AWS_LAMBDA_ARN_NOTIFICATION_KICKOFF: z.string()
   },
   client: {
     NEXT_PUBLIC_SERVICE_NAME: z.string(),
