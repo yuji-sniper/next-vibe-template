@@ -54,6 +54,7 @@ export class Notification {
     sendAt: Date
     audienceType: AudienceType
     audiencePayload?: Record<string, unknown> | null
+    schedulerName: string
   }): Notification {
     const now = new Date()
     return new Notification(
@@ -66,7 +67,7 @@ export class Notification {
       params.audienceType,
       params.audiencePayload ?? null,
       NotificationStatus.SCHEDULED,
-      null,
+      params.schedulerName,
       now,
       now
     )
