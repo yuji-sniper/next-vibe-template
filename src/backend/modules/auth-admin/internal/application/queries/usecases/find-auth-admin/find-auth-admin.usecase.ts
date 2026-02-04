@@ -16,6 +16,7 @@ export class FindAuthAdminUseCase implements FindAuthAdminUseCasePort {
 
   async handle(): Promise<FindAuthAdminUseCasePortOutput> {
     const { authAdmin } = await this.getAuthAdmin.handle()
+
     if (!authAdmin) {
       throw new AuthAdminUnauthorizedError()
     }

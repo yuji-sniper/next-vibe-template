@@ -1,7 +1,7 @@
+import type { AuthAdmin } from "@/backend/modules/auth-admin/internal/domain/auth-admin/auth-admin"
+
 export interface GetAuthAdminPortOutput {
-  authAdmin: {
-    id: string
-  } | null
+  authAdmin: AuthAdmin | null
 }
 
 export interface GetAuthAdminPort {
