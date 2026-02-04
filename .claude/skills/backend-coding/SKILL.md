@@ -13,9 +13,13 @@ Next.js 16 + TypeScript のバックエンド実装ガイド（クリーンア�
 ```
 src/backend/
 ├── bootstrap/
-│   └── container.ts              # DI コンテナ初期化
+│   ├── db/
+│   │   └── schemas/
+│   │       └── index.ts              # 全モジュールのスキーマを集約
+│   └── di/
+│       └── container.ts              # DI コンテナ初期化
 └── modules/
-    ├── shared/                   # 共有モジュール
+    ├── shared/                       # 共有モジュール
     │   ├── di/
     │   │   └── infrastructure.di.ts
     │   ├── application/
@@ -33,8 +37,7 @@ src/backend/
     │   │   │       └── drizzle/
     │   │   │           ├── client.ts
     │   │   │           ├── get-db.ts
-    │   │   │           ├── transactor.ts
-    │   │   │           └── schemas/
+    │   │   │           └── transactor.ts
     │   │   ├── node/
     │   │   │   └── als/
     │   │   │       └── als-context.ts
@@ -46,52 +49,73 @@ src/backend/
     │       └── handlers/types/
     │           └── result.ts
     │
-    └── {module}/                 # ドメインモジュール
-        ├── di/
-        │   ├── index.ts
-        │   ├── application.di.ts
-        │   └── infrastructure.di.ts
-        ├── application/
-        │   ├── ports/
-        │   │   └── *.port.ts           # モジュール共通ポート
-        │   ├── queries/
+    └── {module}/                     # ドメインモジュール
+        ├── internal/                 # モジュール内部実装
+        │   ├── di/
+        │   │   ├── index.ts
+        │   │   ├── application.di.ts
+        │   │   ├── infrastructure.di.ts
+        │   │   └── presentation.di.ts
+        │   ├── application/
         │   │   ├── ports/
-        │   │   │   └── *.port.ts
-        │   │   └── usecases/
-        │   │       └── {usecase}/
-        │   │           ├── *.usecase.ts
-        │   │           └── *.usecase.port.ts
-        │   └── commands/
-        │       ├── ports/
-        │       │   └── *.port.ts
-        │       └── usecases/
-        │           └── {usecase}/
-        │               ├── *.usecase.ts
-        │               └── *.usecase.port.ts
-        ├── domain/
-        │   └── {entity}/
-        │       ├── {entity}.ts
-        │       ├── {entity}.errors.ts
-        │       └── {entity}.repository.ts
-        ├── infrastructure/
-        │   ├── auth/
-        │   │   └── better-auth/
-        │   │       └── *.adapter.ts
-        │   ├── modules/
-        │   │   └── {other-module}/
-        │   │       └── *.adapter.ts    # モジュール間アダプター
-        │   ├── repositories/
-        │   │   └── *.drizzle.repository.ts
-        │   └── {external-service}/
-        │       └── *.adapter.ts        # 外部サービスアダプター
-        └── presentation/
-            ├── actions/
-            │   └── {action}/
-            │       └── {action}.action.ts
-            └── handlers/
-                └── {handler}/
-                    └── {handler}.handler.ts
+        │   │   │   └── *.port.ts           # モジュール共通ポート（認証など）
+        │   │   ├── queries/
+        │   │   │   └── usecases/
+        │   │   │       └── {usecase}/
+        │   │   │           └── {usecase}.usecase.ts
+        │   │   └── commands/
+        │   │       ├── ports/
+        │   │       │   └── *.port.ts       # 外部サービス連携ポート
+        │   │       └── usecases/
+        │   │           └── {usecase}/
+        │   │               └── {usecase}.usecase.ts
+        │   ├── domain/
+        │   │   └── {entity}/
+        │   │       ├── {entity}.ts
+        │   │       └── {entity}.repository.ts
+        │   ├── infrastructure/
+        │   │   ├── db/
+        │   │   │   └── mysql/
+        │   │   │       └── drizzle/
+        │   │   │           └── schemas/
+        │   │   │               ├── index.ts
+        │   │   │               └── {table}.ts
+        │   │   ├── modules/
+        │   │   │   └── {other-module}/
+        │   │   │       └── *.adapter.ts    # モジュール間アダプター
+        │   │   ├── repositories/
+        │   │   │   └── *.drizzle.repository.ts
+        │   │   └── {external-service}/
+        │   │       └── *.adapter.ts        # 外部サービスアダプター
+        │   └── presentation/
+        │       ├── actions/
+        │       │   └── {action}/
+        │       │       └── {action}.action.ts
+        │       └── handlers/
+        │           └── {handler}/
+        │               └── {handler}.handler.ts
+        │
+        └── public/                   # モジュール外部公開
+            ├── errors/
+            │   └── {entity}.errors.ts      # ドメインエラー
+            └── ports/
+                └── {usecase}.usecase.port.ts  # ユースケースポート
 ```
+
+## internal/ と public/ の分離
+
+### internal/（モジュール内部）
+- **di/** - 依存性注入の設定
+- **application/** - ユースケース実装、モジュール共通ポート、外部サービス連携ポート
+- **domain/** - エンティティ、リポジトリインターフェース
+- **infrastructure/** - DB schemas、リポジトリ実装、アダプター
+- **presentation/** - actions、handlers
+
+### public/（外部公開）
+- **errors/** - ドメインエラークラス（他モジュールやPresentation層から参照される）
+- **ports/** - ユースケースポート（Input/Output/Interface/Token）
+
+**重要:** エラーとユースケースポートは `public/` に配置し、他モジュールから参照可能にする。
 
 ## レイヤー構成
 
@@ -100,7 +124,7 @@ Presentation Layer (actions/handlers)
     ↓
 Application Layer (usecases/ports)
     ↓
-Domain Layer (entities/value-objects/errors)
+Domain Layer (entities/value-objects)
     ↓
 Infrastructure Layer (adapters/repositories)
 ```
@@ -112,7 +136,7 @@ Infrastructure Layer (adapters/repositories)
 **Action は「薄いラッパー」として機能し、Handler を呼び出すだけ。バリデーションは Handler で行う。**
 
 ```typescript
-// modules/{module}/presentation/actions/{action}/{action}.action.ts
+// modules/{module}/internal/presentation/actions/{action}/{action}.action.ts
 "use server"
 
 import type { ActionResponse } from "@/backend/modules/shared/presentation/actions/types/action-response"
@@ -140,12 +164,12 @@ export const exampleAction = async (
 **Handler は Zod でバリデーションを行い、UseCase を呼び出し、エラーを Result 型に変換する。**
 
 ```typescript
-// modules/{module}/presentation/handlers/{handler}/{handler}.handler.ts
+// modules/{module}/internal/presentation/handlers/{handler}/{handler}.handler.ts
 import { z } from "zod"
-import { resolveContainer } from "@/backend/bootstrap/container"
-import type { ExampleUseCasePort } from "../../application/queries/usecases/example/example.usecase.port"
-import { ExampleUseCasePortToken } from "../../application/queries/usecases/example/example.usecase.port"
-import { ExampleNotFoundError } from "../../domain/example/example.errors"
+import { resolveContainer } from "@/backend/bootstrap/di/container"
+import type { ExampleUseCasePort } from "@/backend/modules/{module}/public/ports/example.usecase.port"
+import { ExampleUseCasePortToken } from "@/backend/modules/{module}/public/ports/example.usecase.port"
+import { ExampleNotFoundError } from "@/backend/modules/{module}/public/errors/example.errors"
 import type { Result } from "@/backend/modules/shared/presentation/handlers/types/result"
 import { formatZodErrors } from "@/backend/modules/shared/presentation/handlers/utils/format-zod-errors"
 import { EXAMPLE_ERROR_CODES } from "@/shared/errors/example.errors"
@@ -221,39 +245,13 @@ export const handleExample = async (
 }
 ```
 
-### 3. Port（インフラストラクチャ連携用）
+### 3. UseCase Port（public/ports/）
+
+**重要: UseCase Port は `public/ports/` に配置し、外部から参照可能にする。**
+**UseCase の Output はドメイン型（Entity クラス）を直接返さず、DTO形式（プリミティブ型）で返す。**
 
 ```typescript
-// modules/{module}/application/commands/ports/create-example.port.ts
-
-export interface CreateExamplePortInput {
-  name: string
-  email: string
-}
-
-export interface CreateExamplePortOutput {
-  externalId: string
-  createdAt: Date
-}
-
-export interface CreateExamplePort {
-  handle(input: CreateExamplePortInput): Promise<CreateExamplePortOutput>
-}
-
-export const CreateExamplePortToken = Symbol("CreateExamplePort")
-```
-
-### 4. UseCase Port
-
-**重要: UseCase の Output はドメイン型（Entity クラス）を直接返さず、DTO形式（プリミティブ型）で返す。**
-
-理由：
-- Presentation層がDomain層に直接依存しない（レイヤー間の結合度を下げる）
-- Server ActionでのシリアライゼーションでDateやクラスインスタンスの問題を回避
-- 内部のドメインロジックや状態が外部に露出しない
-
-```typescript
-// modules/{module}/application/commands/usecases/{usecase}/{usecase}.usecase.port.ts
+// modules/{module}/public/ports/{usecase}.usecase.port.ts
 
 export interface CreateExampleUseCasePortInput {
   name: string
@@ -285,26 +283,48 @@ export interface CreateExampleUseCasePort {
 export const CreateExampleUseCasePortToken = Symbol("CreateExampleUseCasePort")
 ```
 
-### 5. UseCase 実装
+### 4. Port（外部サービス連携用・internal/application/commands/ports/）
 
 ```typescript
-// modules/{module}/application/commands/usecases/{usecase}/{usecase}.usecase.ts
+// modules/{module}/internal/application/commands/ports/create-example.port.ts
+
+export interface CreateExamplePortInput {
+  name: string
+  email: string
+}
+
+export interface CreateExamplePortOutput {
+  externalId: string
+  createdAt: Date
+}
+
+export interface CreateExamplePort {
+  handle(input: CreateExamplePortInput): Promise<CreateExamplePortOutput>
+}
+
+export const CreateExamplePortToken = Symbol("CreateExamplePort")
+```
+
+### 5. UseCase 実装（internal/application/）
+
+```typescript
+// modules/{module}/internal/application/commands/usecases/{usecase}/{usecase}.usecase.ts
 import { inject, injectable } from "tsyringe"
-import type { ExampleRepository } from "../../../domain/example/example.repository"
-import { ExampleRepositoryToken } from "../../../domain/example/example.repository"
-import type { CreateExamplePort } from "../../ports/create-example.port"
-import { CreateExamplePortToken } from "../../ports/create-example.port"
-import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
-import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
+import type { ExampleRepository } from "@/backend/modules/{module}/internal/domain/example/example.repository"
+import { ExampleRepositoryToken } from "@/backend/modules/{module}/internal/domain/example/example.repository"
+import type { CreateExamplePort } from "@/backend/modules/{module}/internal/application/commands/ports/create-example.port"
+import { CreateExamplePortToken } from "@/backend/modules/{module}/internal/application/commands/ports/create-example.port"
+import type { GetCurrentUserPort } from "@/backend/modules/{module}/internal/application/ports/get-current-user.port"
+import { GetCurrentUserPortToken } from "@/backend/modules/{module}/internal/application/ports/get-current-user.port"
 import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import { UuidV7GeneratorPortToken } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
-import { Example } from "../../../domain/example/example"
-import { ExampleNotFoundError } from "../../../domain/example/example.errors"
+import { Example } from "@/backend/modules/{module}/internal/domain/example/example"
+import { ExampleNotFoundError } from "@/backend/modules/{module}/public/errors/example.errors"
 import type {
   CreateExampleUseCasePort,
   CreateExampleUseCasePortInput,
   CreateExampleUseCasePortOutput
-} from "./create-example.usecase.port"
+} from "@/backend/modules/{module}/public/ports/create-example.usecase.port"
 
 @injectable()
 export class CreateExampleUseCase implements CreateExampleUseCasePort {
@@ -356,10 +376,10 @@ export class CreateExampleUseCase implements CreateExampleUseCasePort {
 }
 ```
 
-### 6. Domain Entity
+### 6. Domain Entity（internal/domain/）
 
 ```typescript
-// modules/{module}/domain/{entity}/{entity}.ts
+// modules/{module}/internal/domain/{entity}/{entity}.ts
 
 // 状態定数（型安全な列挙型）
 export const EXAMPLE_STATUS = {
@@ -445,10 +465,12 @@ export class Example {
 }
 ```
 
-### 7. Domain Errors
+### 7. Domain Errors（public/errors/）
+
+**重要: エラーは `public/errors/` に配置し、他モジュールやPresentation層から参照可能にする。**
 
 ```typescript
-// modules/{module}/domain/{entity}/{entity}.errors.ts
+// modules/{module}/public/errors/{entity}.errors.ts
 
 export class ExampleNotFoundError extends Error {
   constructor() {
@@ -479,10 +501,10 @@ export class ExampleUpdateFailedError extends Error {
 }
 ```
 
-### 8. Repository Interface
+### 8. Repository Interface（internal/domain/）
 
 ```typescript
-// modules/{module}/domain/{entity}/{entity}.repository.ts
+// modules/{module}/internal/domain/{entity}/{entity}.repository.ts
 import type { Example } from "./example"
 
 export const ExampleRepositoryToken = Symbol("ExampleRepository")
@@ -496,17 +518,17 @@ export interface ExampleRepository {
 }
 ```
 
-### 9. Drizzle Repository 実装
+### 9. Drizzle Repository 実装（internal/infrastructure/repositories/）
 
 ```typescript
-// modules/{module}/infrastructure/repositories/{entity}.drizzle.repository.ts
+// modules/{module}/internal/infrastructure/repositories/{entity}.drizzle.repository.ts
 import { eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
-import type { ExampleStatus } from "@/backend/modules/{module}/domain/example/example"
-import { Example } from "@/backend/modules/{module}/domain/example/example"
-import type { ExampleRepository } from "@/backend/modules/{module}/domain/example/example.repository"
+import type { ExampleStatus } from "@/backend/modules/{module}/internal/domain/example/example"
+import { Example } from "@/backend/modules/{module}/internal/domain/example/example"
+import type { ExampleRepository } from "@/backend/modules/{module}/internal/domain/example/example.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { examples } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas"
+import { examples } from "../db/mysql/drizzle/schemas"
 
 @injectable()
 export class ExampleDrizzleRepository implements ExampleRepository {
@@ -597,9 +619,9 @@ export class ExampleDrizzleRepository implements ExampleRepository {
 ### 10. Infrastructure Adapter（外部サービス）
 
 ```typescript
-// modules/{module}/infrastructure/{service}/{action}.{service}.adapter.ts
+// modules/{module}/internal/infrastructure/{service}/{action}.{service}.adapter.ts
 import { injectable } from "tsyringe"
-import { ExampleCreateFailedError } from "../../domain/example/example.errors"
+import { ExampleCreateFailedError } from "@/backend/modules/{module}/public/errors/example.errors"
 import type {
   CreateExamplePort,
   CreateExamplePortInput,
@@ -633,14 +655,14 @@ export class CreateExampleExternalAdapter implements CreateExamplePort {
 ### 11. モジュール間 Adapter
 
 ```typescript
-// modules/{module}/infrastructure/modules/{other-module}/{action}.{other-module}.adapter.ts
+// modules/{module}/internal/infrastructure/modules/{other-module}/{action}.{other-module}.adapter.ts
 import { inject, injectable } from "tsyringe"
-import type { GetAuthUserPort } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
-import { GetAuthUserPortToken } from "@/backend/modules/auth/application/queries/ports/get-auth-user.port"
+import type { GetAuthUserPort } from "@/backend/modules/auth/public/ports/get-auth-user.usecase.port"
+import { GetAuthUserPortToken } from "@/backend/modules/auth/public/ports/get-auth-user.usecase.port"
 import type {
   GetCurrentUserPort,
   GetCurrentUserPortOutput
-} from "../../../application/ports/get-current-user.port"
+} from "../../application/ports/get-current-user.port"
 
 @injectable()
 export class GetCurrentUserAuthModuleAdapter implements GetCurrentUserPort {
@@ -679,14 +701,14 @@ export class Email {
 ### 13. DI Registration
 
 ```typescript
-// modules/{module}/di/infrastructure.di.ts
+// modules/{module}/internal/di/infrastructure.di.ts
 import type { DependencyContainer } from "tsyringe"
-import { ExampleRepositoryToken } from "../domain/example/example.repository"
-import { ExampleDrizzleRepository } from "../infrastructure/repositories/example.drizzle.repository"
-import { CreateExamplePortToken } from "../application/commands/ports/create-example.port"
-import { CreateExampleExternalAdapter } from "../infrastructure/external/create-example.external.adapter"
-import { GetCurrentUserPortToken } from "../application/ports/get-current-user.port"
-import { GetCurrentUserAuthModuleAdapter } from "../infrastructure/modules/auth/get-current-user.auth-module.adapter"
+import { ExampleRepositoryToken } from "@/backend/modules/{module}/internal/domain/example/example.repository"
+import { ExampleDrizzleRepository } from "@/backend/modules/{module}/internal/infrastructure/repositories/example.drizzle.repository"
+import { CreateExamplePortToken } from "@/backend/modules/{module}/internal/application/commands/ports/create-example.port"
+import { CreateExampleExternalAdapter } from "@/backend/modules/{module}/internal/infrastructure/external/create-example.external.adapter"
+import { GetCurrentUserPortToken } from "@/backend/modules/{module}/internal/application/ports/get-current-user.port"
+import { GetCurrentUserAuthModuleAdapter } from "@/backend/modules/{module}/internal/infrastructure/modules/auth/get-current-user.auth-module.adapter"
 
 export function initInfrastructureDependency(container: DependencyContainer) {
   // Repositories
@@ -707,10 +729,10 @@ export function initInfrastructureDependency(container: DependencyContainer) {
 ```
 
 ```typescript
-// modules/{module}/di/application.di.ts
+// modules/{module}/internal/di/application.di.ts
 import type { DependencyContainer } from "tsyringe"
-import { CreateExampleUseCasePortToken } from "../application/commands/usecases/create-example/create-example.usecase.port"
-import { CreateExampleUseCase } from "../application/commands/usecases/create-example/create-example.usecase"
+import { CreateExampleUseCasePortToken } from "@/backend/modules/{module}/public/ports/create-example.usecase.port"
+import { CreateExampleUseCase } from "@/backend/modules/{module}/internal/application/commands/usecases/create-example/create-example.usecase"
 
 export function initApplicationDependency(container: DependencyContainer) {
   container.registerSingleton(
@@ -721,21 +743,26 @@ export function initApplicationDependency(container: DependencyContainer) {
 ```
 
 ```typescript
-// modules/{module}/di/index.ts
+// modules/{module}/internal/di/index.ts
 import type { DependencyContainer } from "tsyringe"
 import { initApplicationDependency } from "./application.di"
 import { initInfrastructureDependency } from "./infrastructure.di"
+import { initPresentationDependency } from "./presentation.di"
 
 export const initExampleDependency = (container: DependencyContainer) => {
+  // infrastructure
   initInfrastructureDependency(container)
+  // application
   initApplicationDependency(container)
+  // presentation
+  initPresentationDependency(container)
 }
 ```
 
 ## Drizzle Schema
 
 ```typescript
-// modules/shared/infrastructure/db/mysql/drizzle/schemas/{table}.ts
+// modules/{module}/internal/infrastructure/db/mysql/drizzle/schemas/{table}.ts
 import { relations } from "drizzle-orm"
 import {
   boolean,
@@ -746,7 +773,7 @@ import {
   timestamp,
   varchar
 } from "drizzle-orm/mysql-core"
-import { users } from "./users"
+import { users } from "@/backend/modules/auth/internal/infrastructure/db/mysql/drizzle/schemas"
 
 // 外部キー制約名の定数化
 export const EXAMPLES_CONSTRAINTS = {
@@ -786,6 +813,11 @@ export const examplesRelations = relations(examples, ({ one }) => ({
     references: [users.id]
   })
 }))
+```
+
+```typescript
+// modules/{module}/internal/infrastructure/db/mysql/drizzle/schemas/index.ts
+export * from "./examples"
 ```
 
 ## Result 型
@@ -834,8 +866,8 @@ export type ActionResponse<T> =
 import { inject, injectable } from "tsyringe"
 import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
 import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
-import type { ExampleRepository } from "../../../domain/example/example.repository"
-import { ExampleRepositoryToken } from "../../../domain/example/example.repository"
+import type { ExampleRepository } from "@/backend/modules/{module}/internal/domain/example/example.repository"
+import { ExampleRepositoryToken } from "@/backend/modules/{module}/internal/domain/example/example.repository"
 
 @injectable()
 export class TransactionalUseCase {
@@ -935,7 +967,7 @@ export class ProcessWebhookUseCase {
 ## Better-Auth 統合
 
 ```typescript
-// modules/auth/infrastructure/auth/better-auth/auth.ts
+// modules/auth/internal/infrastructure/auth/better-auth/auth.ts
 import "server-only"
 
 import { betterAuth } from "better-auth"
@@ -972,12 +1004,12 @@ export const auth = betterAuth({
 ```typescript
 // Better-Auth Adapter
 import { headers } from "next/headers"
-import { AuthUserUnauthorizedError } from "../../../domain/auth-user/auth-user.errors"
+import { AuthUserUnauthorizedError } from "@/backend/modules/auth/public/errors/auth-user.errors"
 import type {
   GetAuthUserPort,
   GetAuthUserPortOutput
-} from "../../../application/queries/ports/get-auth-user.port"
-import { AuthUser } from "../../../domain/auth-user/auth-user"
+} from "@/backend/modules/auth/public/ports/get-auth-user.usecase.port"
+import { AuthUser } from "@/backend/modules/auth/internal/domain/auth-user/auth-user"
 import { auth } from "./auth"
 
 export class GetAuthUserBetterAuthAdapter implements GetAuthUserPort {
@@ -1020,25 +1052,28 @@ export class UuidV7Generator implements UuidV7GeneratorPort {
 
 ## 新規モジュール作成手順
 
-1. `modules/{module}/` ディレクトリを作成
-2. `domain/` にエンティティ、エラー、リポジトリインターフェースを定義
-3. `application/ports/` にモジュール共通ポートを定義（認証ユーザー取得など）
-4. `application/queries/ports/` または `application/commands/ports/` に操作別ポートを定義
-5. `application/*/usecases/{usecase}/` にユースケースとユースケースポートを実装
-6. `infrastructure/repositories/` にリポジトリ実装を追加
-7. `infrastructure/modules/` にモジュール間アダプターを追加
-8. `infrastructure/{service}/` に外部サービスアダプターを追加
-9. `di/` に依存性登録を追加
-10. `bootstrap/container.ts` に init 関数を追加
-11. `presentation/handlers/` にハンドラーを実装
-12. `presentation/actions/` に Server Action を実装
+1. `modules/{module}/internal/` と `modules/{module}/public/` ディレクトリを作成
+2. `public/errors/` にドメインエラーを定義
+3. `internal/domain/` にエンティティ、リポジトリインターフェースを定義
+4. `internal/application/ports/` にモジュール共通ポートを定義（認証ユーザー取得など）
+5. `internal/application/commands/ports/` または内部ポートを定義（外部サービス連携用）
+6. `public/ports/` にユースケースポートを定義（外部公開用）
+7. `internal/application/*/usecases/{usecase}/` にユースケースを実装
+8. `internal/infrastructure/repositories/` にリポジトリ実装を追加
+9. `internal/infrastructure/modules/` にモジュール間アダプターを追加
+10. `internal/infrastructure/{service}/` に外部サービスアダプターを追加
+11. `internal/di/` に依存性登録を追加
+12. `bootstrap/di/container.ts` に init 関数を追加
+13. `internal/presentation/handlers/` にハンドラーを実装
+14. `internal/presentation/actions/` に Server Action を実装
 
 ## スキーマ追加時
 
-1. `modules/shared/infrastructure/db/mysql/drizzle/schemas/` にスキーマファイル作成
+1. `modules/{module}/internal/infrastructure/db/mysql/drizzle/schemas/` にスキーマファイル作成
 2. `schemas/index.ts` にエクスポートを追加
-3. **マイグレーションは実行しない**（ユーザーが手動で実行する）
-4. 実装完了時に以下のコマンドを出力する:
+3. `bootstrap/db/schemas/index.ts` にモジュールのスキーマをエクスポート追加
+4. **マイグレーションは実行しない**（ユーザーが手動で実行する）
+5. 実装完了時に以下のコマンドを出力する:
 
 ```bash
 # マイグレーション生成・適用コマンド
@@ -1064,8 +1099,9 @@ pnpm type:check
 
 ```typescript
 // ✅ 正しい
-import { Product } from "@/backend/modules/billing/domain/product/product"
-import type { ProductRepository } from "@/backend/modules/billing/domain/product/product.repository"
+import { Product } from "@/backend/modules/billing/internal/domain/product/product"
+import type { ProductRepository } from "@/backend/modules/billing/internal/domain/product/product.repository"
+import { ProductNotFoundError } from "@/backend/modules/billing/public/errors/product.errors"
 
 // ❌ 間違い
 import { Product } from "../../domain/product/product"
@@ -1196,6 +1232,8 @@ private toDomain(row: {
 - [ ] **UseCase の Output は DTO形式（プリミティブ型）で返す（Domain Entity を直接返さない）**
 - [ ] ポートは Symbol トークンで定義（`*Token = Symbol("*")`）
 - [ ] Port は Input/Output/Interface/Token を定義
+- [ ] **UseCase Port は `public/ports/` に配置**
+- [ ] **Domain Errors は `public/errors/` に配置**
 - [ ] Domain Entity は `create()` と `reconstruct()` を実装
 - [ ] Domain Entity の変更メソッドで `updatedAt` を更新
 - [ ] Domain Error は `this.name` を設定
@@ -1206,6 +1244,7 @@ private toDomain(row: {
 - [ ] Drizzle Schema で外部キー制約名を定数化
 - [ ] Drizzle Schema で適切なインデックスを定義
 - [ ] Drizzle Schema の JSON カラムに `$type<>()` で型指定
+- [ ] **Schema を `bootstrap/db/schemas/index.ts` にエクスポート追加**
 - [ ] DI 登録を `registerSingleton` で追加
 - [ ] Handler で Zod バリデーションを実装（Action ではなく Handler で行う）
 - [ ] Handler で Domain Error を Result 型に変換
