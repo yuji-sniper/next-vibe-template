@@ -7,7 +7,7 @@ const isRemoteHost =
 export default defineConfig({
   out: "./src/backend/modules/shared/infrastructure/db/mysql/drizzle/migrations",
   schema:
-    "./src/backend/modules/shared/infrastructure/db/mysql/drizzle/schemas",
+    "./src/backend/modules/**/infrastructure/db/mysql/drizzle/schemas/*.ts",
   dialect: "mysql",
   dbCredentials: {
     host: env.DATABASE_HOST,
