@@ -16,9 +16,9 @@
     "lint:fix": "biome check --write src",
     "format": "biome format --write",
     "prepare": "husky",
-    "drizzle:gen": "drizzle-kit generate --config src/backend/modules/shared/infrastructure/db/mysql/drizzle/drizzle.config.ts",
-    "drizzle:migrate": "drizzle-kit migrate --config src/backend/modules/shared/infrastructure/db/mysql/drizzle/drizzle.config.ts",
-    "drizzle:drop": "drizzle-kit drop --config src/backend/modules/shared/infrastructure/db/mysql/drizzle/drizzle.config.ts"
+    "drizzle:gen": "drizzle-kit generate --config src/backend/libs/drizzle/drizzle.config.ts",
+    "drizzle:migrate": "drizzle-kit migrate --config src/backend/libs/drizzle/drizzle.config.ts",
+    "drizzle:drop": "drizzle-kit drop --config src/backend/libs/drizzle/drizzle.config.ts"
   },
   "dependencies": {
     "@bprogress/next": "^3.2.12",
