@@ -4,8 +4,8 @@ import type {
   MySql2PreparedQueryHKT,
   MySql2QueryResultHKT
 } from "drizzle-orm/mysql2"
-import type { Db } from "../../../infrastructure/db/mysql/drizzle/client"
-import type * as schema from "../../../infrastructure/db/mysql/drizzle/schemas"
+import type { Db } from "@/backend/bootstrap/db/client"
+import type * as schema from "@/backend/bootstrap/db/schemas"
 
 export type DbTransaction = MySqlTransaction<
   MySql2QueryResultHKT,

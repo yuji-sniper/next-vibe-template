@@ -1,4 +1,4 @@
-import { resolveContainer } from "@/backend/bootstrap/container"
+import { resolveContainer } from "@/backend/bootstrap/di/container"
 import type { RequestContextPort } from "@/backend/modules/shared/application/ports/context/request-context.port"
 import { RequestContextPortToken } from "@/backend/modules/shared/application/ports/context/request-context.port"
 import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"

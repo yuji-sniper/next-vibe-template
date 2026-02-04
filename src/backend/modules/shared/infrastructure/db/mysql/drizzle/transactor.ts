@@ -1,7 +1,7 @@
 import { inject, injectable } from "tsyringe"
+import { db } from "@/backend/bootstrap/db/client"
 import type { Transactor } from "@/backend/modules/shared/application/ports/db/transactor.port"
 import { AlsContext } from "../../../node/als/als-context"
-import { db } from "./client"
 
 export const MYSQL_DRIZZLE_TRANSACTION_KEY = "MYSQL_DRIZZLE_TRANSACTION_KEY"
 
