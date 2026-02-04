@@ -1037,8 +1037,16 @@ export class UuidV7Generator implements UuidV7GeneratorPort {
 
 1. `modules/shared/infrastructure/db/mysql/drizzle/schemas/` にスキーマファイル作成
 2. `schemas/index.ts` にエクスポートを追加
-3. マイグレーション生成: `pnpm drizzle-kit:generate`
-4. マイグレーション適用: `pnpm drizzle-kit:migrate`
+3. **マイグレーションは実行しない**（ユーザーが手動で実行する）
+4. 実装完了時に以下のコマンドを出力する:
+
+```bash
+# マイグレーション生成・適用コマンド
+pnpm drizzle:gen --name {わかりやすいファイル名}
+pnpm drizzle:migrate
+```
+
+**注意:** `{わかりやすいファイル名}` は実装内容に応じた名前に置き換える（例: `add-notifications-table`, `add-user-preferences`）
 
 ## 実装完了後の必須ステップ
 
