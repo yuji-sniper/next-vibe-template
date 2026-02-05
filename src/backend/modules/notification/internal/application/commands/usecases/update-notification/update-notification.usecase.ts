@@ -87,7 +87,7 @@ export class UpdateNotificationUseCase
           await this.updateSchedule.handle({
             scheduleName: notification.schedulerName,
             scheduleTime: input.sendAt,
-            lambdaArn: env.AWS_LAMBDA_ARN_NOTIFICATION_KICKOFF,
+            lambdaArn: env.AWS_LAMBDA_ARN_NOTIFICATION_FANOUT,
             payload: {
               notificationId: notification.id
             }
@@ -145,7 +145,7 @@ export class UpdateNotificationUseCase
           await this.updateSchedule.handle({
             scheduleName: compensationInfo.schedulerName,
             scheduleTime: compensationInfo.originalSendAt,
-            lambdaArn: env.AWS_LAMBDA_ARN_NOTIFICATION_KICKOFF,
+            lambdaArn: env.AWS_LAMBDA_ARN_NOTIFICATION_FANOUT,
             payload: {
               notificationId: compensationInfo.notificationId
             }

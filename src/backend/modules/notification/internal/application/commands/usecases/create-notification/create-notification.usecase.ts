@@ -48,7 +48,7 @@ export class CreateNotificationUseCase
     await this.createSchedule.handle({
       scheduleName: schedulerName,
       scheduleTime: input.sendAt,
-      lambdaArn: env.AWS_LAMBDA_ARN_NOTIFICATION_KICKOFF,
+      lambdaArn: env.AWS_LAMBDA_ARN_NOTIFICATION_FANOUT,
       payload: {
         notificationId: notificationId
       }

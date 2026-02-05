@@ -15,7 +15,7 @@ export const env = createEnv({
     STRIPE_SECRET_KEY: z.string(),
     STRIPE_WEBHOOK_SECRET: z.string(),
     AWS_REGION: z.string(),
-    AWS_LAMBDA_ARN_NOTIFICATION_KICKOFF: z.string()
+    AWS_LAMBDA_ARN_NOTIFICATION_FANOUT: z.string()
   },
   client: {
     NEXT_PUBLIC_SERVICE_NAME: z.string(),
