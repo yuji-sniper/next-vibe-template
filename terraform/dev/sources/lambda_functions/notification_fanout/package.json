@@ -1,0 +1,24 @@
+{
+  "name": "notification-fanout",
+  "version": "1.0.0",
+  "description": "Fanout Lambda for notification processing",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "node esbuild.config.js",
+    "type:check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@aws-sdk/client-sqs": "^3.645.0",
+    "drizzle-orm": "^0.45.1",
+    "mysql2": "^3.16.2",
+    "uuid": "^13.0.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.143",
+    "@types/node": "^20",
+    "esbuild": "^0.21.5",
+    "typescript": "^5"
+  }
+}
