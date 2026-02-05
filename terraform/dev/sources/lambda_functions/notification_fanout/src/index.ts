@@ -23,6 +23,9 @@ export async function handler(event: ScheduledEvent | FanoutEvent): Promise<void
 
   try {
     await fanoutHandler.handle(fanoutEvent)
+  } catch (error) {
+    console.error("Fanout handler failed:", error)
+    throw error // re-throw してLambdaのリトライ機構に任せる
   } finally {
     // Lambda終了時にコネクションをクリーンアップ
     // Note: コールドスタート最適化のため、通常は closePool を呼ばない
