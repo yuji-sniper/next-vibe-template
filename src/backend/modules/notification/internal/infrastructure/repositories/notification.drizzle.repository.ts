@@ -1,4 +1,4 @@
-import { and, count, desc, eq } from "drizzle-orm"
+import { and, count, desc, eq, sql } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
 import type {
   AudienceType,
@@ -32,6 +32,59 @@ export class NotificationDrizzleRepository implements NotificationRepository {
     }
 
     return this.toDomain(result[0])
+  }
+
+  async findByIdForUpdate(id: string): Promise<Notification | null> {
+    const db = this.getDb.handle()
+
+    const result = await db.execute(
+      sql`SELECT
+        id, title, subject, body_text, body_html, send_at,
+        audience_type, audience_payload, status, scheduler_name,
+        created_at, updated_at
+      FROM notifications
+      WHERE id = ${id}
+      FOR UPDATE`
+    )
+
+    type NotificationRow = {
+      id: string
+      title: string
+      subject: string
+      body_text: string
+      body_html: string | null
+      send_at: Date
+      audience_type: number
+      audience_payload: string | null
+      status: number
+      scheduler_name: string | null
+      created_at: Date
+      updated_at: Date
+    }
+
+    const rows = result[0] as unknown as NotificationRow[]
+
+    if (rows.length === 0) {
+      return null
+    }
+
+    const row = rows[0]
+    return Notification.reconstruct({
+      id: row.id,
+      title: row.title,
+      subject: row.subject,
+      bodyText: row.body_text,
+      bodyHtml: row.body_html,
+      sendAt: row.send_at,
+      audienceType: row.audience_type as AudienceType,
+      audiencePayload: row.audience_payload
+        ? (JSON.parse(row.audience_payload) as Record<string, unknown>)
+        : null,
+      status: row.status as NotificationStatus,
+      schedulerName: row.scheduler_name,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    })
   }
 
   async findByStatus(status: NotificationStatus): Promise<Notification[]> {
