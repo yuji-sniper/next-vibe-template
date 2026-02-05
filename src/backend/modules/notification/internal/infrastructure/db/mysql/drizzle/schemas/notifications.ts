@@ -9,6 +9,10 @@ import {
   tinyint,
   varchar
 } from "drizzle-orm/mysql-core"
+import type {
+  AudienceType,
+  NotificationStatus
+} from "@/backend/modules/notification/internal/domain/notification/notification"
 import { notificationDeliveries } from "./notification-deliveries"
 
 /**
@@ -39,12 +43,15 @@ export const notifications = mysqlTable(
     bodyText: mediumtext("body_text").notNull(),
     bodyHtml: mediumtext("body_html"),
     sendAt: datetime("send_at", { fsp: 3 }).notNull(),
-    audienceType: tinyint("audience_type").notNull(),
+    audienceType: tinyint("audience_type").notNull().$type<AudienceType>(),
     audiencePayload: json("audience_payload").$type<Record<
       string,
       unknown
     > | null>(),
-    status: smallint("status").notNull().default(100),
+    status: smallint("status")
+      .notNull()
+      .default(100)
+      .$type<NotificationStatus>(),
     schedulerName: varchar("scheduler_name", { length: 255 }),
     createdAt: datetime("created_at", { fsp: 3 })
       .notNull()
