@@ -1,9 +1,6 @@
 import { and, count, desc, eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
-import type {
-  AudienceType,
-  NotificationStatus
-} from "@/backend/modules/notification/internal/domain/notification/notification"
+import type { NotificationStatus } from "@/backend/modules/notification/internal/domain/notification/notification"
 import {
   Notification,
   NotificationStatus as NotificationStatusEnum
@@ -31,7 +28,7 @@ export class NotificationDrizzleRepository implements NotificationRepository {
       return null
     }
 
-    return this.toDomain(result[0])
+    return Notification.reconstruct(result[0])
   }
 
   async findByIdForUpdate(id: string): Promise<Notification | null> {
@@ -47,7 +44,7 @@ export class NotificationDrizzleRepository implements NotificationRepository {
       return null
     }
 
-    return this.toDomain(result[0])
+    return Notification.reconstruct(result[0])
   }
 
   async findByStatus(status: NotificationStatus): Promise<Notification[]> {
@@ -58,7 +55,7 @@ export class NotificationDrizzleRepository implements NotificationRepository {
       .where(eq(notifications.status, status))
       .orderBy(desc(notifications.sendAt))
 
-    return result.map((row) => this.toDomain(row))
+    return result.map((row) => Notification.reconstruct(row))
   }
 
   async findScheduled(limit: number): Promise<Notification[]> {
@@ -70,7 +67,7 @@ export class NotificationDrizzleRepository implements NotificationRepository {
       .orderBy(notifications.sendAt)
       .limit(limit)
 
-    return result.map((row) => this.toDomain(row))
+    return result.map((row) => Notification.reconstruct(row))
   }
 
   async findAll(options?: {
@@ -101,7 +98,7 @@ export class NotificationDrizzleRepository implements NotificationRepository {
 
     const result = await query
 
-    return result.map((row) => this.toDomain(row))
+    return result.map((row) => Notification.reconstruct(row))
   }
 
   async count(status?: NotificationStatus): Promise<number> {
@@ -152,35 +149,5 @@ export class NotificationDrizzleRepository implements NotificationRepository {
           updatedAt: notification.updatedAt
         }
       })
-  }
-
-  private toDomain(row: {
-    id: string
-    title: string
-    subject: string
-    bodyText: string
-    bodyHtml: string | null
-    sendAt: Date
-    audienceType: AudienceType
-    audiencePayload: Record<string, unknown> | null
-    status: NotificationStatus
-    schedulerName: string | null
-    createdAt: Date
-    updatedAt: Date
-  }): Notification {
-    return Notification.reconstruct({
-      id: row.id,
-      title: row.title,
-      subject: row.subject,
-      bodyText: row.bodyText,
-      bodyHtml: row.bodyHtml,
-      sendAt: row.sendAt,
-      audienceType: row.audienceType,
-      audiencePayload: row.audiencePayload,
-      status: row.status,
-      schedulerName: row.schedulerName,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt
-    })
   }
 }
