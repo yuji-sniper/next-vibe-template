@@ -8,6 +8,10 @@ import {
   CreateNotificationHandlerToken
 } from "@/backend/modules/notification/internal/presentation/handlers/create-notification/create-notification.handler"
 import {
+  FindNotificationByIdHandlerImpl,
+  FindNotificationByIdHandlerToken
+} from "@/backend/modules/notification/internal/presentation/handlers/find-notification-by-id/find-notification-by-id.handler"
+import {
   FindNotificationsHandlerImpl,
   FindNotificationsHandlerToken
 } from "@/backend/modules/notification/internal/presentation/handlers/find-notifications/find-notifications.handler"
@@ -32,5 +36,9 @@ export const initPresentationDependency = (container: DependencyContainer) => {
   container.registerSingleton(
     FindNotificationsHandlerToken,
     FindNotificationsHandlerImpl
+  )
+  container.registerSingleton(
+    FindNotificationByIdHandlerToken,
+    FindNotificationByIdHandlerImpl
   )
 }
