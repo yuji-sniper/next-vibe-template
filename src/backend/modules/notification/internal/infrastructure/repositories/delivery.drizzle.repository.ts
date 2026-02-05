@@ -50,7 +50,7 @@ export class DeliveryDrizzleRepository implements DeliveryRepository {
 
     const result = await query
 
-    return result.map((row) => this.toDomain(row))
+    return result.map((row) => Delivery.reconstruct(row))
   }
 
   async findByBatchId(
@@ -68,7 +68,7 @@ export class DeliveryDrizzleRepository implements DeliveryRepository {
         )
       )
 
-    return result.map((row) => this.toDomain(row))
+    return result.map((row) => Delivery.reconstruct(row))
   }
 
   async findPendingByBatchId(
@@ -87,7 +87,7 @@ export class DeliveryDrizzleRepository implements DeliveryRepository {
         )
       )
 
-    return result.map((row) => this.toDomain(row))
+    return result.map((row) => Delivery.reconstruct(row))
   }
 
   async bulkInsertIgnore(deliveries: Delivery[]): Promise<void> {
@@ -209,39 +209,9 @@ export class DeliveryDrizzleRepository implements DeliveryRepository {
     }
 
     for (const row of result) {
-      counts[row.status as DeliveryStatus] = row.count
+      counts[row.status] = row.count
     }
 
     return counts
-  }
-
-  private toDomain(row: {
-    id: string
-    notificationId: string
-    userId: string
-    email: string
-    status: number
-    attemptCount: number
-    lastError: string | null
-    sesMessageId: string | null
-    sentAt: Date | null
-    batchId: string | null
-    createdAt: Date
-    updatedAt: Date
-  }): Delivery {
-    return Delivery.reconstruct({
-      id: row.id,
-      notificationId: row.notificationId,
-      userId: row.userId,
-      email: row.email,
-      status: row.status as DeliveryStatus,
-      attemptCount: row.attemptCount,
-      lastError: row.lastError,
-      sesMessageId: row.sesMessageId,
-      sentAt: row.sentAt,
-      batchId: row.batchId,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt
-    })
   }
 }

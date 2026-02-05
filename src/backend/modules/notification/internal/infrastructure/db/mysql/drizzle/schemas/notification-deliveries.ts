@@ -10,6 +10,7 @@ import {
   uniqueIndex,
   varchar
 } from "drizzle-orm/mysql-core"
+import type { DeliveryStatus } from "@/backend/modules/notification/internal/domain/delivery/delivery"
 import { notifications } from "./notifications"
 
 /**
@@ -44,7 +45,7 @@ export const notificationDeliveries = mysqlTable(
     notificationId: varchar("notification_id", { length: 36 }).notNull(),
     userId: varchar("user_id", { length: 36 }).notNull(),
     email: varchar("email", { length: 255 }).notNull(),
-    status: smallint("status").notNull().default(100),
+    status: smallint("status").notNull().default(100).$type<DeliveryStatus>(),
     attemptCount: tinyint("attempt_count").notNull().default(0),
     lastError: text("last_error"),
     sesMessageId: varchar("ses_message_id", { length: 255 }),
