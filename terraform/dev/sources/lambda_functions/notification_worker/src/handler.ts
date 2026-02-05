@@ -5,6 +5,7 @@ import { DeliveryManager } from "./services/delivery-manager"
 import { SesSender } from "./services/ses-sender"
 import { UserRepository } from "./services/user-repository"
 import type {
+  BulkEmailEntry,
   DeliveryResult,
   NotificationRecord,
   PendingDelivery,
@@ -115,7 +116,7 @@ export class WorkerHandler {
   }
 
   /**
-   * メール送信処理
+   * メール送信処理（バルク送信）
    * @param notification 通知情報
    * @param deliveries 送信対象の配信情報
    * @returns 一時的エラーが発生した場合 true
@@ -124,53 +125,57 @@ export class WorkerHandler {
     notification: NotificationRecord,
     deliveries: PendingDelivery[]
   ): Promise<boolean> {
+    // PendingDelivery を BulkEmailEntry に変換
+    const entries: BulkEmailEntry[] = deliveries.map((d) => ({
+      deliveryId: d.id,
+      email: d.email
+    }))
+
+    // バルク送信（内部で50件ずつチャンク分割される）
+    const bulkResults = await this.sesSender.sendBulkEmail(
+      entries,
+      notification.subject,
+      notification.bodyText,
+      notification.bodyHtml
+    )
+
+    // BulkSendResultEntry を DeliveryResult に変換
     const results: DeliveryResult[] = []
     let hasTransientError = false
 
-    // 各配信に対してSES送信し、結果を蓄積
-    for (const delivery of deliveries) {
-      const sendResult = await this.sesSender.sendEmail(
-        delivery.email,
-        notification.subject,
-        notification.bodyText,
-        notification.bodyHtml
-      )
-
-      // SendResult を DeliveryResult に変換
-      switch (sendResult.type) {
+    for (const { deliveryId, result } of bulkResults) {
+      switch (result.type) {
         case "success":
           results.push({
             type: "sent",
-            deliveryId: delivery.id,
-            sesMessageId: sendResult.messageId
+            deliveryId,
+            sesMessageId: result.messageId
           })
-          console.log(
-            `Email sent to ${delivery.email} (messageId: ${sendResult.messageId})`
-          )
+          console.log(`Email sent (deliveryId: ${deliveryId}, messageId: ${result.messageId})`)
           break
 
         case "transient":
           hasTransientError = true
-          results.push({ type: "transient", deliveryId: delivery.id })
-          console.warn(`Transient error for ${delivery.email}: ${sendResult.error}`)
+          results.push({ type: "transient", deliveryId })
+          console.warn(`Transient error for deliveryId ${deliveryId}: ${result.error}`)
           break
 
         case "permanent":
           results.push({
             type: "failed",
-            deliveryId: delivery.id,
-            error: sendResult.error
+            deliveryId,
+            error: result.error
           })
-          console.error(`Permanent error for ${delivery.email}: ${sendResult.error}`)
+          console.error(`Permanent error for deliveryId ${deliveryId}: ${result.error}`)
           break
 
         case "suppressed":
           results.push({
             type: "suppressed",
-            deliveryId: delivery.id,
-            reason: sendResult.reason
+            deliveryId,
+            reason: result.reason
           })
-          console.warn(`Suppressed for ${delivery.email}: ${sendResult.reason}`)
+          console.warn(`Suppressed for deliveryId ${deliveryId}: ${result.reason}`)
           break
       }
     }

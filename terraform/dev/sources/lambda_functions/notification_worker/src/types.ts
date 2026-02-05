@@ -64,13 +64,29 @@ export interface PendingDelivery {
 }
 
 /**
- * SES送信結果
+ * SES送信結果（単一メール）
  */
 export type SendResult =
   | { type: "success"; messageId: string }
   | { type: "transient"; error: string }
   | { type: "permanent"; error: string }
   | { type: "suppressed"; reason: string }
+
+/**
+ * バルク送信用の入力
+ */
+export interface BulkEmailEntry {
+  deliveryId: string
+  email: string
+}
+
+/**
+ * バルク送信の結果（各宛先ごと）
+ */
+export interface BulkSendResultEntry {
+  deliveryId: string
+  result: SendResult
+}
 
 /**
  * 配信処理結果（バルク更新用）
