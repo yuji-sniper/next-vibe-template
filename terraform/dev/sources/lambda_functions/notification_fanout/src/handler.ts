@@ -204,7 +204,6 @@ export class FanoutHandler {
       const lastUserId = chunk[chunk.length - 1].id
 
       messages.push({
-        type: "send_chunk",
         notificationId,
         batchId,
         userIds: chunk.map((u) => u.id),

@@ -4,7 +4,6 @@ import type { DeliveryStatus, NotificationStatus } from "./config"
  * SQSから受け取るWorkerメッセージ形式
  */
 export interface WorkerMessage {
-  type: "send_chunk"
   notificationId: string
   batchId: string
   userIds: string[]

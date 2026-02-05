@@ -11,7 +11,6 @@ export interface FanoutEvent {
  * Worker Queue に投入するメッセージ形式
  */
 export interface WorkerMessage {
-  type: "send_chunk"
   notificationId: string
   batchId: string
   userIds: string[]
