@@ -11,11 +11,6 @@ import type {
 } from "@/backend/modules/notification/internal/application/commands/ports/create-schedule.port"
 import { env } from "@/env"
 
-// TODO: IAM Role ARNは環境変数から取得するように変更する
-const SCHEDULER_ROLE_ARN =
-  process.env.SCHEDULER_ROLE_ARN ??
-  "arn:aws:iam::000000000000:role/notification-scheduler-role"
-
 @injectable()
 export class CreateScheduleEventBridgeSchedulerAdapter
   implements CreateSchedulePort
@@ -40,7 +35,7 @@ export class CreateScheduleEventBridgeSchedulerAdapter
       },
       Target: {
         Arn: input.lambdaArn,
-        RoleArn: SCHEDULER_ROLE_ARN,
+        RoleArn: env.AWS_SCHEDULER_ROLE_ARN_NOTIFICATION,
         Input: JSON.stringify(input.payload)
       },
       ActionAfterCompletion: "DELETE"
