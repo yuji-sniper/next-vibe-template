@@ -5,6 +5,10 @@ terraform {
       source  = "hashicorp/aws"
       version = "6.30.0"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "~> 3.2"
+    }
   }
   backend "s3" {
     bucket       = "next-vibe-template-dev-tfstate"

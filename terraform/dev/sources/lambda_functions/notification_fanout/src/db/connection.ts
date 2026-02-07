@@ -17,11 +17,12 @@ function getPool(): mysql.Pool {
       password: DB_CONFIG.password,
       database: DB_CONFIG.database,
       // Lambda環境向け設定
-      connectionLimit: 5,
-      maxIdle: 2,
+      connectionLimit: 1,
+      maxIdle: 1,
       idleTimeout: 30000,
       enableKeepAlive: true,
-      keepAliveInitialDelay: 10000
+      keepAliveInitialDelay: 10000,
+      ssl: { minVersion: "TLSv1.2", rejectUnauthorized: true }
     })
   }
   return pool

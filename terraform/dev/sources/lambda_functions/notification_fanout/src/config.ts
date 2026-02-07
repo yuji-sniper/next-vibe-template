@@ -1,7 +1,3 @@
-/**
- * Kickoff Lambda 設定
- */
-
 /** 1回のDB抽出で取得するユーザー数 */
 export const PAGE_SIZE = 1000
 

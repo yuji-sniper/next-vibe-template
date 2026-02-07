@@ -6,7 +6,7 @@
 export const FROM_EMAIL = process.env.FROM_EMAIL ?? ""
 
 /** SESリージョン（環境変数から取得） */
-export const SES_REGION = process.env.SES_REGION ?? "ap-northeast-1"
+export const SES_REGION = "ap-northeast-1"
 
 /** 最大リトライ回数 */
 export const MAX_RETRY_ATTEMPTS = 3
@@ -34,7 +34,8 @@ export const DeliveryStatus = {
   SUPPRESSED: 500
 } as const
 
-export type DeliveryStatus = (typeof DeliveryStatus)[keyof typeof DeliveryStatus]
+export type DeliveryStatus =
+  (typeof DeliveryStatus)[keyof typeof DeliveryStatus]
 
 /** NotificationStatus - 通知ステータス */
 export const NotificationStatus = {
