@@ -1,7 +1,7 @@
 import "reflect-metadata"
 import { container, type InjectionToken } from "tsyringe"
-import { initAuthDependency } from "../modules/auth/di"
-import { initAuthAdminDependency } from "../modules/auth-admin/di"
+import { initAuthDependency } from "../modules/auth/internal/di"
+import { initAuthAdminDependency } from "../modules/auth-admin/internal/di"
 import { initSharedDependency } from "../modules/shared/di"
 
 let initialized = false
