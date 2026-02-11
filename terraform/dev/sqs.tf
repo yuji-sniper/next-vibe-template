@@ -21,6 +21,3 @@ resource "aws_sqs_queue" "notification" {
     maxReceiveCount     = 3
   })
 }
-
-# TODO: CloudWatch AlarmでDLQメッセージ数が閾値を超えたら通知する
-# 参考: https://docs.aws.amazon.com/ja_jp/AWSSimpleQueueService/latest/SQSDeveloperGuide/set-cloudwatch-alarms-for-metrics.html

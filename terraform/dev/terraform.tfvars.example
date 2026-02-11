@@ -4,3 +4,6 @@ db_host             =
 db_port             = 
 db_user             = 
 db_name             = 
+
+slack_channel_id = 
+slack_team_id = 

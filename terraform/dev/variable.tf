@@ -22,3 +22,13 @@ variable "db_name" {
   type        = string
   description = "The name of the database"
 }
+
+variable "slack_channel_id" {
+  type        = string
+  description = "The ID of the Slack channel"
+}
+
+variable "slack_team_id" {
+  type        = string
+  description = " ID of the Slack workspace authorized with AWS Chatbot"
+}
