@@ -7,7 +7,9 @@ import type { FanoutEvent } from "./types"
  * Lambda ハンドラー
  * EventBridge Scheduler から呼び出されるエントリポイント
  */
-export async function handler(event: ScheduledEvent | FanoutEvent): Promise<void> {
+export async function handler(
+  event: ScheduledEvent | FanoutEvent
+): Promise<void> {
   console.log("Received event:", JSON.stringify(event, null, 2))
 
   // イベントペイロードを取得
@@ -45,8 +47,11 @@ function parseEvent(event: ScheduledEvent | FanoutEvent): FanoutEvent | null {
 
   // EventBridge Scheduler の detail に含まれる場合
   if ("detail" in event && event.detail && typeof event.detail === "object") {
-    const detail = event.detail as Record<string, unknown>
-    if ("notificationId" in detail && typeof detail.notificationId === "string") {
+    const detail = event.detail
+    if (
+      "notificationId" in detail &&
+      typeof detail.notificationId === "string"
+    ) {
       return { notificationId: detail.notificationId }
     }
   }
