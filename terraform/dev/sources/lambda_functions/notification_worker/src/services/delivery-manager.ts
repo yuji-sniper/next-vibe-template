@@ -139,8 +139,8 @@ export class DeliveryManager {
       (r) => r.type === "suppressed"
     ).length
 
-    // JSON 配列を構築
-    const jsonData = updateTargets.map((result) => {
+    // 更新データを構築
+    const updateRows = updateTargets.map((result) => {
       switch (result.type) {
         case "sent":
           return {
@@ -173,26 +173,21 @@ export class DeliveryManager {
       }
     })
 
-    const jsonString = JSON.stringify(jsonData)
+    // UNION ALL 派生テーブルを使った UPDATE（TiDB互換）
+    const rows = updateRows.map(
+      (row) =>
+        sql`SELECT ${row.id} AS id, ${row.status} AS status, ${row.ses_message_id} AS ses_message_id, ${row.last_error} AS last_error, CAST(${row.sent_at} AS DATETIME(3)) AS sent_at`
+    )
+    const unionAll = sql.join(rows, sql` UNION ALL `)
 
-    // JSON_TABLE を使った UPDATE
     await this.db.execute(sql`
       UPDATE notification_deliveries nd
-      JOIN JSON_TABLE(
-        ${jsonString},
-        '$[*]' COLUMNS(
-          id VARCHAR(36) PATH '$.id',
-          status SMALLINT PATH '$.status',
-          ses_message_id VARCHAR(255) PATH '$.ses_message_id',
-          last_error TEXT PATH '$.last_error',
-          sent_at DATETIME(3) PATH '$.sent_at'
-        )
-      ) AS jt ON nd.id = jt.id
+      JOIN (${unionAll}) AS src ON nd.id = src.id
       SET
-        nd.status = jt.status,
-        nd.ses_message_id = COALESCE(jt.ses_message_id, nd.ses_message_id),
-        nd.last_error = COALESCE(jt.last_error, nd.last_error),
-        nd.sent_at = COALESCE(jt.sent_at, nd.sent_at),
+        nd.status = src.status,
+        nd.ses_message_id = COALESCE(src.ses_message_id, nd.ses_message_id),
+        nd.last_error = COALESCE(src.last_error, nd.last_error),
+        nd.sent_at = COALESCE(src.sent_at, nd.sent_at),
         nd.updated_at = NOW(3)
     `)
 

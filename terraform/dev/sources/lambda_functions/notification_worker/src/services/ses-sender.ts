@@ -141,7 +141,8 @@ export class SesSender {
               Subject: subject,
               Text: bodyText,
               Html: bodyHtml ?? undefined
-            }
+            },
+            TemplateData: "{}"
           }
         },
         BulkEmailEntries: bulkEmailEntries

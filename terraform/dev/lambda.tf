@@ -104,6 +104,10 @@ resource "aws_lambda_function" "notification_fanout" {
     aws_iam_role_policy_attachment.notification_fanout,
     aws_iam_role_policy_attachment.notification_fanout
   ]
+
+  lifecycle {
+    ignore_changes = [environment]
+  }
 }
 
 # ==============================
@@ -207,6 +211,10 @@ resource "aws_lambda_function" "notification_worker" {
     aws_iam_role_policy_attachment.notification_worker_basic,
     aws_iam_role_policy_attachment.notification_worker_sqs,
   ]
+
+  lifecycle {
+    ignore_changes = [environment]
+  }
 }
 
 # SQSイベントソースマッピング

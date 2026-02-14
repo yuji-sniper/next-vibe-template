@@ -151,13 +151,17 @@ export class WorkerHandler {
             deliveryId,
             sesMessageId: result.messageId
           })
-          console.log(`Email sent (deliveryId: ${deliveryId}, messageId: ${result.messageId})`)
+          console.log(
+            `Email sent (deliveryId: ${deliveryId}, messageId: ${result.messageId})`
+          )
           break
 
         case "transient":
           hasTransientError = true
           results.push({ type: "transient", deliveryId })
-          console.warn(`Transient error for deliveryId ${deliveryId}: ${result.error}`)
+          console.warn(
+            `Transient error for deliveryId ${deliveryId}: ${result.error}`
+          )
           break
 
         case "permanent":
@@ -166,7 +170,9 @@ export class WorkerHandler {
             deliveryId,
             error: result.error
           })
-          console.error(`Permanent error for deliveryId ${deliveryId}: ${result.error}`)
+          console.error(
+            `Permanent error for deliveryId ${deliveryId}: ${result.error}`
+          )
           break
 
         case "suppressed":
@@ -175,7 +181,9 @@ export class WorkerHandler {
             deliveryId,
             reason: result.reason
           })
-          console.warn(`Suppressed for deliveryId ${deliveryId}: ${result.reason}`)
+          console.warn(
+            `Suppressed for deliveryId ${deliveryId}: ${result.reason}`
+          )
           break
       }
     }
