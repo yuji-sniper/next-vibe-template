@@ -8,7 +8,6 @@ import type { WorkerMessage } from "./types"
  * WorkerMessage のスキーマ定義
  */
 const workerMessageSchema = z.object({
-  type: z.literal("send_chunk"),
   notificationId: z.string().min(1),
   batchId: z.string().min(1),
   userIds: z.array(z.string().min(1)),

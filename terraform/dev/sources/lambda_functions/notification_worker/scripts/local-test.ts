@@ -60,7 +60,6 @@ async function main() {
         messageId: "test-message-1",
         receiptHandle: "test-receipt-handle",
         body: JSON.stringify({
-          type: "send_chunk",
           notificationId,
           batchId,
           userIds,
