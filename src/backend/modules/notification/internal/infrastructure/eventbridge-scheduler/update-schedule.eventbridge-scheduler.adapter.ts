@@ -44,6 +44,7 @@ export class UpdateScheduleEventBridgeSchedulerAdapter
         RoleArn: env.AWS_SCHEDULER_ROLE_ARN_NOTIFICATION,
         Input: JSON.stringify(input.payload)
       },
+      GroupName: env.AWS_SCHEDULER_GROUP_NAME_NOTIFICATION,
       ActionAfterCompletion: "DELETE"
     })
 

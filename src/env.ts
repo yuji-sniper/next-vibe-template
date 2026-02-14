@@ -17,6 +17,7 @@ export const env = createEnv({
     AWS_REGION: z.string(),
     AWS_ROLE_ARN: z.string(),
     AWS_SCHEDULER_ROLE_ARN_NOTIFICATION: z.string(),
+    AWS_SCHEDULER_GROUP_NAME_NOTIFICATION: z.string(),
     AWS_LAMBDA_ARN_NOTIFICATION_FANOUT: z.string()
   },
   client: {

@@ -27,7 +27,8 @@ export class DeleteScheduleEventBridgeSchedulerAdapter
     })
 
     const command = new DeleteScheduleCommand({
-      Name: input.scheduleName
+      Name: input.scheduleName,
+      GroupName: env.AWS_SCHEDULER_GROUP_NAME_NOTIFICATION
     })
 
     await schedulerClient.send(command)
