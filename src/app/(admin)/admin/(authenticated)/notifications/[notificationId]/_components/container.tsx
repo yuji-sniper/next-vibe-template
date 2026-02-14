@@ -1,6 +1,5 @@
 "use client"
 
-import { useRouter } from "next/navigation"
 import { useState } from "react"
 import { toast } from "sonner"
 import { useUpdateNotificationMutation } from "@/features/admin-notifications/hooks/mutations/useUpdateNotificationMutation"
@@ -15,7 +14,6 @@ type NotificationDetailContainerProps = {
 export const NotificationDetailContainer = ({
   notificationId
 }: NotificationDetailContainerProps) => {
-  const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const { data, isLoading } = useGetNotificationByIdQuery({ notificationId })
   const updateMutation = useUpdateNotificationMutation()
@@ -43,10 +41,6 @@ export const NotificationDetailContainer = ({
     }
   }
 
-  const handleBack = () => {
-    router.push("/notifications")
-  }
-
   const defaultValues: Partial<NotificationFormValues> = notification
     ? {
         title: notification.title,
@@ -62,7 +56,6 @@ export const NotificationDetailContainer = ({
 
   return (
     <NotificationDetailPresentational
-      notificationId={notificationId}
       notification={notification ?? null}
       isLoading={isLoading}
       isEditing={isEditing}
@@ -71,7 +64,6 @@ export const NotificationDetailContainer = ({
       onEdit={handleEdit}
       onCancelEdit={handleCancelEdit}
       onUpdate={handleUpdate}
-      onBack={handleBack}
     />
   )
 }

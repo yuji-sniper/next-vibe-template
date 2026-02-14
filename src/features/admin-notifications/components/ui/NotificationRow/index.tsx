@@ -48,7 +48,7 @@ export const NotificationRow = ({
       <TableCell>
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="icon-sm" asChild>
-            <Link href={`/admin/notifications/${notification.id}`}>
+            <Link href={`/notifications/${notification.id}`}>
               <EyeIcon className="size-4" />
               <span className="sr-only">詳細</span>
             </Link>
