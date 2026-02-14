@@ -10,6 +10,7 @@ import { GetCurrentAdminPortToken } from "@/backend/modules/billing/internal/app
 import { GetCurrentUserPortToken } from "@/backend/modules/billing/internal/application/ports/get-current-user.port"
 import { ProcessStripeWebhookPortToken } from "@/backend/modules/billing/internal/application/ports/process-stripe-webhook.port"
 import { UpdateStripeProductPortToken } from "@/backend/modules/billing/internal/application/ports/update-stripe-product.port"
+import { FindProductsQueryServicePortToken } from "@/backend/modules/billing/internal/application/queries/usecases/find-products/find-products.query-service.port"
 import { CustomerRepositoryToken } from "@/backend/modules/billing/internal/domain/customer/customer.repository"
 import { InvoiceRepositoryToken } from "@/backend/modules/billing/internal/domain/invoice/invoice.repository"
 import { PaymentRepositoryToken } from "@/backend/modules/billing/internal/domain/payment/payment.repository"
@@ -19,6 +20,7 @@ import { SubscriptionRepositoryToken } from "@/backend/modules/billing/internal/
 import { WebhookEventRepositoryToken } from "@/backend/modules/billing/internal/domain/webhook-event/webhook-event.repository"
 import { GetCurrentUserAuthModuleAdapter } from "@/backend/modules/billing/internal/infrastructure/modules/auth/get-current-user.auth-module.adapter"
 import { GetCurrentAdminAuthAdminModuleAdapter } from "@/backend/modules/billing/internal/infrastructure/modules/auth-admin/get-current-admin.auth-admin-module.adapter"
+import { FindProductsDrizzleQueryService } from "@/backend/modules/billing/internal/infrastructure/query-services/find-products.drizzle.query-service"
 import { CustomerDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/repositories/customer.drizzle.repository"
 import { InvoiceDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/repositories/invoice.drizzle.repository"
 import { PaymentDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/repositories/payment.drizzle.repository"
@@ -37,6 +39,12 @@ import { ProcessStripeWebhookStripeAdapter } from "@/backend/modules/billing/int
 import { UpdateStripeProductStripeAdapter } from "@/backend/modules/billing/internal/infrastructure/stripe/update-stripe-product.stripe.adapter"
 
 export function initInfrastructureDependency(container: DependencyContainer) {
+  // Query Services
+  container.registerSingleton(
+    FindProductsQueryServicePortToken,
+    FindProductsDrizzleQueryService
+  )
+
   // Repositories
   container.registerSingleton(
     CustomerRepositoryToken,

@@ -21,6 +21,7 @@ export type FindProductsHandlerResult = Result<{
     displayOrder: number
     features: string[] | null
     metadata: Record<string, string> | null
+    priceCount: number
     createdAt: string
     updatedAt: string
     prices?: {
@@ -72,6 +73,7 @@ export class FindProductsHandlerImpl implements FindProductsHandler {
             displayOrder: product.displayOrder,
             features: product.features,
             metadata: product.metadata,
+            priceCount: product.priceCount,
             createdAt: product.createdAt.toISOString(),
             updatedAt: product.updatedAt.toISOString(),
             prices: product.prices

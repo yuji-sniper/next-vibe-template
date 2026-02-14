@@ -1,20 +1,20 @@
 import { inject, injectable } from "tsyringe"
 import type { PriceRepository } from "@/backend/modules/billing/internal/domain/price/price.repository"
 import { PriceRepositoryToken } from "@/backend/modules/billing/internal/domain/price/price.repository"
-import type { ProductRepository } from "@/backend/modules/billing/internal/domain/product/product.repository"
-import { ProductRepositoryToken } from "@/backend/modules/billing/internal/domain/product/product.repository"
 import type {
   FindProductsUseCaseInput,
   FindProductsUseCaseOutput,
   FindProductsUseCasePort,
   ProductWithPrices
 } from "@/backend/modules/billing/public/ports/find-products.usecase.port"
+import type { FindProductsQueryServicePort } from "./find-products.query-service.port"
+import { FindProductsQueryServicePortToken } from "./find-products.query-service.port"
 
 @injectable()
 export class FindProductsUseCase implements FindProductsUseCasePort {
   constructor(
-    @inject(ProductRepositoryToken)
-    private readonly productRepository: ProductRepository,
+    @inject(FindProductsQueryServicePortToken)
+    private readonly findProductsQueryService: FindProductsQueryServicePort,
     @inject(PriceRepositoryToken)
     private readonly priceRepository: PriceRepository
   ) {}
@@ -22,8 +22,8 @@ export class FindProductsUseCase implements FindProductsUseCasePort {
   async handle(
     input: FindProductsUseCaseInput
   ): Promise<FindProductsUseCaseOutput> {
-    // 1. 商品一覧取得
-    const products = await this.productRepository.findAll({
+    // 1. 商品一覧 + priceCount を一括取得
+    const { products } = await this.findProductsQueryService.handle({
       activeOnly: input.activeOnly
     })
 
@@ -32,7 +32,7 @@ export class FindProductsUseCase implements FindProductsUseCasePort {
       (a, b) => a.displayOrder - b.displayOrder
     )
 
-    // 3. 商品を DTO に変換（価格取得はオプション）
+    // 3. 商品を DTO に変換（価格詳細取得はオプション）
     const productsWithPrices: ProductWithPrices[] = await Promise.all(
       sortedProducts.map(async (product) => {
         const result: ProductWithPrices = {
@@ -45,7 +45,8 @@ export class FindProductsUseCase implements FindProductsUseCasePort {
           features: product.features,
           metadata: product.metadata,
           createdAt: product.createdAt,
-          updatedAt: product.updatedAt
+          updatedAt: product.updatedAt,
+          priceCount: product.priceCount
         }
 
         if (input.includePrices) {

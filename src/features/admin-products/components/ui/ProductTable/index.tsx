@@ -69,6 +69,7 @@ export const ProductTable = ({
           <TableHead>Stripe連携</TableHead>
           <TableHead>ステータス</TableHead>
           <TableHead className="text-center">表示順</TableHead>
+          <TableHead className="text-center">価格数</TableHead>
           <TableHead>作成日</TableHead>
           <TableHead>操作</TableHead>
         </TableRow>

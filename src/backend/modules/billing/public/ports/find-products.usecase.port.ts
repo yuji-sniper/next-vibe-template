@@ -14,6 +14,7 @@ export type ProductWithPrices = {
   metadata: Record<string, string> | null
   createdAt: Date
   updatedAt: Date
+  priceCount: number
   prices?: {
     id: string
     stripePriceId: string | null

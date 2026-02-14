@@ -7,6 +7,7 @@ export type Product = {
   displayOrder: number
   features: string[] | null
   metadata: Record<string, string> | null
+  priceCount: number
   createdAt: string
   updatedAt: string
   prices?: {

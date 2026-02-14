@@ -49,6 +49,7 @@ export const ProductRow = ({ product, onArchive }: ProductRowProps) => {
         )}
       </TableCell>
       <TableCell className="text-center">{product.displayOrder}</TableCell>
+      <TableCell className="text-center">{product.priceCount}</TableCell>
       <TableCell>{formatDate(product.createdAt)}</TableCell>
       <TableCell>
         <ProductActions
