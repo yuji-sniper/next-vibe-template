@@ -1,5 +1,8 @@
 "use client"
 
+import { PlusIcon } from "lucide-react"
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
 import { CancelNotificationDialog } from "@/features/admin-notifications/components/ui/CancelNotificationDialog"
 import { NotificationFilter } from "@/features/admin-notifications/components/ui/NotificationFilter"
 import { NotificationPagination } from "@/features/admin-notifications/components/ui/NotificationPagination"
@@ -44,6 +47,12 @@ export const NotificationsPresentational = ({
     <div className="container py-8">
       <div className="mb-8 flex items-center justify-between">
         <h1 className="text-2xl font-bold">お知らせ管理</h1>
+        <Button asChild>
+          <Link href="/notifications/new">
+            <PlusIcon className="size-4" />
+            新規作成
+          </Link>
+        </Button>
       </div>
 
       <div className="mb-4">

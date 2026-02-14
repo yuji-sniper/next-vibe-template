@@ -14,22 +14,22 @@ import { env } from "@/env"
 export class DeleteScheduleEventBridgeSchedulerAdapter
   implements DeleteSchedulePort
 {
-  private readonly client: SchedulerClient
+  async handle(input: DeleteSchedulePortInput): Promise<void> {
+    if (process.env.NODE_ENV === "development") {
+      return
+    }
 
-  constructor() {
-    this.client = new SchedulerClient({
+    const schedulerClient = new SchedulerClient({
       region: env.AWS_REGION,
       credentials: awsCredentialsProvider({
         roleArn: env.AWS_ROLE_ARN
       })
     })
-  }
 
-  async handle(input: DeleteSchedulePortInput): Promise<void> {
     const command = new DeleteScheduleCommand({
       Name: input.scheduleName
     })
 
-    await this.client.send(command)
+    await schedulerClient.send(command)
   }
 }

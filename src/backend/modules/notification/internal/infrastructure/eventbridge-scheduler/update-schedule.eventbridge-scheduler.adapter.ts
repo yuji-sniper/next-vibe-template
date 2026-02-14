@@ -16,20 +16,22 @@ import { env } from "@/env"
 export class UpdateScheduleEventBridgeSchedulerAdapter
   implements UpdateSchedulePort
 {
-  private readonly client: SchedulerClient
+  async handle(
+    input: UpdateSchedulePortInput
+  ): Promise<UpdateSchedulePortOutput> {
+    if (process.env.NODE_ENV === "development") {
+      return {
+        scheduleArn: `arn:aws:scheduler:${env.AWS_REGION}:000000000000:schedule/${input.scheduleName}`
+      }
+    }
 
-  constructor() {
-    this.client = new SchedulerClient({
+    const schedulerClient = new SchedulerClient({
       region: env.AWS_REGION,
       credentials: awsCredentialsProvider({
         roleArn: env.AWS_ROLE_ARN
       })
     })
-  }
 
-  async handle(
-    input: UpdateSchedulePortInput
-  ): Promise<UpdateSchedulePortOutput> {
     const command = new UpdateScheduleCommand({
       Name: input.scheduleName,
       ScheduleExpression: `at(${input.scheduleTime.toISOString().replace(/\.\d{3}Z$/, "")})`,
@@ -45,7 +47,7 @@ export class UpdateScheduleEventBridgeSchedulerAdapter
       ActionAfterCompletion: "DELETE"
     })
 
-    const response = await this.client.send(command)
+    const response = await schedulerClient.send(command)
 
     return {
       scheduleArn: response.ScheduleArn ?? ""
