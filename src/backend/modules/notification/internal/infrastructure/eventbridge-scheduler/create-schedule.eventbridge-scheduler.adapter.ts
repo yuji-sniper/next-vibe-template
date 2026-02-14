@@ -12,6 +12,9 @@ import type {
 } from "@/backend/modules/notification/internal/application/ports/create-schedule.port"
 import { env } from "@/env"
 
+const MAX_EVENT_AGE_IN_SECONDS = 60 * 60 * 24
+const MAX_RETRY_ATTEMPTS = 3
+
 @injectable()
 export class CreateScheduleEventBridgeSchedulerAdapter
   implements CreateSchedulePort
@@ -42,7 +45,11 @@ export class CreateScheduleEventBridgeSchedulerAdapter
       Target: {
         Arn: input.lambdaArn,
         RoleArn: env.AWS_SCHEDULER_ROLE_ARN_NOTIFICATION,
-        Input: JSON.stringify(input.payload)
+        Input: JSON.stringify(input.payload),
+        RetryPolicy: {
+          MaximumEventAgeInSeconds: MAX_EVENT_AGE_IN_SECONDS,
+          MaximumRetryAttempts: MAX_RETRY_ATTEMPTS
+        }
       },
       GroupName: env.AWS_SCHEDULER_GROUP_NAME_NOTIFICATION,
       ActionAfterCompletion: "DELETE"
