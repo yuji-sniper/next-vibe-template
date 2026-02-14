@@ -1,6 +1,6 @@
 import { inject, injectable } from "tsyringe"
-import type { DeleteSchedulePort } from "@/backend/modules/notification/internal/application/commands/ports/delete-schedule.port"
-import { DeleteSchedulePortToken } from "@/backend/modules/notification/internal/application/commands/ports/delete-schedule.port"
+import type { DeleteSchedulePort } from "@/backend/modules/notification/internal/application/ports/delete-schedule.port"
+import { DeleteSchedulePortToken } from "@/backend/modules/notification/internal/application/ports/delete-schedule.port"
 import type { GetAdminUserPort } from "@/backend/modules/notification/internal/application/ports/get-admin-user.port"
 import { GetAdminUserPortToken } from "@/backend/modules/notification/internal/application/ports/get-admin-user.port"
 import type { NotificationRepository } from "@/backend/modules/notification/internal/domain/notification/notification.repository"

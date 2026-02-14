@@ -4,7 +4,7 @@ import type {
   CancelSubscriptionPort,
   CancelSubscriptionPortInput,
   CancelSubscriptionPortOutput
-} from "../../application/commands/ports/cancel-subscription.port"
+} from "../../application/ports/cancel-subscription.port"
 import { stripe } from "./stripe-client"
 
 @injectable()

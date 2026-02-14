@@ -4,7 +4,7 @@ import type {
   CreateStripePricePort,
   CreateStripePricePortInput,
   CreateStripePricePortOutput
-} from "../../application/commands/ports/create-stripe-price.port"
+} from "../../application/ports/create-stripe-price.port"
 import { stripe } from "./stripe-client"
 
 @injectable()

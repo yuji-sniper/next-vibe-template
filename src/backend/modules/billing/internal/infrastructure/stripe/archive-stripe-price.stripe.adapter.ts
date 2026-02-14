@@ -3,7 +3,7 @@ import { PriceArchiveFailedError } from "@/backend/modules/billing/public/errors
 import type {
   ArchiveStripePricePort,
   ArchiveStripePricePortInput
-} from "../../application/commands/ports/archive-stripe-price.port"
+} from "../../application/ports/archive-stripe-price.port"
 import { stripe } from "./stripe-client"
 
 @injectable()

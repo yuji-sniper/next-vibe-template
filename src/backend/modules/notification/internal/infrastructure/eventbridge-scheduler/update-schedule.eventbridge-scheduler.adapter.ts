@@ -8,7 +8,7 @@ import type {
   UpdateSchedulePort,
   UpdateSchedulePortInput,
   UpdateSchedulePortOutput
-} from "@/backend/modules/notification/internal/application/commands/ports/update-schedule.port"
+} from "@/backend/modules/notification/internal/application/ports/update-schedule.port"
 import { env } from "@/env"
 
 // TODO: IAM Role ARNは環境変数から取得するように変更する

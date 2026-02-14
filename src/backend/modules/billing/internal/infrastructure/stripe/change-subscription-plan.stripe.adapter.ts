@@ -4,7 +4,7 @@ import type {
   ChangeSubscriptionPlanPort,
   ChangeSubscriptionPlanPortInput,
   ChangeSubscriptionPlanPortOutput
-} from "../../application/commands/ports/change-subscription-plan.port"
+} from "../../application/ports/change-subscription-plan.port"
 import { stripe } from "./stripe-client"
 
 @injectable()

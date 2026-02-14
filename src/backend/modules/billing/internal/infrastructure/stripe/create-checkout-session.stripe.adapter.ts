@@ -4,7 +4,7 @@ import type {
   CreateCheckoutSessionPort,
   CreateCheckoutSessionPortInput,
   CreateCheckoutSessionPortOutput
-} from "../../application/commands/ports/create-checkout-session.port"
+} from "../../application/ports/create-checkout-session.port"
 import { stripe } from "./stripe-client"
 
 @injectable()

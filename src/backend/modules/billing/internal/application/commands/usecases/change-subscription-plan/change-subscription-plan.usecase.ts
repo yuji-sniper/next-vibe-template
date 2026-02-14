@@ -15,10 +15,10 @@ import type {
 } from "@/backend/modules/billing/public/ports/change-subscription-plan.usecase.port"
 import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import type { ChangeSubscriptionPlanPort } from "../../../ports/change-subscription-plan.port"
+import { ChangeSubscriptionPlanPortToken } from "../../../ports/change-subscription-plan.port"
 import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
 import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
-import type { ChangeSubscriptionPlanPort } from "../../ports/change-subscription-plan.port"
-import { ChangeSubscriptionPlanPortToken } from "../../ports/change-subscription-plan.port"
 
 @injectable()
 export class ChangeSubscriptionPlanUseCase

@@ -16,15 +16,15 @@ import type { LoggerPort } from "@/backend/modules/shared/application/ports/logg
 import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import { UuidV7GeneratorPortToken } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
-import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
-import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
-import type { CreateCheckoutSessionPort } from "../../ports/create-checkout-session.port"
+import type { CreateCheckoutSessionPort } from "../../../ports/create-checkout-session.port"
 import {
   CHECKOUT_SESSION_MODE,
   CreateCheckoutSessionPortToken
-} from "../../ports/create-checkout-session.port"
-import type { CreateStripeCustomerPort } from "../../ports/create-stripe-customer.port"
-import { CreateStripeCustomerPortToken } from "../../ports/create-stripe-customer.port"
+} from "../../../ports/create-checkout-session.port"
+import type { CreateStripeCustomerPort } from "../../../ports/create-stripe-customer.port"
+import { CreateStripeCustomerPortToken } from "../../../ports/create-stripe-customer.port"
+import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
+import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
 
 @injectable()
 export class CreateCheckoutSessionUseCase

@@ -13,8 +13,8 @@ import type { LoggerPort } from "@/backend/modules/shared/application/ports/logg
 import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import { UuidV7GeneratorPortToken } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
-import type { CreateStripeProductPort } from "../../ports/create-stripe-product.port"
-import { CreateStripeProductPortToken } from "../../ports/create-stripe-product.port"
+import type { CreateStripeProductPort } from "../../../ports/create-stripe-product.port"
+import { CreateStripeProductPortToken } from "../../../ports/create-stripe-product.port"
 
 @injectable()
 export class CreateProductUseCase implements CreateProductUseCasePort {

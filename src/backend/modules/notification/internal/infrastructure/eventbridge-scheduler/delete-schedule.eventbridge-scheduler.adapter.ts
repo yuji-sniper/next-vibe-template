@@ -6,7 +6,7 @@ import { injectable } from "tsyringe"
 import type {
   DeleteSchedulePort,
   DeleteSchedulePortInput
-} from "@/backend/modules/notification/internal/application/commands/ports/delete-schedule.port"
+} from "@/backend/modules/notification/internal/application/ports/delete-schedule.port"
 import { env } from "@/env"
 
 @injectable()

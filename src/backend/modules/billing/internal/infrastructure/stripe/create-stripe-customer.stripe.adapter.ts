@@ -4,7 +4,7 @@ import type {
   CreateStripeCustomerPort,
   CreateStripeCustomerPortInput,
   CreateStripeCustomerPortOutput
-} from "../../application/commands/ports/create-stripe-customer.port"
+} from "../../application/ports/create-stripe-customer.port"
 import { stripe } from "./stripe-client"
 
 @injectable()

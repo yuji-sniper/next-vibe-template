@@ -6,7 +6,7 @@ import type {
   ProcessStripeWebhookPort,
   ProcessStripeWebhookPortInput,
   ProcessStripeWebhookPortOutput
-} from "../../application/commands/ports/process-stripe-webhook.port"
+} from "../../application/ports/process-stripe-webhook.port"
 import { stripe } from "./stripe-client"
 
 @injectable()

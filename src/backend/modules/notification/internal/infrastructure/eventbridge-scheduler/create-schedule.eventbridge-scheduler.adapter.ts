@@ -8,7 +8,7 @@ import type {
   CreateSchedulePort,
   CreateSchedulePortInput,
   CreateSchedulePortOutput
-} from "@/backend/modules/notification/internal/application/commands/ports/create-schedule.port"
+} from "@/backend/modules/notification/internal/application/ports/create-schedule.port"
 import { env } from "@/env"
 
 @injectable()

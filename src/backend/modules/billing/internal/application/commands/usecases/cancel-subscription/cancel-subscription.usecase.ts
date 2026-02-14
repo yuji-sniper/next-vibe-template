@@ -14,10 +14,10 @@ import type { Transactor } from "@/backend/modules/shared/application/ports/db/t
 import { TransactorToken } from "@/backend/modules/shared/application/ports/db/transactor.port"
 import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
+import type { CancelSubscriptionPort } from "../../../ports/cancel-subscription.port"
+import { CancelSubscriptionPortToken } from "../../../ports/cancel-subscription.port"
 import type { GetCurrentUserPort } from "../../../ports/get-current-user.port"
 import { GetCurrentUserPortToken } from "../../../ports/get-current-user.port"
-import type { CancelSubscriptionPort } from "../../ports/cancel-subscription.port"
-import { CancelSubscriptionPortToken } from "../../ports/cancel-subscription.port"
 
 @injectable()
 export class CancelSubscriptionUseCase

@@ -35,8 +35,8 @@ import type { LoggerPort } from "@/backend/modules/shared/application/ports/logg
 import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
 import { UuidV7GeneratorPortToken } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
-import type { ProcessStripeWebhookPort } from "../../ports/process-stripe-webhook.port"
-import { ProcessStripeWebhookPortToken } from "../../ports/process-stripe-webhook.port"
+import type { ProcessStripeWebhookPort } from "../../../ports/process-stripe-webhook.port"
+import { ProcessStripeWebhookPortToken } from "../../../ports/process-stripe-webhook.port"
 
 @injectable()
 export class ProcessStripeWebhookUseCase

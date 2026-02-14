@@ -10,8 +10,8 @@ import type {
 } from "@/backend/modules/billing/public/ports/archive-price.usecase.port"
 import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
-import type { ArchiveStripePricePort } from "../../ports/archive-stripe-price.port"
-import { ArchiveStripePricePortToken } from "../../ports/archive-stripe-price.port"
+import type { ArchiveStripePricePort } from "../../../ports/archive-stripe-price.port"
+import { ArchiveStripePricePortToken } from "../../../ports/archive-stripe-price.port"
 
 @injectable()
 export class ArchivePriceUseCase implements ArchivePriceUseCasePort {

@@ -3,7 +3,7 @@ import { ProductUpdateFailedError } from "@/backend/modules/billing/public/error
 import type {
   UpdateStripeProductPort,
   UpdateStripeProductPortInput
-} from "../../application/commands/ports/update-stripe-product.port"
+} from "../../application/ports/update-stripe-product.port"
 import { stripe } from "./stripe-client"
 
 @injectable()

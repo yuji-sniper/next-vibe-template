@@ -11,8 +11,8 @@ import type {
 } from "@/backend/modules/billing/public/ports/update-product.usecase.port"
 import type { LoggerPort } from "@/backend/modules/shared/application/ports/logger/logger.port"
 import { LoggerPortToken } from "@/backend/modules/shared/application/ports/logger/logger.port"
-import type { UpdateStripeProductPort } from "../../ports/update-stripe-product.port"
-import { UpdateStripeProductPortToken } from "../../ports/update-stripe-product.port"
+import type { UpdateStripeProductPort } from "../../../ports/update-stripe-product.port"
+import { UpdateStripeProductPortToken } from "../../../ports/update-stripe-product.port"
 
 @injectable()
 export class UpdateProductUseCase implements UpdateProductUseCasePort {
