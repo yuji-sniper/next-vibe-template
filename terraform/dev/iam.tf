@@ -37,7 +37,7 @@ data "aws_iam_policy_document" "vercel_oidc_policy" {
       "scheduler:DeleteSchedule",
     ]
     resources = [
-      "arn:aws:scheduler:ap-northeast-1:${data.aws_caller_identity.current.account_id}:schedule/${aws_scheduler_schedule_group.notification.name}/*"
+      "arn:aws:scheduler:${local.region}:${data.aws_caller_identity.current.account_id}:schedule/${aws_scheduler_schedule_group.notification.name}/*"
     ]
   }
   statement {
