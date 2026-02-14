@@ -61,7 +61,7 @@ resource "null_resource" "notification_fanout_build" {
 data "archive_file" "notification_fanout" {
   type        = "zip"
   source_file = "${path.module}/sources/lambda_functions/notification_fanout/dist/index.js"
-  output_path = "${path.module}/sources/lambda_functions/notification_fanout/notification_fanout.zip"
+  output_path = "${path.module}/outputs/lambda_functions/notification_fanout.zip"
 
   depends_on = [null_resource.notification_fanout_build]
 }
@@ -163,7 +163,7 @@ resource "null_resource" "notification_worker_build" {
 data "archive_file" "notification_worker" {
   type        = "zip"
   source_file = "${path.module}/sources/lambda_functions/notification_worker/dist/index.js"
-  output_path = "${path.module}/sources/lambda_functions/notification_worker/notification_worker.zip"
+  output_path = "${path.module}/outputs/lambda_functions/notification_worker.zip"
 
   depends_on = [null_resource.notification_worker_build]
 }
