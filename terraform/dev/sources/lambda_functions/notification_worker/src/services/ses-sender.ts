@@ -5,7 +5,7 @@ import {
   SESv2ServiceException,
   SendBulkEmailCommand
 } from "@aws-sdk/client-sesv2"
-import { FROM_EMAIL, SES_REGION } from "../config"
+import { FROM_EMAIL, FROM_NAME, SES_REGION } from "../config"
 import type {
   BulkEmailEntry as BulkEmailInput,
   BulkSendResultEntry,
@@ -73,7 +73,7 @@ export class SesSender {
       maxAttempts: 3,
       retryMode: "adaptive" // スロットリングを考慮した適応型リトライ
     })
-    this.fromEmail = FROM_EMAIL
+    this.fromEmail = `"${FROM_NAME}" <${FROM_EMAIL}>`
   }
 
   /**

@@ -5,6 +5,9 @@
 /** 送信元メールアドレス（環境変数から取得） */
 export const FROM_EMAIL = process.env.FROM_EMAIL ?? ""
 
+/** 送信元表示名 */
+export const FROM_NAME = "Next Vibe Template"
+
 /** SESリージョン（環境変数から取得） */
 export const SES_REGION = "ap-northeast-1"
 
