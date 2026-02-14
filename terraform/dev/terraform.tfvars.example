@@ -1,5 +1,8 @@
 vercel_cname_target = 
 
+vercel_team_slug = 
+vercel_project   = 
+
 db_host             = 
 db_port             = 
 db_user             = 

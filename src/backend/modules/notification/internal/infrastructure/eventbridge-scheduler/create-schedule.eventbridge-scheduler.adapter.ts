@@ -3,6 +3,7 @@ import {
   FlexibleTimeWindowMode,
   SchedulerClient
 } from "@aws-sdk/client-scheduler"
+import { awsCredentialsProvider } from "@vercel/oidc-aws-credentials-provider"
 import { injectable } from "tsyringe"
 import type {
   CreateSchedulePort,
@@ -19,7 +20,10 @@ export class CreateScheduleEventBridgeSchedulerAdapter
 
   constructor() {
     this.client = new SchedulerClient({
-      region: env.AWS_REGION
+      region: env.AWS_REGION,
+      credentials: awsCredentialsProvider({
+        roleArn: env.AWS_ROLE_ARN
+      })
     })
   }
 

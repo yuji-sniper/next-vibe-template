@@ -3,6 +3,16 @@ variable "vercel_cname_target" {
   description = "The CNAME target of the Vercel deployment"
 }
 
+variable "vercel_team_slug" {
+  type        = string
+  description = "The team slug of the Vercel project"
+}
+
+variable "vercel_project" {
+  type        = string
+  description = "The project of the Vercel project"
+}
+
 variable "db_host" {
   type        = string
   description = "The host of the database"

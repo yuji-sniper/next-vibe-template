@@ -3,6 +3,7 @@ import {
   SchedulerClient,
   UpdateScheduleCommand
 } from "@aws-sdk/client-scheduler"
+import { awsCredentialsProvider } from "@vercel/oidc-aws-credentials-provider"
 import { injectable } from "tsyringe"
 import type {
   UpdateSchedulePort,
@@ -10,11 +11,6 @@ import type {
   UpdateSchedulePortOutput
 } from "@/backend/modules/notification/internal/application/ports/update-schedule.port"
 import { env } from "@/env"
-
-// TODO: IAM Role ARNは環境変数から取得するように変更する
-const SCHEDULER_ROLE_ARN =
-  process.env.SCHEDULER_ROLE_ARN ??
-  "arn:aws:iam::000000000000:role/notification-scheduler-role"
 
 @injectable()
 export class UpdateScheduleEventBridgeSchedulerAdapter
@@ -24,7 +20,10 @@ export class UpdateScheduleEventBridgeSchedulerAdapter
 
   constructor() {
     this.client = new SchedulerClient({
-      region: env.AWS_REGION
+      region: env.AWS_REGION,
+      credentials: awsCredentialsProvider({
+        roleArn: env.AWS_ROLE_ARN
+      })
     })
   }
 
@@ -40,7 +39,7 @@ export class UpdateScheduleEventBridgeSchedulerAdapter
       },
       Target: {
         Arn: input.lambdaArn,
-        RoleArn: SCHEDULER_ROLE_ARN,
+        RoleArn: env.AWS_SCHEDULER_ROLE_ARN_NOTIFICATION,
         Input: JSON.stringify(input.payload)
       },
       ActionAfterCompletion: "DELETE"
