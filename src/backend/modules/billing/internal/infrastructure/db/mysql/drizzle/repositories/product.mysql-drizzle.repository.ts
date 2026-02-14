@@ -3,10 +3,10 @@ import { inject, injectable } from "tsyringe"
 import { Product } from "@/backend/modules/billing/internal/domain/product/product"
 import type { ProductRepository } from "@/backend/modules/billing/internal/domain/product/product.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { products } from "../db/mysql/drizzle/schemas"
+import { products } from "../schemas"
 
 @injectable()
-export class ProductDrizzleRepository implements ProductRepository {
+export class ProductMysqlDrizzleRepository implements ProductRepository {
   constructor(
     @inject(GetDb)
     private readonly getDb: GetDb

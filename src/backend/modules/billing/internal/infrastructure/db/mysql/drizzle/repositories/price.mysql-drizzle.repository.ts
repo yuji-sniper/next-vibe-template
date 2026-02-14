@@ -7,10 +7,10 @@ import type {
 import { Price } from "@/backend/modules/billing/internal/domain/price/price"
 import type { PriceRepository } from "@/backend/modules/billing/internal/domain/price/price.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { prices } from "../db/mysql/drizzle/schemas"
+import { prices } from "../schemas"
 
 @injectable()
-export class PriceDrizzleRepository implements PriceRepository {
+export class PriceMysqlDrizzleRepository implements PriceRepository {
   constructor(
     @inject(GetDb)
     private readonly getDb: GetDb

@@ -3,10 +3,12 @@ import { inject, injectable } from "tsyringe"
 import { WebhookEvent } from "@/backend/modules/billing/internal/domain/webhook-event/webhook-event"
 import type { WebhookEventRepository } from "@/backend/modules/billing/internal/domain/webhook-event/webhook-event.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { stripeWebhookEvents } from "../db/mysql/drizzle/schemas"
+import { stripeWebhookEvents } from "../schemas"
 
 @injectable()
-export class WebhookEventDrizzleRepository implements WebhookEventRepository {
+export class WebhookEventMysqlDrizzleRepository
+  implements WebhookEventRepository
+{
   constructor(
     @inject(GetDb)
     private readonly getDb: GetDb

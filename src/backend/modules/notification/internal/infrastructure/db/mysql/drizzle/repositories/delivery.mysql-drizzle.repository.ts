@@ -8,10 +8,10 @@ import {
 } from "@/backend/modules/notification/internal/domain/delivery/delivery"
 import type { DeliveryRepository } from "@/backend/modules/notification/internal/domain/delivery/delivery.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { notificationDeliveries } from "../db/mysql/drizzle/schemas"
+import { notificationDeliveries } from "../schemas"
 
 @injectable()
-export class DeliveryDrizzleRepository implements DeliveryRepository {
+export class DeliveryMysqlDrizzleRepository implements DeliveryRepository {
   constructor(
     @inject(GetDb)
     private readonly getDb: GetDb

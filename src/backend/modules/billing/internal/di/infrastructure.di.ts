@@ -18,16 +18,16 @@ import { PriceRepositoryToken } from "@/backend/modules/billing/internal/domain/
 import { ProductRepositoryToken } from "@/backend/modules/billing/internal/domain/product/product.repository"
 import { SubscriptionRepositoryToken } from "@/backend/modules/billing/internal/domain/subscription/subscription.repository"
 import { WebhookEventRepositoryToken } from "@/backend/modules/billing/internal/domain/webhook-event/webhook-event.repository"
+import { FindProductsMysqlDrizzleQueryService } from "@/backend/modules/billing/internal/infrastructure/db/mysql/drizzle/query-services/find-products.mysql-drizzle.query-service"
+import { CustomerMysqlDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/db/mysql/drizzle/repositories/customer.mysql-drizzle.repository"
+import { InvoiceMysqlDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/db/mysql/drizzle/repositories/invoice.mysql-drizzle.repository"
+import { PaymentMysqlDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/db/mysql/drizzle/repositories/payment.mysql-drizzle.repository"
+import { PriceMysqlDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/db/mysql/drizzle/repositories/price.mysql-drizzle.repository"
+import { ProductMysqlDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/db/mysql/drizzle/repositories/product.mysql-drizzle.repository"
+import { SubscriptionMysqlDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/db/mysql/drizzle/repositories/subscription.mysql-drizzle.repository"
+import { WebhookEventMysqlDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/db/mysql/drizzle/repositories/webhook-event.mysql-drizzle.repository"
 import { GetCurrentUserAuthModuleAdapter } from "@/backend/modules/billing/internal/infrastructure/modules/auth/get-current-user.auth-module.adapter"
 import { GetCurrentAdminAuthAdminModuleAdapter } from "@/backend/modules/billing/internal/infrastructure/modules/auth-admin/get-current-admin.auth-admin-module.adapter"
-import { FindProductsDrizzleQueryService } from "@/backend/modules/billing/internal/infrastructure/query-services/find-products.drizzle.query-service"
-import { CustomerDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/repositories/customer.drizzle.repository"
-import { InvoiceDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/repositories/invoice.drizzle.repository"
-import { PaymentDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/repositories/payment.drizzle.repository"
-import { PriceDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/repositories/price.drizzle.repository"
-import { ProductDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/repositories/product.drizzle.repository"
-import { SubscriptionDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/repositories/subscription.drizzle.repository"
-import { WebhookEventDrizzleRepository } from "@/backend/modules/billing/internal/infrastructure/repositories/webhook-event.drizzle.repository"
 import { ArchiveStripePriceStripeAdapter } from "@/backend/modules/billing/internal/infrastructure/stripe/archive-stripe-price.stripe.adapter"
 import { CancelSubscriptionStripeAdapter } from "@/backend/modules/billing/internal/infrastructure/stripe/cancel-subscription.stripe.adapter"
 import { ChangeSubscriptionPlanStripeAdapter } from "@/backend/modules/billing/internal/infrastructure/stripe/change-subscription-plan.stripe.adapter"
@@ -42,26 +42,35 @@ export function initInfrastructureDependency(container: DependencyContainer) {
   // Query Services
   container.registerSingleton(
     FindProductsQueryServicePortToken,
-    FindProductsDrizzleQueryService
+    FindProductsMysqlDrizzleQueryService
   )
 
   // Repositories
   container.registerSingleton(
     CustomerRepositoryToken,
-    CustomerDrizzleRepository
+    CustomerMysqlDrizzleRepository
   )
-  container.registerSingleton(PaymentRepositoryToken, PaymentDrizzleRepository)
+  container.registerSingleton(
+    PaymentRepositoryToken,
+    PaymentMysqlDrizzleRepository
+  )
   container.registerSingleton(
     WebhookEventRepositoryToken,
-    WebhookEventDrizzleRepository
+    WebhookEventMysqlDrizzleRepository
   )
   container.registerSingleton(
     SubscriptionRepositoryToken,
-    SubscriptionDrizzleRepository
+    SubscriptionMysqlDrizzleRepository
   )
-  container.registerSingleton(InvoiceRepositoryToken, InvoiceDrizzleRepository)
-  container.registerSingleton(ProductRepositoryToken, ProductDrizzleRepository)
-  container.registerSingleton(PriceRepositoryToken, PriceDrizzleRepository)
+  container.registerSingleton(
+    InvoiceRepositoryToken,
+    InvoiceMysqlDrizzleRepository
+  )
+  container.registerSingleton(
+    ProductRepositoryToken,
+    ProductMysqlDrizzleRepository
+  )
+  container.registerSingleton(PriceRepositoryToken, PriceMysqlDrizzleRepository)
 
   // External Module Adapters
   container.registerSingleton(

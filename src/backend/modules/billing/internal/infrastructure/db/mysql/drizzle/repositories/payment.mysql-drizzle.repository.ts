@@ -4,10 +4,10 @@ import type { PaymentStatus } from "@/backend/modules/billing/internal/domain/pa
 import { Payment } from "@/backend/modules/billing/internal/domain/payment/payment"
 import type { PaymentRepository } from "@/backend/modules/billing/internal/domain/payment/payment.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { payments } from "../db/mysql/drizzle/schemas"
+import { payments } from "../schemas"
 
 @injectable()
-export class PaymentDrizzleRepository implements PaymentRepository {
+export class PaymentMysqlDrizzleRepository implements PaymentRepository {
   constructor(
     @inject(GetDb)
     private readonly getDb: GetDb

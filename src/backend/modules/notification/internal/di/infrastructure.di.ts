@@ -5,22 +5,22 @@ import { GetAdminUserPortToken } from "@/backend/modules/notification/internal/a
 import { UpdateSchedulePortToken } from "@/backend/modules/notification/internal/application/ports/update-schedule.port"
 import { DeliveryRepositoryToken } from "@/backend/modules/notification/internal/domain/delivery/delivery.repository"
 import { NotificationRepositoryToken } from "@/backend/modules/notification/internal/domain/notification/notification.repository"
+import { DeliveryMysqlDrizzleRepository } from "@/backend/modules/notification/internal/infrastructure/db/mysql/drizzle/repositories/delivery.mysql-drizzle.repository"
+import { NotificationMysqlDrizzleRepository } from "@/backend/modules/notification/internal/infrastructure/db/mysql/drizzle/repositories/notification.mysql-drizzle.repository"
 import { CreateScheduleEventBridgeSchedulerAdapter } from "@/backend/modules/notification/internal/infrastructure/eventbridge-scheduler/create-schedule.eventbridge-scheduler.adapter"
 import { DeleteScheduleEventBridgeSchedulerAdapter } from "@/backend/modules/notification/internal/infrastructure/eventbridge-scheduler/delete-schedule.eventbridge-scheduler.adapter"
 import { UpdateScheduleEventBridgeSchedulerAdapter } from "@/backend/modules/notification/internal/infrastructure/eventbridge-scheduler/update-schedule.eventbridge-scheduler.adapter"
 import { GetAdminUserAuthModuleAdapter } from "@/backend/modules/notification/internal/infrastructure/modules/auth/get-admin-user.auth-module.adapter"
-import { DeliveryDrizzleRepository } from "@/backend/modules/notification/internal/infrastructure/repositories/delivery.drizzle.repository"
-import { NotificationDrizzleRepository } from "@/backend/modules/notification/internal/infrastructure/repositories/notification.drizzle.repository"
 
 export function initInfrastructureDependency(container: DependencyContainer) {
   // Repositories
   container.registerSingleton(
     NotificationRepositoryToken,
-    NotificationDrizzleRepository
+    NotificationMysqlDrizzleRepository
   )
   container.registerSingleton(
     DeliveryRepositoryToken,
-    DeliveryDrizzleRepository
+    DeliveryMysqlDrizzleRepository
   )
 
   // External Module Adapters

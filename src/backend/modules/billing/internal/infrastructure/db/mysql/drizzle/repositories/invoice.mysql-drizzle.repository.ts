@@ -4,10 +4,10 @@ import type { InvoiceStatus } from "@/backend/modules/billing/internal/domain/in
 import { Invoice } from "@/backend/modules/billing/internal/domain/invoice/invoice"
 import type { InvoiceRepository } from "@/backend/modules/billing/internal/domain/invoice/invoice.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { invoices } from "../db/mysql/drizzle/schemas"
+import { invoices } from "../schemas"
 
 @injectable()
-export class InvoiceDrizzleRepository implements InvoiceRepository {
+export class InvoiceMysqlDrizzleRepository implements InvoiceRepository {
   constructor(
     @inject(GetDb)
     private readonly getDb: GetDb

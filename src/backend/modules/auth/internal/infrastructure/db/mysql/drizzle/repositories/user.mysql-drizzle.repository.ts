@@ -2,10 +2,10 @@ import { eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
 import type { UserRepository } from "@/backend/modules/auth/internal/domain/auth-user/user.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { users } from "../db/mysql/drizzle/schemas"
+import { users } from "../schemas"
 
 @injectable()
-export class UserDrizzleRepository implements UserRepository {
+export class UserMysqlDrizzleRepository implements UserRepository {
   constructor(
     @inject(GetDb)
     private readonly getDb: GetDb

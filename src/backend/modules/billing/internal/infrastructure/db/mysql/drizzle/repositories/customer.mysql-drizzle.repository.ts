@@ -3,10 +3,10 @@ import { inject, injectable } from "tsyringe"
 import { Customer } from "@/backend/modules/billing/internal/domain/customer/customer"
 import type { CustomerRepository } from "@/backend/modules/billing/internal/domain/customer/customer.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { customers } from "../db/mysql/drizzle/schemas"
+import { customers } from "../schemas"
 
 @injectable()
-export class CustomerDrizzleRepository implements CustomerRepository {
+export class CustomerMysqlDrizzleRepository implements CustomerRepository {
   constructor(
     @inject(GetDb)
     private readonly getDb: GetDb

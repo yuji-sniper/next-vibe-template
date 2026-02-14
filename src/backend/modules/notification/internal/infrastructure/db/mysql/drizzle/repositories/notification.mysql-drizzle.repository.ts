@@ -7,10 +7,12 @@ import {
 } from "@/backend/modules/notification/internal/domain/notification/notification"
 import type { NotificationRepository } from "@/backend/modules/notification/internal/domain/notification/notification.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { notifications } from "../db/mysql/drizzle/schemas"
+import { notifications } from "../schemas"
 
 @injectable()
-export class NotificationDrizzleRepository implements NotificationRepository {
+export class NotificationMysqlDrizzleRepository
+  implements NotificationRepository
+{
   constructor(
     @inject(GetDb)
     private readonly getDb: GetDb

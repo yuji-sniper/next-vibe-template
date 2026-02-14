@@ -6,10 +6,10 @@ import type {
   FindProductsQueryServicePortOutput
 } from "@/backend/modules/billing/internal/application/queries/usecases/find-products/find-products.query-service.port"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { prices, products } from "../db/mysql/drizzle/schemas"
+import { prices, products } from "../schemas"
 
 @injectable()
-export class FindProductsDrizzleQueryService
+export class FindProductsMysqlDrizzleQueryService
   implements FindProductsQueryServicePort
 {
   constructor(
