@@ -1,6 +1,6 @@
 "use client"
 
-import { LayoutDashboard, LogOut, Package } from "lucide-react"
+import { Bell, LayoutDashboard, LogOut, Package } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -30,6 +30,11 @@ const navItems = [
     title: "商品管理",
     href: "/products",
     icon: Package
+  },
+  {
+    title: "お知らせ管理",
+    href: "/notifications",
+    icon: Bell
   }
 ]
 
