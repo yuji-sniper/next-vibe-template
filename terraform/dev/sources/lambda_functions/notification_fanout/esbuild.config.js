@@ -6,13 +6,10 @@ await esbuild.build({
   outfile: "dist/index.js",
   platform: "node",
   target: "node22",
-  format: "esm",
+  format: "cjs",
   minify: true,
   sourcemap: true,
-  external: [],
-  banner: {
-    js: `import { createRequire } from 'module';const require = createRequire(import.meta.url);`
-  }
+  external: []
 })
 
 console.log("Build completed successfully!")
