@@ -5,10 +5,10 @@ services:
     ports:
       - 3306:3306
     environment:
-      MYSQL_ROOT_PASSWORD: password
-      MYSQL_DATABASE: next_vibe_template
-      MYSQL_USER: next_vibe_template
-      MYSQL_PASSWORD: password
+      MYSQL_ROOT_PASSWORD: ${DATABASE_PASSWORD}
+      MYSQL_DATABASE: ${DATABASE_NAME}
+      MYSQL_USER: ${DATABASE_USER}
+      MYSQL_PASSWORD: ${DATABASE_PASSWORD}
     volumes:
       - mysql-data:/var/lib/mysql
       - .docker/mysql/initdb.d:/docker-entrypoint-initdb.d
@@ -21,7 +21,7 @@ services:
       PMA_HOST: db
       PMA_PORT: 3306
       PMA_USER: root
-      PMA_PASSWORD: password
+      PMA_PASSWORD: ${DATABASE_PASSWORD}
     depends_on:
       - db
 volumes:
