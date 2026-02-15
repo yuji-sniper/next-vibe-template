@@ -57,8 +57,8 @@ jobs:
   #       image: mysql:8.0.45
   #       env:
   #         MYSQL_ROOT_PASSWORD: password
-  #         MYSQL_DATABASE: next_vibe_template_test
-  #         MYSQL_USER: next_vibe_template
+  #         MYSQL_DATABASE: test
+  #         MYSQL_USER: test
   #         MYSQL_PASSWORD: password
   #       ports:
   #         - 3306:3306
@@ -78,9 +78,9 @@ jobs:
   #         SKIP_ENV_VALIDATION: true
   #         DATABASE_HOST: 127.0.0.1
   #         DATABASE_PORT: 3306
-  #         DATABASE_USER: next_vibe_template
+  #         DATABASE_USER: test
   #         DATABASE_PASSWORD: password
-  #         DATABASE_NAME_TEST: next_vibe_template_test
+  #         DATABASE_NAME_TEST: test
   #     - name: Run integration tests
   #       run: pnpm test:integration
   #       env:
