@@ -66,14 +66,13 @@ src/backend/
         │   │   └── presentation.di.ts
         │   ├── application/
         │   │   ├── ports/
-        │   │   │   └── *.port.ts           # モジュール共通ポート（認証など）
+        │   │   │   └── *.port.ts           # 内部ポート（認証・外部サービス連携など全て）
         │   │   ├── queries/
         │   │   │   └── usecases/
         │   │   │       └── {usecase}/
-        │   │   │           └── {usecase}.usecase.ts
+        │   │   │           ├── {usecase}.usecase.ts
+        │   │   │           └── {usecase}.query-service.port.ts  # クエリサービスポート（必要な場合）
         │   │   └── commands/
-        │   │       ├── ports/
-        │   │       │   └── *.port.ts       # 外部サービス連携ポート
         │   │       └── usecases/
         │   │           └── {usecase}/
         │   │               └── {usecase}.usecase.ts
@@ -85,14 +84,16 @@ src/backend/
         │   │   ├── db/
         │   │   │   └── mysql/
         │   │   │       └── drizzle/
-        │   │   │           └── schemas/
-        │   │   │               ├── index.ts
-        │   │   │               └── {table}.ts
+        │   │   │           ├── schemas/
+        │   │   │           │   ├── index.ts
+        │   │   │           │   └── {table}.ts
+        │   │   │           ├── repositories/
+        │   │   │           │   └── {entity}.mysql-drizzle.repository.ts
+        │   │   │           └── query-services/
+        │   │   │               └── {query}.mysql-drizzle.query-service.ts  # クエリサービス実装（必要な場合）
         │   │   ├── modules/
         │   │   │   └── {other-module}/
         │   │   │       └── *.adapter.ts    # モジュール間アダプター
-        │   │   ├── repositories/
-        │   │   │   └── *.drizzle.repository.ts
         │   │   └── {external-service}/
         │   │       └── *.adapter.ts        # 外部サービスアダプター
         │   └── presentation/
@@ -114,7 +115,7 @@ src/backend/
 
 ### internal/（モジュール内部）
 - **di/** - 依存性注入の設定
-- **application/** - ユースケース実装、モジュール共通ポート、外部サービス連携ポート
+- **application/** - ユースケース実装、内部ポート（認証・外部サービス連携など全て `ports/` に配置）
 - **domain/** - エンティティ、リポジトリインターフェース
 - **infrastructure/** - DB schemas、リポジトリ実装、アダプター
 - **presentation/** - actions、handlers
@@ -153,8 +154,8 @@ import { withRequestContext } from "@/backend/modules/shared/presentation/middle
 import type {
   ExampleHandler,
   ExampleHandlerInput
-} from "../../handlers/example/example.handler"
-import { ExampleHandlerToken } from "../../handlers/example/example.handler"
+} from "@/backend/modules/{module}/internal/presentation/handlers/example/example.handler"
+import { ExampleHandlerToken } from "@/backend/modules/{module}/internal/presentation/handlers/example/example.handler"
 
 // Handler の入力型を再利用
 export type ExampleActionRequest = ExampleHandlerInput
@@ -317,10 +318,10 @@ export interface CreateExampleUseCasePort {
 export const CreateExampleUseCasePortToken = Symbol("CreateExampleUseCasePort")
 ```
 
-### 4. Port（外部サービス連携用・internal/application/commands/ports/）
+### 4. Port（外部サービス連携用・internal/application/ports/）
 
 ```typescript
-// modules/{module}/internal/application/commands/ports/create-example.port.ts
+// modules/{module}/internal/application/ports/create-example.port.ts
 
 export interface CreateExamplePortInput {
   name: string
@@ -346,8 +347,8 @@ export const CreateExamplePortToken = Symbol("CreateExamplePort")
 import { inject, injectable } from "tsyringe"
 import type { ExampleRepository } from "@/backend/modules/{module}/internal/domain/example/example.repository"
 import { ExampleRepositoryToken } from "@/backend/modules/{module}/internal/domain/example/example.repository"
-import type { CreateExamplePort } from "@/backend/modules/{module}/internal/application/commands/ports/create-example.port"
-import { CreateExamplePortToken } from "@/backend/modules/{module}/internal/application/commands/ports/create-example.port"
+import type { CreateExamplePort } from "@/backend/modules/{module}/internal/application/ports/create-example.port"
+import { CreateExamplePortToken } from "@/backend/modules/{module}/internal/application/ports/create-example.port"
 import type { GetCurrentUserPort } from "@/backend/modules/{module}/internal/application/ports/get-current-user.port"
 import { GetCurrentUserPortToken } from "@/backend/modules/{module}/internal/application/ports/get-current-user.port"
 import type { UuidV7GeneratorPort } from "@/backend/modules/shared/application/ports/uuid/uuid-v7-generator.port"
@@ -544,34 +545,33 @@ import type { Example } from "./example"
 export const ExampleRepositoryToken = Symbol("ExampleRepository")
 
 export interface ExampleRepository {
-  findById(id: string): Promise<Example | undefined>
-  findByUserId(userId: string): Promise<Example | undefined>
-  findByExternalId(externalId: string): Promise<Example | undefined>
+  findById(id: string): Promise<Example | null>
+  findByUserId(userId: string): Promise<Example | null>
+  findByExternalId(externalId: string): Promise<Example | null>
   save(example: Example): Promise<void>
   delete(id: string): Promise<void>
 }
 ```
 
-### 9. Drizzle Repository 実装（internal/infrastructure/repositories/）
+### 9. Drizzle Repository 実装（internal/infrastructure/db/mysql/drizzle/repositories/）
 
 ```typescript
-// modules/{module}/internal/infrastructure/repositories/{entity}.drizzle.repository.ts
+// modules/{module}/internal/infrastructure/db/mysql/drizzle/repositories/{entity}.mysql-drizzle.repository.ts
 import { eq } from "drizzle-orm"
 import { inject, injectable } from "tsyringe"
-import type { ExampleStatus } from "@/backend/modules/{module}/internal/domain/example/example"
 import { Example } from "@/backend/modules/{module}/internal/domain/example/example"
 import type { ExampleRepository } from "@/backend/modules/{module}/internal/domain/example/example.repository"
 import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
-import { examples } from "../db/mysql/drizzle/schemas"
+import { examples } from "@/backend/modules/{module}/internal/infrastructure/db/mysql/drizzle/schemas"
 
 @injectable()
-export class ExampleDrizzleRepository implements ExampleRepository {
+export class ExampleMysqlDrizzleRepository implements ExampleRepository {
   constructor(
     @inject(GetDb)
     private readonly getDb: GetDb
   ) {}
 
-  async findById(id: string): Promise<Example | undefined> {
+  async findById(id: string): Promise<Example | null> {
     const db = this.getDb.handle()
     const result = await db
       .select()
@@ -580,13 +580,13 @@ export class ExampleDrizzleRepository implements ExampleRepository {
       .limit(1)
 
     if (result.length === 0) {
-      return undefined
+      return null
     }
 
-    return this.toDomain(result[0])
+    return Example.reconstruct(result[0])
   }
 
-  async findByUserId(userId: string): Promise<Example | undefined> {
+  async findByUserId(userId: string): Promise<Example | null> {
     const db = this.getDb.handle()
     const result = await db
       .select()
@@ -595,10 +595,10 @@ export class ExampleDrizzleRepository implements ExampleRepository {
       .limit(1)
 
     if (result.length === 0) {
-      return undefined
+      return null
     }
 
-    return this.toDomain(result[0])
+    return Example.reconstruct(result[0])
   }
 
   async save(example: Example): Promise<void> {
@@ -627,26 +627,6 @@ export class ExampleDrizzleRepository implements ExampleRepository {
     const db = this.getDb.handle()
     await db.delete(examples).where(eq(examples.id, id))
   }
-
-  private toDomain(row: {
-    id: string
-    userId: string
-    externalId: string
-    name: string
-    status: string
-    createdAt: Date
-    updatedAt: Date
-  }): Example {
-    return Example.reconstruct({
-      id: row.id,
-      userId: row.userId,
-      externalId: row.externalId,
-      name: row.name,
-      status: row.status as ExampleStatus,
-      createdAt: row.createdAt,
-      updatedAt: row.updatedAt
-    })
-  }
 }
 ```
 
@@ -660,8 +640,8 @@ import type {
   CreateExamplePort,
   CreateExamplePortInput,
   CreateExamplePortOutput
-} from "../../application/commands/ports/create-example.port"
-import { externalClient } from "./external-client"
+} from "@/backend/modules/{module}/internal/application/ports/create-example.port"
+import { externalClient } from "@/backend/modules/{module}/internal/infrastructure/{service}/external-client"
 
 @injectable()
 export class CreateExampleExternalAdapter implements CreateExamplePort {
@@ -696,7 +676,7 @@ import { GetAuthUserPortToken } from "@/backend/modules/auth/public/ports/get-au
 import type {
   GetCurrentUserPort,
   GetCurrentUserPortOutput
-} from "../../application/ports/get-current-user.port"
+} from "@/backend/modules/{module}/internal/application/ports/get-current-user.port"
 
 @injectable()
 export class GetCurrentUserAuthModuleAdapter implements GetCurrentUserPort {
@@ -738,15 +718,15 @@ export class Email {
 // modules/{module}/internal/di/infrastructure.di.ts
 import type { DependencyContainer } from "tsyringe"
 import { ExampleRepositoryToken } from "@/backend/modules/{module}/internal/domain/example/example.repository"
-import { ExampleDrizzleRepository } from "@/backend/modules/{module}/internal/infrastructure/repositories/example.drizzle.repository"
-import { CreateExamplePortToken } from "@/backend/modules/{module}/internal/application/commands/ports/create-example.port"
-import { CreateExampleExternalAdapter } from "@/backend/modules/{module}/internal/infrastructure/external/create-example.external.adapter"
+import { ExampleMysqlDrizzleRepository } from "@/backend/modules/{module}/internal/infrastructure/db/mysql/drizzle/repositories/example.mysql-drizzle.repository"
+import { CreateExamplePortToken } from "@/backend/modules/{module}/internal/application/ports/create-example.port"
+import { CreateExampleExternalAdapter } from "@/backend/modules/{module}/internal/infrastructure/{service}/create-example.{service}.adapter"
 import { GetCurrentUserPortToken } from "@/backend/modules/{module}/internal/application/ports/get-current-user.port"
 import { GetCurrentUserAuthModuleAdapter } from "@/backend/modules/{module}/internal/infrastructure/modules/auth/get-current-user.auth-module.adapter"
 
 export function initInfrastructureDependency(container: DependencyContainer) {
   // Repositories
-  container.registerSingleton(ExampleRepositoryToken, ExampleDrizzleRepository)
+  container.registerSingleton(ExampleRepositoryToken, ExampleMysqlDrizzleRepository)
 
   // External Module Adapters
   container.registerSingleton(
@@ -808,9 +788,11 @@ export const initExampleDependency = (container: DependencyContainer) => {
 
 ## Drizzle Schema
 
+**注意:** タイムスタンプ型は `timestamp` または `datetime` を使用する（既存モジュールに合わせる）。デフォルト値は `.default(sql\`CURRENT_TIMESTAMP(3)\`)` を使用する（`.defaultNow()` は使わない）。
+
 ```typescript
 // modules/{module}/internal/infrastructure/db/mysql/drizzle/schemas/{table}.ts
-import { relations } from "drizzle-orm"
+import { relations, sql } from "drizzle-orm"
 import {
   boolean,
   foreignKey,
@@ -822,7 +804,7 @@ import {
 } from "drizzle-orm/mysql-core"
 import { users } from "@/backend/modules/auth/internal/infrastructure/db/mysql/drizzle/schemas"
 
-// 外部キー制約名の定数化
+// 外部キー制約名の定数化（外部キーがある場合）
 export const EXAMPLES_CONSTRAINTS = {
   USER_ID_FOREIGN_KEY: "examples_user_id_users_id_fk"
 } as const
@@ -837,10 +819,10 @@ export const examples = mysqlTable(
     status: text("status").notNull(),
     createdAt: timestamp("created_at", { fsp: 3 })
       .notNull()
-      .defaultNow(),
+      .default(sql`CURRENT_TIMESTAMP(3)`),
     updatedAt: timestamp("updated_at", { fsp: 3 })
       .notNull()
-      .defaultNow()
+      .default(sql`CURRENT_TIMESTAMP(3)`)
       .$onUpdate(() => new Date())
   },
   (table) => [
@@ -876,15 +858,27 @@ interface Ok<T> {
   data: T
 }
 
-interface Err {
+interface ValidationErr {
   ok: false
   error: {
     code: string
-    status: number
+    status: 422
+    message: string
+    fieldErrors: Record<string, string>
+  }
+}
+
+interface OtherErr {
+  ok: false
+  error: {
+    code: string
+    status: Exclude<number, 422>
     message: string
     details?: Record<string, unknown>
   }
 }
+
+export type Err = ValidationErr | OtherErr
 
 export type Result<T> = Ok<T> | Err
 ```
@@ -1156,17 +1150,16 @@ export class UuidV7Generator implements UuidV7GeneratorPort {
 1. `modules/{module}/internal/` と `modules/{module}/public/` ディレクトリを作成
 2. `public/errors/` にドメインエラーを定義
 3. `internal/domain/` にエンティティ、リポジトリインターフェースを定義
-4. `internal/application/ports/` にモジュール共通ポートを定義（認証ユーザー取得など）
-5. `internal/application/commands/ports/` または内部ポートを定義（外部サービス連携用）
-6. `public/ports/` にユースケースポートを定義（外部公開用）
-7. `internal/application/*/usecases/{usecase}/` にユースケースを実装
-8. `internal/infrastructure/repositories/` にリポジトリ実装を追加
-9. `internal/infrastructure/modules/` にモジュール間アダプターを追加
-10. `internal/infrastructure/{service}/` に外部サービスアダプターを追加
-11. `internal/di/` に依存性登録を追加
-12. `bootstrap/di/container.ts` に init 関数を追加
-13. `internal/presentation/handlers/` にハンドラーを実装
-14. `internal/presentation/actions/` に Server Action を実装
+4. `internal/application/ports/` に内部ポートを定義（認証・外部サービス連携など全て）
+5. `public/ports/` にユースケースポートを定義（外部公開用）
+6. `internal/application/*/usecases/{usecase}/` にユースケースを実装
+7. `internal/infrastructure/db/mysql/drizzle/repositories/` にリポジトリ実装を追加
+8. `internal/infrastructure/modules/` にモジュール間アダプターを追加
+9. `internal/infrastructure/{service}/` に外部サービスアダプターを追加
+10. `internal/di/` に依存性登録を追加
+11. `bootstrap/di/container.ts` に init 関数を追加
+12. `internal/presentation/handlers/` にハンドラーを実装
+13. `internal/presentation/actions/` に Server Action を実装
 
 ## スキーマ追加時
 
@@ -1241,7 +1234,7 @@ return {
 型アサーション（`as`）は型安全性を損なうため、可能な限り使用しない。
 
 **例外として許容されるケース:**
-- Drizzle の toDomain() で、DBから取得した文字列をドメインの列挙型にマッピングする場合
+- Repository の `Entity.reconstruct()` 呼び出しで、DBから取得した文字列をドメインの列挙型にマッピングする場合
 
 ```typescript
 // ❌ NG: 型アサーションを使用
@@ -1254,12 +1247,10 @@ const products: Product[] = res.data.products.map((p) => ({
   // ...
 }))
 
-// ✅ OK（例外）: Repository の toDomain() でのドメイン型マッピング
-private toDomain(row: { status: string }): Example {
-  return Example.reconstruct({
-    status: row.status as ExampleStatus,  // DBの文字列 → ドメイン列挙型
-  })
-}
+// ✅ OK（例外）: Repository での Entity.reconstruct() 呼び出し時のドメイン型マッピング
+return Example.reconstruct({
+  status: row.status as ExampleStatus,  // DBの文字列 → ドメイン列挙型
+})
 ```
 
 ## バリューオブジェクト（VO）の判断基準
@@ -1307,19 +1298,99 @@ export const products = mysqlTable("products", {
 })
 ```
 
-## Repository の toDomain() での nullable 処理
+## Repository の Entity.reconstruct() での nullable 処理
 
 DB から取得した nullable カラムのデフォルト値処理：
 
 ```typescript
-private toDomain(row: {
-  displayOrder: number | null  // DB では nullable
+// Repository 内での Entity.reconstruct() 呼び出し
+return Product.reconstruct({
+  displayOrder: row.displayOrder ?? 0,  // nullable → デフォルト値を設定
   // ...
-}): Product {
-  return Product.reconstruct({
-    displayOrder: row.displayOrder ?? 0,  // デフォルト値を設定
-    // ...
-  })
+})
+```
+
+## Query Service パターン
+
+複雑なクエリ（JOIN、集計など）でリポジトリパターンが適さない場合、Query Service を使用する。
+
+### Query Service Port（queries/usecases/ に同居）
+
+```typescript
+// modules/{module}/internal/application/queries/usecases/{query}/{query}.query-service.port.ts
+
+export type FindExamplesQueryServicePortInput = {
+  activeOnly?: boolean
+}
+
+export type FindExamplesQueryServicePortRow = {
+  id: string
+  name: string
+  relatedCount: number
+}
+
+export type FindExamplesQueryServicePortOutput = {
+  examples: FindExamplesQueryServicePortRow[]
+}
+
+export interface FindExamplesQueryServicePort {
+  handle(
+    input: FindExamplesQueryServicePortInput
+  ): Promise<FindExamplesQueryServicePortOutput>
+}
+
+export const FindExamplesQueryServicePortToken = Symbol(
+  "FindExamplesQueryServicePort"
+)
+```
+
+### Query Service 実装（infrastructure/db/mysql/drizzle/query-services/）
+
+```typescript
+// modules/{module}/internal/infrastructure/db/mysql/drizzle/query-services/{query}.mysql-drizzle.query-service.ts
+import { count, eq } from "drizzle-orm"
+import { inject, injectable } from "tsyringe"
+import type {
+  FindExamplesQueryServicePort,
+  FindExamplesQueryServicePortInput,
+  FindExamplesQueryServicePortOutput
+} from "@/backend/modules/{module}/internal/application/queries/usecases/find-examples/find-examples.query-service.port"
+import { GetDb } from "@/backend/modules/shared/infrastructure/db/mysql/drizzle/get-db"
+import { examples, relatedItems } from "@/backend/modules/{module}/internal/infrastructure/db/mysql/drizzle/schemas"
+
+@injectable()
+export class FindExamplesMysqlDrizzleQueryService
+  implements FindExamplesQueryServicePort
+{
+  constructor(
+    @inject(GetDb)
+    private readonly getDb: GetDb
+  ) {}
+
+  async handle(
+    input: FindExamplesQueryServicePortInput
+  ): Promise<FindExamplesQueryServicePortOutput> {
+    const db = this.getDb.handle()
+
+    const rows = await db
+      .select({
+        id: examples.id,
+        name: examples.name,
+        relatedCount: count(relatedItems.id)
+      })
+      .from(examples)
+      .leftJoin(relatedItems, eq(examples.id, relatedItems.exampleId))
+      .where(input.activeOnly ? eq(examples.active, true) : undefined)
+      .groupBy(examples.id)
+
+    return {
+      examples: rows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        relatedCount: row.relatedCount
+      }))
+    }
+  }
 }
 ```
 
@@ -1341,9 +1412,11 @@ private toDomain(row: {
 - [ ] Domain Error は `this.name` を設定
 - [ ] Repository は `GetDb` 経由で DB アクセス（`this.getDb.handle()`）
 - [ ] Repository の `save()` は `onDuplicateKeyUpdate` で upsert 実装
-- [ ] Repository に `toDomain()` プライベートメソッドを実装
+- [ ] Repository で `Entity.reconstruct()` を使用してドメインオブジェクトに変換
+- [ ] Repository のファイル名は `{entity}.mysql-drizzle.repository.ts`
+- [ ] Repository は `infrastructure/db/mysql/drizzle/repositories/` に配置
 - [ ] Repository の import はエイリアスパス（`@/backend/...`）を使用
-- [ ] Drizzle Schema で外部キー制約名を定数化
+- [ ] Drizzle Schema で外部キー制約名を定数化（外部キーがある場合）
 - [ ] Drizzle Schema で適切なインデックスを定義
 - [ ] Drizzle Schema の JSON カラムに `$type<>()` で型指定
 - [ ] **Schema を `bootstrap/db/schemas/index.ts` にエクスポート追加**
@@ -1357,5 +1430,8 @@ private toDomain(row: {
 - [ ] **Handler で予期しないエラーをログ出力（`this.logger.error()`）**
 - [ ] **Handler を `presentation.di.ts` で DI 登録**
 - [ ] Action は「薄いラッパー」として Handler を呼び出すだけ
-- [ ] 型アサーション（as）を避ける（Repository の toDomain() での列挙型マッピングは例外）
+- [ ] Repository の戻り値は `null`（`undefined` ではない）
+- [ ] 型アサーション（as）を避ける（Repository の `Entity.reconstruct()` での列挙型マッピングは例外）
+- [ ] Drizzle Schema のタイムスタンプデフォルト値は `.default(sql\`CURRENT_TIMESTAMP(3)\`)`
+- [ ] 内部ポート（外部サービス連携含む）は `application/ports/` に配置
 - [ ] `pnpm type:check` が通ること（必須）
